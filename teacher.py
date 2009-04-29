@@ -41,13 +41,9 @@ from config import *
 class TeacherRunner(Thread):
     selected_machines = 0
     """Teacher service"""
-    def __init__(self, gui):
+    def __init__(self):
         """Initializes the benchmarking thread"""
         Thread.__init__(self)
-
-        # GUI
-        self.gui = gui
-        self.gui.set_service(self)
 
         # connected machines
         self.machines = []
@@ -57,6 +53,23 @@ class TeacherRunner(Thread):
 
         # experiments queue
         self.experiments = Queue.Queue()
+
+        # new clients
+        self.new_clients_queue = Queue.Queue()
+
+    def set_gui(self, gui):
+        """Associates a GUI to this service"""
+        self.gui = gui
+
+    def add_client(self, client):
+        """Adds a new client"""
+        self.gui.add_client(client)
+
+    def start_broadcast(self, classname):
+        """Start broadcasting service"""
+        self.classname = classname
+        self.bcast = TrafBroadcast(LISTENPORT, self, classname)
+        self.bcast.start()
 
     def multicast(self, machines, num_msgs, bandwidth, type="multicast"):
         """Inicia a captura"""
@@ -97,9 +110,13 @@ class TeacherRunner(Thread):
 class TeacherGui:
     selected_machines = 0
     """Teacher GUI main class"""
-    def __init__(self, guifile):
+    def __init__(self, guifile, service):
         """Initializes the interface"""
-        # inter-class communication
+        # internal variables
+        self.classname = None
+        self.bcast = None
+        self.service = service
+        self.service.set_gui(self)
         self.new_clients_queue = Queue.Queue()
         # colors
         self.color_normal = gtk.gdk.color_parse("#99BFEA")
@@ -156,6 +173,36 @@ class TeacherGui:
             self.machines[addr] = machine
             machine.show_all()
 
+        self.login()
+
+    def login(self):
+        """Asks teacher to login"""
+        dialog = gtk.Dialog(_("Login"), self.MainWindow, 0,
+                (gtk.STOCK_OK, gtk.RESPONSE_OK,
+                gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+        dialogLabel = gtk.Label(_("Please login"))
+        dialog.vbox.add(dialogLabel)
+        dialog.vbox.set_border_width(8)
+        hbox = gtk.HBox()
+        login = gtk.Label(_("Class name:"))
+        hbox.pack_start(login)
+        entry_login = gtk.Entry()
+        entry_login.set_text(_("My class"))
+        hbox.pack_start(entry_login)
+        dialog.vbox.pack_start(hbox)
+        dialog.show_all()
+        response = dialog.run()
+        if response == gtk.RESPONSE_OK:
+            self.classname = entry_login.get_text()
+            print "Login: %s" % self.class_name
+            dialog.destroy()
+            # Starting broadcasting service
+            self.service.start_broadcast(self.classname)
+            return True
+        else:
+            dialog.destroy()
+            return None
+
     def question(self, title, input=None):
         """Asks a question :)"""
         # cria a janela do dialogo
@@ -180,6 +227,10 @@ class TeacherGui:
         else:
             dialog.destroy()
             return None
+
+    def add_client(self, client):
+        """Adds a new client"""
+        self.new_clients_queue.put(client)
 
     def set_service(self, service):
         """Determines the active benchmarking service"""
@@ -399,11 +450,12 @@ class TeacherGui:
 # {{{ TrafBroadcast
 class TrafBroadcast(Thread):
     """Broadcast-related services"""
-    def __init__(self, port, gui):
+    def __init__(self, port, service, name):
         """Initializes listening thread"""
         Thread.__init__(self)
         self.port = port
-        self.gui = gui
+        self.service = service
+        self.name = name
 
     def run(self):
         """Starts listening to broadcast"""
@@ -412,10 +464,10 @@ class TrafBroadcast(Thread):
             def handle(self):
                 """Receives a broadcast message"""
                 client = self.client_address[0]
-#                print " >> Heartbeat from %s!" % client
-                global gui
-                gui.new_clients_queue.put(client)
+                print " >> Heartbeat from %s!" % client
+                self.server.service.add_client(client)
         self.socket_bcast = SocketServer.UDPServer(('', self.port), BcastHandler)
+        self.socket_bcast.service = self.service
         while 1:
             try:
                 self.socket_bcast.handle_request()
@@ -431,17 +483,14 @@ if __name__ == "__main__":
     # configura o timeout padrao para sockets
     socket.setdefaulttimeout(5)
     gtk.gdk.threads_init()
+    gtk.gdk.threads_enter()
     print _("Starting broadcast..")
+    # Main service service
+    service = TeacherRunner()
     # Main interface
-    gui = TeacherGui("iface/teacher.glade")
-    # Benchmarking service
-    service = TeacherRunner(gui)
+    gui = TeacherGui("iface/teacher.glade", service)
     service.start()
-    # Broadcasting service
-    bcast = TrafBroadcast(LISTENPORT, service)
-    bcast.start()
 
     print _("Starting main loop..")
-    gtk.gdk.threads_enter()
     gtk.main()
     gtk.gdk.threads_leave()
