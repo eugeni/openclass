@@ -33,7 +33,7 @@ MACHINES_X = 8
 MACHINES_Y = 8
 
 # configuration
-from config import *
+from openclass import network, system
 
 # helper functions
 
@@ -65,10 +65,10 @@ class TeacherRunner(Thread):
         """Adds a new client"""
         self.gui.add_client(client)
 
-    def start_broadcast(self, classname):
+    def start_broadcast(self, class_name):
         """Start broadcasting service"""
-        self.classname = classname
-        self.bcast = TrafBroadcast(LISTENPORT, self, classname)
+        self.class_name = class_name
+        self.bcast = network.TrafBroadcast(network.LISTENPORT, self, class_name)
         self.bcast.start()
 
     def multicast(self, machines, num_msgs, bandwidth, type="multicast"):
@@ -113,7 +113,7 @@ class TeacherGui:
     def __init__(self, guifile, service):
         """Initializes the interface"""
         # internal variables
-        self.classname = None
+        self.class_name = None
         self.bcast = None
         self.service = service
         self.service.set_gui(self)
@@ -193,11 +193,11 @@ class TeacherGui:
         dialog.show_all()
         response = dialog.run()
         if response == gtk.RESPONSE_OK:
-            self.classname = entry_login.get_text()
+            self.class_name = entry_login.get_text()
             print "Login: %s" % self.class_name
             dialog.destroy()
             # Starting broadcasting service
-            self.service.start_broadcast(self.classname)
+            self.service.start_broadcast(self.class_name)
             return True
         else:
             dialog.destroy()
@@ -445,38 +445,6 @@ class TeacherGui:
             button.connect('clicked', action, "")
         button.show_all()
         return button
-# }}}
-
-# {{{ TrafBroadcast
-class TrafBroadcast(Thread):
-    """Broadcast-related services"""
-    def __init__(self, port, service, name):
-        """Initializes listening thread"""
-        Thread.__init__(self)
-        self.port = port
-        self.service = service
-        self.name = name
-
-    def run(self):
-        """Starts listening to broadcast"""
-        class BcastHandler(SocketServer.DatagramRequestHandler):
-            """Handles broadcast messages"""
-            def handle(self):
-                """Receives a broadcast message"""
-                client = self.client_address[0]
-                print " >> Heartbeat from %s!" % client
-                self.server.service.add_client(client)
-        self.socket_bcast = SocketServer.UDPServer(('', self.port), BcastHandler)
-        self.socket_bcast.service = self.service
-        while 1:
-            try:
-                self.socket_bcast.handle_request()
-            except socket.timeout:
-                print "Timeout caught!"
-                continue
-            except:
-                print "Error handling broadcast socket!"
-                break
 # }}}
 
 if __name__ == "__main__":
