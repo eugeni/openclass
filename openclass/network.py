@@ -10,6 +10,7 @@ import sys
 import time
 from threading import Thread
 
+# constants
 LISTENPORT = 40000
 MCASTPORT = 40001
 BCASTPORT = 40002
