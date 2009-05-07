@@ -10,6 +10,7 @@ import SocketServer
 import sys
 import time
 import thread
+import ssl
 from threading import Thread
 
 # constants
@@ -173,17 +174,51 @@ class BcastListener(Thread):
                 traceback.print_exc()
 # }}}
 
-def connect_tcp(addr, port, timeout=None):
-    """Envia mensagem por socket TCP"""
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((addr, port))
-        if timeout:
-            s.settimeout(timeout)
-        return s
-    except:
-        traceback.print_exc()
-        return None
+# {{{ TcpClient
+class TcpClient:
+    """TCP Client"""
+    def __init__(self, addr, port, use_ssl=False):
+        """Initializes a TCP connection"""
+        self.addr = addr
+        self.port = port
+        self.use_ssl = use_ssl
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        if use_ssl:
+            self.sock = ssl.wrap_socket(self.sock)
+
+    def connect(self, timeout=None, retries=1):
+        """Attempts to connect"""
+        while retries > 0:
+            try:
+                self.sock.connect((self.addr, self.port))
+                if timeout:
+                    s.settimeout(timeout)
+                return True
+            except:
+                traceback.print_exc()
+                continue
+        # Unable to establish a connection
+        return False
+
+    def close(self, msg=None):
+        """Closes a connection"""
+        if msg:
+            self.sock.send(msg)
+        self.sock.close()
+
+    def send(self, msg):
+        """Sends a message"""
+        self.sock.write(msg)
+
+    def recv(self, msg_size):
+        """Receives a message"""
+        try:
+            data = self.sock.read(msg_size)
+            return data
+        except:
+            traceback.print_exc()
+            return None
+# }}}
 
 class ReusableSocketServer(SocketServer.TCPServer):
     # TODO: allow address reuse
