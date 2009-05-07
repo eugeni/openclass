@@ -81,7 +81,7 @@ class Student:
         self.iface = None
         self.outfile = None
         # Inicializa as threads
-        self.bcast = network.BcastSender(network.LISTENPORT, self)
+        self.bcast = network.BcastListener(network.LISTENPORT)
         self.client = StudentClient(network.LISTENPORT, self)
         self.log( _("Starting broadcasting service.."))
         self.bcast.start()

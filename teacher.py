@@ -33,7 +33,7 @@ MACHINES_X = 8
 MACHINES_Y = 8
 
 # configuration
-from openclass import network, system
+from openclass import network, system, protocol
 
 # helper functions
 
@@ -48,11 +48,11 @@ class TeacherRunner(Thread):
         # connected machines
         self.machines = []
 
-        # inicializa o timestamp
-        self.curtimestamp = 0
+        # actions
+        self.actions = Queue.Queue()
 
-        # experiments queue
-        self.experiments = Queue.Queue()
+        # protocol
+        self.protocol = protocol.Protocol()
 
         # new clients
         self.new_clients_queue = Queue.Queue()
@@ -68,7 +68,7 @@ class TeacherRunner(Thread):
     def start_broadcast(self, class_name):
         """Start broadcasting service"""
         self.class_name = class_name
-        self.bcast = network.TrafBroadcast(network.LISTENPORT, self, class_name)
+        self.bcast = network.BcastSender(network.LISTENPORT, self.protocol.create_announce(class_name))
         self.bcast.start()
 
     def multicast(self, machines, num_msgs, bandwidth, type="multicast"):
@@ -93,17 +93,17 @@ class TeacherRunner(Thread):
     def run(self):
         """Starts a background thread"""
         while 1:
-            experiment = self.experiments.get()
-            if not experiment:
+            action = self.actions.get()
+            if not action:
                 continue
             # chegou ALGO
-            name, parameters = experiment
+            name, parameters = action
             print "Running %s" % name
             if name == "multicast":
                 machines, num_msgs, bandwidth = parameters
                 self.multicast(machines, num_msgs, bandwidth, type="broadcast")
             else:
-                print "Unknown experiment %s" % name
+                print "Unknown action %s" % name
 # }}}
 
 # {{{ TeacherGui
@@ -320,7 +320,7 @@ class TeacherGui:
             if img == self.machines[z].button.img_on:
                 machines.append(z)
 
-        self.service.experiments.put((type, (machines, num_msgs, bandwidth)))
+        self.service.actions.put((type, (machines, num_msgs, bandwidth)))
 
     def select_all(self, widget):
         """Selects all machines"""

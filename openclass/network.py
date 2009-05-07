@@ -2,12 +2,14 @@
 """OpenClass network module"""
 
 import os
+import Queue
 import socket
 import traceback
 import struct
 import SocketServer
 import sys
 import time
+import thread
 from threading import Thread
 
 # constants
@@ -18,51 +20,26 @@ BCASTPORT = 40002
 MCASTADDR="224.51.105.104"
 BCASTADDR="255.255.255.255"
 
+DATAGRAM_SIZE=65000
+
 DEBUG=False
-
-# {{{ TrafBroadcast
-class TrafBroadcast(Thread):
-    """Broadcast-related services"""
-    def __init__(self, port, service, name):
-        """Initializes listening thread"""
-        Thread.__init__(self)
-        self.port = port
-        self.service = service
-        self.name = name
-
-    def run(self):
-        """Starts listening to broadcast"""
-        class BcastHandler(SocketServer.DatagramRequestHandler):
-            """Handles broadcast messages"""
-            def handle(self):
-                """Receives a broadcast message"""
-                client = self.client_address[0]
-                print " >> Heartbeat from %s!" % client
-                self.server.service.add_client(client)
-        self.socket_bcast = SocketServer.UDPServer(('', self.port), BcastHandler)
-        self.socket_bcast.service = self.service
-        while 1:
-            try:
-                self.socket_bcast.handle_request()
-            except socket.timeout:
-                print "Timeout caught!"
-                continue
-            except:
-                print "Error handling broadcast socket!"
-                break
-# }}}
 
 # {{{ BcastSender
 class BcastSender(Thread):
     """Sends broadcast requests"""
-    def __init__(self, port, gui):
+    def __init__(self, port, data):
         Thread.__init__(self)
         self.port = port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind(('', 0))
-        self.gui = gui
+        self.actions = Queue.Queue()
+        self.data = data
+
+    def stop():
+        """Stops sending"""
+        self.actions.put()
 
     def run(self):
         """Starts threading loop"""
@@ -70,9 +47,12 @@ class BcastSender(Thread):
         while 1:
             # TODO: add timers to exit when required
             try:
+                if not self.actions.empty():
+                    # exiting
+                    return
                 if DEBUG:
                     self.gui.log(_("Sending broadcasting message.."))
-                self.sock.sendto("hello", ('255.255.255.255', self.port))
+                self.sock.sendto(self.data, ('255.255.255.255', self.port))
                 time.sleep(1)
             except:
                 self.gui.log("Error sending broadcast message: %s" % sys.exc_value)
@@ -148,18 +128,20 @@ class McastListener(Thread):
 # {{{ BcastListener
 class BcastListener(Thread):
     """Broadcast listening thread"""
-    def __init__(self):
+    def __init__(self, port=BCASTPORT, datagram_size=DATAGRAM_SIZE):
         Thread.__init__(self)
+        self.port = port
+        self.datagram_size = datagram_size
         self.actions = Queue.Queue()
-        self.messages = []
+        self.messages = Queue.Queue()
         self.lock = thread.allocate_lock()
 
     def get_log(self):
-        """Returns the execution log"""
-        self.lock.acquire()
-        msgs = "\n".join(self.messages)
-        return "# received msgs: %d msg_size: %d\n%s" % (len(self.messages), DATAGRAM_SIZE, msgs)
-        self.lock.release()
+        """Returns one of received messages"""
+        if not self.messages.empty():
+            return self.messages.get()
+        else:
+            return None
 
     def stop(self):
         """Stops the execution"""
@@ -170,34 +152,19 @@ class BcastListener(Thread):
         # Configura o socket
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        s.bind(('', BCASTPORT))
+        s.bind(('', self.port))
         # configura timeout para 1 segundo
         s.settimeout(1)
         # configura o mecanismo de captura de tempo
-        if get_os() == "Windows":
-            timefunc = time.clock
-        else:
-            timefunc = time.time
-        last_ts = None
         while 1:
             if not self.actions.empty():
                 print "Finishing broadcast capture"
                 s.close()
                 return
             try:
-                data = s.recv(DATAGRAM_SIZE)
-                count = struct.unpack("<I", data[:struct.calcsize("<I")])[0]
-                self.lock.acquire()
-                curtime = timefunc()
-                walltime = time.time()
-                if not last_ts:
-                    last_ts = curtime
-                    timediff = 0
-                else:
-                    timediff = curtime - last_ts
-                    last_ts = curtime
-                self.messages.append("%d %f %f %f" % (count, timediff, curtime, walltime))
-                self.lock.release()
+                data = s.recv(self.datagram_size)
+                print "Received %s" % data
+                self.messages.put(data)
             except socket.timeout:
                 #print "Timeout!"
                 pass
