@@ -137,12 +137,16 @@ class BcastListener(Thread):
         self.messages = Queue.Queue()
         self.lock = thread.allocate_lock()
 
-    def get_log(self):
+    def get_msg(self):
         """Returns one of received messages"""
         if not self.messages.empty():
             return self.messages.get()
         else:
             return None
+
+    def has_msgs(self):
+        """Returns if we have new messages"""
+        return not self.messages.empty()
 
     def stop(self):
         """Stops the execution"""

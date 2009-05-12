@@ -7,6 +7,7 @@ OPENCLASS_VERSION_MINOR=1
 OPENCLASS_BUILD=1
 
 import struct
+import traceback
 
 class Protocol:
     """This is the main class for OpenClass protocol."""
@@ -52,7 +53,13 @@ class Protocol:
 
     def parse_announce(self, announce):
         """Parses a class announcment"""
-        print announce
+        try:
+            name, flags = struct.unpack("!128si", announce)
+            print name
+            return {"name": name, "flags": flags}
+        except:
+            traceback.print_exc()
+            return None
 
 
 proto = Protocol()

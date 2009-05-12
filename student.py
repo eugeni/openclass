@@ -35,7 +35,7 @@ import gettext
 import __builtin__
 __builtin__._ = gettext.gettext
 
-from openclass import network, system
+from openclass import network, system, protocol
 
 DEBUG=False
 
@@ -67,6 +67,9 @@ class Student:
         # Configura os botoes
         self.QuitButton.connect('clicked', self.on_MainWindow_destroy)
 
+        # protocol handler
+        self.protocol = protocol.Protocol()
+
         # Configura o timer
         gobject.timeout_add(1000, self.monitor)
 
@@ -88,10 +91,42 @@ class Student:
         self.log( _("Starting listening service.."))
         self.client.start()
 
+        self.login()
+
+    def login(self):
+        """Asks student to login"""
+        dialog = gtk.Dialog(_("Login"), self.MainWindow, 0,
+                (gtk.STOCK_OK, gtk.RESPONSE_OK,
+                gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+        dialogLabel = gtk.Label(_("Please login"))
+        dialog.vbox.add(dialogLabel)
+        dialog.vbox.set_border_width(8)
+        hbox = gtk.HBox()
+        login = gtk.Label(_("Your name:"))
+        hbox.pack_start(login)
+        entry_login = gtk.Entry()
+        entry_login.set_text(_("My class"))
+        hbox.pack_start(entry_login)
+        dialog.vbox.pack_start(hbox)
+        dialog.show_all()
+        response = dialog.run()
+        if response == gtk.RESPONSE_OK:
+            self.class_name = entry_login.get_text()
+            print "Login: %s" % self.class_name
+            dialog.destroy()
+            # Starting broadcasting service
+            return True
+        else:
+            dialog.destroy()
+            return None
+
     def monitor(self):
         """Monitors WIFI status"""
+        if self.bcast.has_msgs():
+            msg = self.protocol.parse_header(self.bcast.get_msg())
+            print "Got a message: %s" % self.protocol.parse_announce(msg)
         #self.StatusLabel.set_markup("<b>Link:</b> %s, <b>Signal:</b> %s, <b>Noise:</b> %s" % (link, level, noise))
-        #gobject.timeout_add(1000, self.monitor)
+        gobject.timeout_add(1000, self.monitor)
 
     def __getattr__(self, attr):
         """Requests an attribute from Glade"""
@@ -160,11 +195,11 @@ if __name__ == "__main__":
     socket.setdefaulttimeout(5)
     # Atualizando a lista de interfaces
     gtk.gdk.threads_init()
+    gtk.gdk.threads_enter()
 
     print _("Starting GUI..")
     gui = Student("iface/student.glade")
     try:
-        gtk.gdk.threads_enter()
         gui.log(_("\nWelcome to OpenClass Student!!\n\n"))
         gtk.main()
         gtk.gdk.threads_leave()
