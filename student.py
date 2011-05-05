@@ -97,6 +97,7 @@ class Student:
         gobject.timeout_add(1000, self.monitor)
 
         self.teacher = None
+        self.teacher_addr = None
         self.name = None
         self.outfile = None
         # Inicializa as threads
@@ -143,11 +144,13 @@ class Student:
     def monitor(self):
         """Monitors WIFI status"""
         if self.bcast.has_msgs():
-            msg = self.protocol.parse_header(self.bcast.get_msg())
+            data, source = self.bcast.get_msg()
+            msg = self.protocol.parse_header(data)
             name, flags = self.protocol.parse_announce(msg)
             # TODO: support multiple teachers
             self.teacher = name
-            self.teacher_label.set_text(name)
+            self.teacher_addr = source
+            self.teacher_label.set_text("%s (%s)" % (name, source))
         #self.StatusLabel.set_markup("<b>Link:</b> %s, <b>Signal:</b> %s, <b>Noise:</b> %s" % (link, level, noise))
         gobject.timeout_add(1000, self.monitor)
 

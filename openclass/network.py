@@ -199,9 +199,9 @@ class BcastListener(Thread):
                 s.close()
                 return
             try:
-                data = s.recv(self.datagram_size)
-                print "Received %s" % data
-                self.messages.put(data)
+                data, client_addr = s.recvfrom(self.datagram_size)
+                print "Received %s from %s" % (data, client_addr[0])
+                self.messages.put((data, client_addr[0]))
             except socket.timeout:
                 #print "Timeout!"
                 pass

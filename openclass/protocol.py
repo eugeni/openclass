@@ -44,11 +44,11 @@ class Protocol:
     def create_announce(self, class_name, restricted=False):
         """Creates announce message."""
         header = self.header
-        header += struct.pack("64p", class_name)
+        header += struct.pack("!64p", class_name)
         flags = 0
         if restricted:
             flags |= ANNOUNCE_RESTRICTED
-        header += struct.pack("!i", flags)
+        header += struct.pack("i", flags)
         return header
 
     def parse_announce(self, announce):
