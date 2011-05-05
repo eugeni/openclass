@@ -175,6 +175,7 @@ class TeacherGui:
         self.SelectAllButton.connect('clicked', self.select_all)
         self.UnselectAllButton.connect('clicked', self.unselect_all)
         self.SendScreen.connect('clicked', self.send_screen)
+        self.LockScreen.connect('clicked', self.lock_screen)
         #self.StopCapture.connect('clicked', self.stop_capture)
         #self.BandwidthButton.connect('clicked', self.bandwidth)
         #self.MulticastButton.connect('clicked', self.multicast)
@@ -196,6 +197,7 @@ class TeacherGui:
 
         # maquinas de estados
         self.projection_running = False
+        self.screen_locked = False
         self.projection_screen = screen.Screen()
 
         # Configura os timers
@@ -346,6 +348,23 @@ class TeacherGui:
             print "Stopping sending screens"
             self.SendScreen.set_label(_("Send Screen"))
             self.projection_running = False
+            for machine in machines:
+                self.service.add_client_action(machine, protocol.ACTION_NOOP)
+
+    def lock_screen(self, widget):
+        """Starts screen locking for selected machines"""
+        machines = self.get_selected_machines()
+        print "Locking screen on %s" % machines
+        if self.screen_locked == False:
+            print "Locking screens"
+            self.LockScreen.set_label(_("Stop locking screen"))
+            self.screen_locked = True
+            for machine in machines:
+                self.service.add_client_action(machine, protocol.ACTION_ATTENTION)
+        else:
+            print "Stopping locking screens"
+            self.LockScreen.set_label(_("Lock Screen"))
+            self.screen_locked = False
             for machine in machines:
                 self.service.add_client_action(machine, protocol.ACTION_NOOP)
 

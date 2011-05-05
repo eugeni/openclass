@@ -172,9 +172,8 @@ class Student:
 
     def noop(self):
         """Back to noop state"""
-        if self.projection_window.visible == True:
-            self.projection_window.visible = False
-            self.projection_window.hide()
+        self.projection_window.visible = False
+        self.projection_window.hide()
 
     def login(self, widget):
         """Asks student to login"""
@@ -220,6 +219,7 @@ class Student:
                 self.start_projection()
             elif command == protocol.ACTION_ATTENTION:
                 print "Attention!"
+                self.ask_attention()
                 print params
             else:
                 # noop
