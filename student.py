@@ -112,7 +112,6 @@ class Student:
         self.bcast.start()
 
         self.mcast = network.McastListener()
-        self.mcast.start()
 
         self.screen = screen.Screen()
         self.projection_window = gtk.Window()
@@ -121,7 +120,7 @@ class Student:
         self.projection_window.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DESKTOP)
         self.projection_window.set_resizable(False)
         self.projection_window.set_geometry_hints(min_width = self.screen.width, min_height=self.screen.height)
-        #self.projection_window.set_has_frame(False)
+        self.projection_window.set_has_frame(False)
         self.projection_window.set_decorated(False)
         self.projection_window.set_keep_above(True)
         self.projection_window.connect('delete-event', lambda *w: True)
@@ -136,7 +135,7 @@ class Student:
         vbox.pack_start(self.attention_label)
 
         # drawing
-        self.gc = self.style.fg_gc[gtk.STATE_NORMAL]
+        self.gc = None
         self.drawing = gtk.DrawingArea()
         self.drawing.set_size_request(self.screen.width, self.screen.height)
         vbox.pack_start(self.drawing)
@@ -199,6 +198,9 @@ class Student:
             print "Login: %s" % self.name
             self.name_label.set_text(self.name)
             self.login_button.set_label(_("Login as different user"))
+
+            # start threads
+            self.mcast.start()
             dialog.destroy()
         else:
             dialog.destroy()
@@ -257,18 +259,17 @@ class Student:
         while not self.mcast.messages.empty():
             message = self.mcast.messages.get()
             pos_x, pos_y, step_x, step_y, img = self.protocol.unpack_chunk(message)
-            print len(img)
             try:
                 loader = gdk.PixbufLoader(image_type="jpeg")
                 loader.write(img)
                 loader.close()
                 pb = loader.get_pixbuf()
 
-                self.drawing.draw_drawable(self.gc, pb, 0, 0, pos_x, pos_y, step_x, step_y)
+                gc = self.drawing.get_style().fg_gc[gtk.STATE_NORMAL]
+                self.drawing.window.draw_pixbuf(gc, pb, 0, 0, pos_x, pos_y, step_x, step_y)
             except:
                 traceback.print_exc()
 
-            print "%d %d - %d %d" % (pos_x, pos_y, step_x, step_y)
         gobject.timeout_add(1000, self.monitor_mcast)
 
     def monitor_bcast(self):
