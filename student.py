@@ -31,6 +31,8 @@ import socket
 import traceback
 import time
 
+import urllib, urllib2
+
 import gettext
 import __builtin__
 __builtin__._ = gettext.gettext
@@ -94,7 +96,8 @@ class Student:
         self.protocol = protocol.Protocol()
 
         # Configura o timer
-        gobject.timeout_add(1000, self.monitor)
+        gobject.timeout_add(1000, self.monitor_bcast)
+        gobject.timeout_add(1000, self.monitor_teacher)
 
         self.teacher = None
         self.teacher_addr = None
@@ -141,18 +144,65 @@ class Student:
         else:
             dialog.destroy()
 
-    def monitor(self):
-        """Monitors WIFI status"""
+    def monitor_teacher(self):
+        """Periodically checks for teacher commands"""
+        if self.teacher_addr:
+            # connect to teacher for instructions
+            commands = self.send_command("actions")
+            print commands
+        gobject.timeout_add(1000, self.monitor_teacher)
+
+    def send_command(self, command, params={}):
+        """Sends a command to teacher"""
+        if not self.teacher_addr:
+            print "Error: no teacher yet!"
+            return
+        if not self.name:
+            print "Error: not logged in yet!"
+            return
+        # TODO: proper user-agent
+        url = "http://%s:%d/%s" % (self.teacher_addr, network.LISTENPORT, command)
+        if params:
+            params_enc = urllib.urlencode(params)
+        else:
+            params_enc = None
+        headers = {'User-Agent': 'openclass'}
+
+        try:
+            req = urllib2.Request(url, params_enc, headers)
+            response = urllib2.urlopen(req)
+            return response.read()
+        except:
+            # something went wrong, disconnect
+            self.teacher = None
+            self.teacher_addr = None
+            traceback.print_exc()
+
+    def monitor_bcast(self):
+        """Monitors broadcast teacher status"""
+        print "here"
         if self.bcast.has_msgs():
             data, source = self.bcast.get_msg()
-            msg = self.protocol.parse_header(data)
-            name, flags = self.protocol.parse_announce(msg)
-            # TODO: support multiple teachers
-            self.teacher = name
-            self.teacher_addr = source
-            self.teacher_label.set_text("%s (%s)" % (name, source))
-        #self.StatusLabel.set_markup("<b>Link:</b> %s, <b>Signal:</b> %s, <b>Noise:</b> %s" % (link, level, noise))
-        gobject.timeout_add(1000, self.monitor)
+            # if there is an announce, but we are not yet logged in, skip
+            if not self.name:
+                print "ERROR: found teacher, but not yet logged in!"
+            else:
+                msg = self.protocol.parse_header(data)
+                name, flags = self.protocol.parse_announce(msg)
+                # TODO: support multiple teachers
+                if not self.teacher:
+                    self.teacher = name
+                    self.teacher_addr = source
+                    self.teacher_label.set_text("%s (%s)" % (name, source))
+
+                    # register on teacher
+                    self.send_command("register")
+                elif self.teacher != name:
+                    print "ERROR: Multiple teachers not yet supported"
+                else:
+                    # same teacher
+                    pass
+        gobject.timeout_add(1000, self.monitor_bcast)
 
     def log(self, text):
         """Logs something somewhere"""

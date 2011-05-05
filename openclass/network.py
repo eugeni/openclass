@@ -69,19 +69,35 @@ class HTTPRequestHandler(SimpleHTTPRequestHandler):
     """Handles HTTP requests"""
     listener = None
 
+    def log_request(self, code='-', size='-'):
+        """Log request"""
+        pass
+
     def do_GET(self):
         """GET request"""
-        print self.path
-        print self.listener
+        client = self.client_address[0]
+
+        # find out what to reply
+        # TODO: count sequence numbers
+        seqno = self.headers.get('seqno', "0")
+        seqno = int(seqno)
+        results = self.controller.process_request(client, self.path, seqno)
+
+        self.send_response(200)
+        self.end_headers()
+
+        if results:
+            self.wfile.write(results)
 
 class HTTPListener(Thread):
-    def __init__(self):
+    def __init__(self, controller):
         Thread.__init__(self)
         self.actions = Queue.Queue()
         self.messages = []
         self.lock = thread.allocate_lock()
+        self.controller = controller
 
-        HTTPRequestHandler.listener = self
+        HTTPRequestHandler.controller = controller
         self.socket = ReusableForkingTCPServer(("", LISTENPORT), HTTPRequestHandler)
 
     def run(self):
@@ -89,7 +105,6 @@ class HTTPListener(Thread):
             if not self.actions.empty():
                 print "Finishing server listening"
                 return
-            print "Handling request"
             self.socket.handle_request()
 # }}}
 

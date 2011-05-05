@@ -58,11 +58,14 @@ class TeacherRunner(Thread):
         self.new_clients_queue = Queue.Queue()
 
         # listening server
-        self.server = network.HTTPListener()
-        self.server.start()
+        self.server = network.HTTPListener(self)
 
         # broadcast sender
         self.bcast = None
+
+    def process_request(self, client, request, seqno):
+        """Gets pending actions for a client, starting with seqno"""
+        print "Processing requests for %s (%s)" % (client, request)
 
     def quit(self):
         """Tells everything to quit"""
@@ -214,6 +217,7 @@ class TeacherGui:
             dialog.destroy()
             # Starting broadcasting service
             self.service.start_broadcast(self.class_name)
+            self.service.server.start()
             return True
         else:
             dialog.destroy()
