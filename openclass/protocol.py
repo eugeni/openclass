@@ -60,13 +60,3 @@ class Protocol:
         except:
             traceback.print_exc()
             return None
-
-
-proto = Protocol()
-a = proto.create_announce("hi")
-print "<%s>" % a
-
-msg = proto.parse_header(a)
-print msg
-
-print proto.parse_announce(msg)

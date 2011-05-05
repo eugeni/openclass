@@ -61,6 +61,16 @@ class TeacherRunner(Thread):
         self.server = network.HTTPListener()
         self.server.start()
 
+        # broadcast sender
+        self.bcast = None
+
+    def quit(self):
+        """Tells everything to quit"""
+        self.actions.put(("quit", None))
+        if self.bcast:
+            self.bcast.actions.put(1)
+        self.server.actions.put(1)
+
     def set_gui(self, gui):
         """Associates a GUI to this service"""
         self.gui = gui
@@ -71,8 +81,8 @@ class TeacherRunner(Thread):
 
     def start_broadcast(self, class_name):
         """Start broadcasting service"""
-        self.class_name = class_name
         self.bcast = network.BcastSender(network.LISTENPORT, self.protocol.create_announce(class_name))
+        self.class_name = class_name
         self.bcast.start()
 
     def multicast(self, machines, num_msgs, bandwidth, type="multicast"):
@@ -106,6 +116,8 @@ class TeacherRunner(Thread):
             if name == "multicast":
                 machines, num_msgs, bandwidth = parameters
                 self.multicast(machines, num_msgs, bandwidth, type="broadcast")
+            elif name == "quit":
+                return
             else:
                 print "Unknown action %s" % name
 # }}}
@@ -313,8 +325,10 @@ class TeacherGui:
 
     def on_MainWindow_destroy(self, widget):
         """Main window was closed"""
+        print "Here!!"
         gtk.main_quit()
-        sys.exit(0)
+        print "Closing pending threads.."
+        self.service.quit()
 
     def get_img(self, imgpath):
         """Returns image widget if exists"""

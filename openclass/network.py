@@ -88,7 +88,6 @@ class HTTPListener(Thread):
         while 1:
             if not self.actions.empty():
                 print "Finishing server listening"
-                self.socket.close()
                 return
             print "Handling request"
             self.socket.handle_request()
