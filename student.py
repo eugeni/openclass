@@ -207,9 +207,13 @@ class Student:
         if self.teacher_addr:
             # connect to teacher for instructions
             commands = self.send_command("actions")
-            if commands == protocol.ACTION_PROJECTION:
+            command, params = commands.split(" ", 1)
+            if command == protocol.ACTION_PROJECTION:
                 print "Projecting"
                 self.start_projection()
+            elif command == protocol.ACTION_ATTENTION:
+                print "Attention!"
+                print params
             else:
                 # noop
                 self.noop()
