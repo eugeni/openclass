@@ -12,7 +12,7 @@ import sys
 import traceback
 import time
 
-import Queue
+from multiprocessing import Queue
 
 import socket
 import SocketServer
@@ -152,24 +152,25 @@ class Student:
             print commands
         gobject.timeout_add(1000, self.monitor_teacher)
 
-    def send_command(self, command, params={}):
+    def send_command(self, command, params={}, teacher=None):
         """Sends a command to teacher"""
-        if not self.teacher_addr:
+        if not teacher:
+            teacher = self.teacher_addr
+        if not teacher:
             print "Error: no teacher yet!"
             return
         if not self.name:
             print "Error: not logged in yet!"
             return
         # TODO: proper user-agent
-        url = "http://%s:%d/%s" % (self.teacher_addr, network.LISTENPORT, command)
+        url = "http://%s:%d/%s" % (teacher, network.LISTENPORT, command)
         if params:
-            params_enc = urllib.urlencode(params)
-        else:
-            params_enc = None
+            url += "?%s" % urllib.urlencode(params)
+        print url
         headers = {'User-Agent': 'openclass'}
 
         try:
-            req = urllib2.Request(url, params_enc, headers)
+            req = urllib2.Request(url, None, headers)
             response = urllib2.urlopen(req)
             return response.read()
         except:
@@ -180,7 +181,6 @@ class Student:
 
     def monitor_bcast(self):
         """Monitors broadcast teacher status"""
-        print "here"
         if self.bcast.has_msgs():
             data, source = self.bcast.get_msg()
             # if there is an announce, but we are not yet logged in, skip
@@ -191,12 +191,18 @@ class Student:
                 name, flags = self.protocol.parse_announce(msg)
                 # TODO: support multiple teachers
                 if not self.teacher:
-                    self.teacher = name
-                    self.teacher_addr = source
-                    self.teacher_label.set_text("%s (%s)" % (name, source))
-
                     # register on teacher
-                    self.send_command("register")
+                    res = self.send_command("register", {"name": self.name}, teacher=source)
+                    if res == "registered":
+                        # registered successfully
+                        self.teacher = name
+                        self.teacher_addr = source
+                        self.teacher_label.set_text("%s (%s)" % (name, source))
+                    elif res == "rejected":
+                        print "rejected by teacher"
+                    else:
+                        print "Unknown answer: %s" % res
+
                 elif self.teacher != name:
                     print "ERROR: Multiple teachers not yet supported"
                 else:

@@ -20,7 +20,7 @@ import gtk.glade
 import pygtk
 import gobject
 
-import Queue
+from multiprocessing import Queue
 import SocketServer
 import socket
 from threading import Thread
@@ -49,13 +49,10 @@ class TeacherRunner(Thread):
         self.machines = []
 
         # actions
-        self.actions = Queue.Queue()
+        self.actions = Queue()
 
         # protocol
         self.protocol = protocol.Protocol()
-
-        # new clients
-        self.new_clients_queue = Queue.Queue()
 
         # listening server
         self.server = network.HTTPListener(self)
@@ -63,9 +60,20 @@ class TeacherRunner(Thread):
         # broadcast sender
         self.bcast = None
 
-    def process_request(self, client, request, seqno):
+    def process_request(self, client, request, params, seqno):
         """Gets pending actions for a client, starting with seqno"""
         print "Processing requests for %s (%s)" % (client, request)
+        print request
+        if request == "/register":
+            # registering
+            if "name" in params:
+                name = params["name"][0]
+            else:
+                name = client
+            print "Registering %s (%s)" % (client, name)
+            print params
+            self.add_client(client, name)
+            return "registered"
 
     def quit(self):
         """Tells everything to quit"""
@@ -78,9 +86,9 @@ class TeacherRunner(Thread):
         """Associates a GUI to this service"""
         self.gui = gui
 
-    def add_client(self, client):
+    def add_client(self, client, name):
         """Adds a new client"""
-        self.gui.add_client(client)
+        self.gui.add_client(client, name)
 
     def start_broadcast(self, class_name):
         """Start broadcasting service"""
@@ -134,9 +142,9 @@ class TeacherGui:
         # internal variables
         self.class_name = None
         self.bcast = None
+        self.clients_queue = Queue()
         self.service = service
         self.service.set_gui(self)
-        self.new_clients_queue = Queue.Queue()
         # colors
         self.color_normal = gtk.gdk.color_parse("#99BFEA")
         self.color_active = gtk.gdk.color_parse("#FFBBFF")
@@ -183,14 +191,6 @@ class TeacherGui:
 
         # inicializa o timestamp
         self.curtimestamp = 0
-
-        # Create some testing machines
-        for addr in range(64, 98):
-            machine = self.mkmachine("192.168.0.%d" % addr)
-            machine.button.connect('clicked', self.cb_machine, machine)
-            self.put_machine(machine)
-            self.machines[addr] = machine
-            machine.show_all()
 
         self.login()
 
@@ -248,9 +248,10 @@ class TeacherGui:
             dialog.destroy()
             return None
 
-    def add_client(self, client):
+    def add_client(self, client, name):
         """Adds a new client"""
-        self.new_clients_queue.put(client)
+        print "Adding %s" % client
+        self.clients_queue.put(("new", client, {"name": name}))
 
     def put_machine(self, machine):
         """Puts a client machine in an empty spot"""
@@ -266,22 +267,24 @@ class TeacherGui:
 
     def monitor(self):
         """Monitors new machines connections"""
-        #self.StatusLabel.set_markup("<b>Link:</b> %s, <b>Signal:</b> %s, <b>Noise:</b> %s" % (link, level, noise))
-        while not self.new_clients_queue.empty():
-            addr = self.new_clients_queue.get()
-            if addr not in self.machines:
-                # Maquina nova
-                gtk.gdk.threads_enter()
-                machine = self.mkmachine("%s" % addr)
-                machine.button.connect('clicked', self.cb_machine, machine)
-                self.put_machine(machine)
-                self.machines[addr] = machine
-                machine.show_all()
-                self.StatusLabel.set_text("Found %s (%d machines connected)!" % (addr, len(self.machines)))
-                gtk.gdk.threads_leave()
-            else:
-                machine = self.machines[addr]
-                self.tooltip.set_tip(machine, _("Updated on %s" % (time.asctime())))
+        while not self.clients_queue.empty():
+            action, addr, params = self.clients_queue.get()
+            if action == "new":
+                # adding a new machine
+                if addr not in self.machines:
+                    # Maquina nova
+                    gtk.gdk.threads_enter()
+                    name = params.get("name", addr)
+                    machine = self.mkmachine(name)
+                    machine.button.connect('clicked', self.cb_machine, machine)
+                    self.put_machine(machine)
+                    self.machines[addr] = machine
+                    machine.show_all()
+                    self.StatusLabel.set_text("Found %s (%d machines connected)!" % (addr, len(self.machines)))
+                    gtk.gdk.threads_leave()
+                else:
+                    machine = self.machines[addr]
+                    self.tooltip.set_tip(machine, _("Updated on %s" % (time.asctime())))
 
         gobject.timeout_add(1000, self.monitor)
 
@@ -322,14 +325,12 @@ class TeacherGui:
         """Requests an attribute from Glade"""
         obj = self.wTree.get_widget(attr)
         if not obj:
-            #bluelab_config.error("Attribute %s not found!" % attr)
             return None
         else:
             return obj
 
     def on_MainWindow_destroy(self, widget):
         """Main window was closed"""
-        print "Here!!"
         gtk.main_quit()
         print "Closing pending threads.."
         self.service.quit()

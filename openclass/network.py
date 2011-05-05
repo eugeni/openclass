@@ -13,6 +13,8 @@ import thread
 import ssl
 from threading import Thread
 
+import cgi
+
 import BaseHTTPServer
 from SimpleHTTPServer import SimpleHTTPRequestHandler
 
@@ -81,7 +83,13 @@ class HTTPRequestHandler(SimpleHTTPRequestHandler):
         # TODO: count sequence numbers
         seqno = self.headers.get('seqno', "0")
         seqno = int(seqno)
-        results = self.controller.process_request(client, self.path, seqno)
+        p = self.path.split("?")
+        path = p[0]
+        if len(p) > 1:
+            params = cgi.parse_qs(p[1], True, True)
+        else:
+            params = {}
+        results = self.controller.process_request(client, path, params, seqno)
 
         self.send_response(200)
         self.end_headers()
