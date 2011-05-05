@@ -33,7 +33,7 @@ MACHINES_X = 8
 MACHINES_Y = 8
 
 # configuration
-from openclass import network, system, protocol
+from openclass import network, system, protocol, screen
 
 # helper functions
 
@@ -51,6 +51,9 @@ class TeacherRunner(Thread):
         # actions
         self.actions = Queue()
 
+        # actions for clients
+        self.clients_actions = {}
+
         # protocol
         self.protocol = protocol.Protocol()
 
@@ -59,6 +62,9 @@ class TeacherRunner(Thread):
 
         # broadcast sender
         self.bcast = None
+
+        # multicast sender
+        self.mcast = network.McastSender()
 
     def process_request(self, client, request, params, seqno):
         """Gets pending actions for a client, starting with seqno"""
@@ -74,6 +80,12 @@ class TeacherRunner(Thread):
             print params
             self.add_client(client, name)
             return "registered"
+        elif request == "/actions":
+            # checking actions for the client
+            if client not in self.clients_actions:
+                return protocol.ACTION_NOOP
+            else:
+                return self.clients_actions[client]
 
     def quit(self):
         """Tells everything to quit"""
@@ -89,6 +101,12 @@ class TeacherRunner(Thread):
     def add_client(self, client, name):
         """Adds a new client"""
         self.gui.add_client(client, name)
+        self.add_client_action(client, protocol.ACTION_NOOP)
+
+    def add_client_action(self, client, action):
+        """Adds an action for a client into a list"""
+        # TODO: implement seqnos
+        self.clients_actions[client] = action
 
     def start_broadcast(self, class_name):
         """Start broadcasting service"""
@@ -96,24 +114,10 @@ class TeacherRunner(Thread):
         self.class_name = class_name
         self.bcast.start()
 
-    def multicast(self, machines, num_msgs, bandwidth, type="multicast"):
-        """Inicia a captura"""
-
-        # funcoes de socket
-        def sock_mcast():
-            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_IP)
-            s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            return s
-
-        def sock_bcast():
-            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_IP)
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            return s
-
-        s = sock_mcast()
-        s = connect(z, LISTENPORT, timeout=5)
+    def send_projection(self, chunks):
+        """Send chunks of projection over multicast"""
+        for chunk in chunks:
+            self.mcast.send(chunk)
 
     def run(self):
         """Starts a background thread"""
@@ -169,15 +173,12 @@ class TeacherGui:
         self.QuitButton.connect('clicked', self.on_MainWindow_destroy)
         self.SelectAllButton.connect('clicked', self.select_all)
         self.UnselectAllButton.connect('clicked', self.unselect_all)
-        #self.StartCapture.connect('clicked', self.start_capture)
+        self.SendScreen.connect('clicked', self.send_screen)
         #self.StopCapture.connect('clicked', self.stop_capture)
         #self.BandwidthButton.connect('clicked', self.bandwidth)
         #self.MulticastButton.connect('clicked', self.multicast)
         #self.BroadcastButton.connect('clicked', self.multicast, "broadcast")
         #self.AnalyzeButton.connect('clicked', self.analyze)
-
-        # Configura o timer
-        gobject.timeout_add(1000, self.monitor)
 
         # Inicializa a matriz de maquinas
         self.machine_layout = [None] * MACHINES_X
@@ -191,6 +192,16 @@ class TeacherGui:
 
         # inicializa o timestamp
         self.curtimestamp = 0
+
+        # maquinas de estados
+        self.projection_running = False
+        self.projection_screen = screen.Screen()
+
+        # Configura os timers
+        # monitora os eventos
+        gobject.timeout_add(1000, self.monitor)
+        # monitora a projecao
+        gobject.timeout_add(500, self.projection)
 
         self.login()
 
@@ -265,6 +276,15 @@ class TeacherGui:
                     return
         print "Not enough layout space to add a machine!"
 
+    def projection(self):
+        """Grabs the screen for multicast projection when needed"""
+        if self.projection_running == True:
+            print "Sending screens, yee-ha!"
+            # we are projecting, grab stuff
+            chunks = self.projection_screen.chunks()
+            self.service.send_projection(chunks)
+        gobject.timeout_add(500, self.projection)
+
     def monitor(self):
         """Monitors new machines connections"""
         while not self.clients_queue.empty():
@@ -310,6 +330,33 @@ class TeacherGui:
                 machines.append(z)
 
         self.service.actions.put((type, (machines, num_msgs, bandwidth)))
+
+    def send_screen(self, widget):
+        """Starts screen sharing for selected machines"""
+        machines = self.get_selected_machines()
+        print "Sending screen to %s" % machines
+        if self.projection_running == False:
+            print "Sending screens"
+            self.SendScreen.set_label(_("Stop sending screen"))
+            self.projection_running = True
+            for machine in machines:
+                self.service.add_client_action(machine, protocol.ACTION_PROJECTION)
+        else:
+            print "Stopping sending screens"
+            self.SendScreen.set_label(_("Send Screen"))
+            self.projection_running = False
+            for machine in machines:
+                self.service.add_client_action(machine, protocol.ACTION_NOOP)
+
+    def get_selected_machines(self):
+        """Returns the list of all selected machines"""
+        machines = []
+        for z in self.machines:
+            machine = self.machines[z]
+            img = machine.button.get_image()
+            if img == machine.button.img_on:
+                machines.append(z)
+        return machines
 
     def select_all(self, widget):
         """Selects all machines"""

@@ -2,7 +2,7 @@
 """OpenClass network module"""
 
 import os
-import Queue
+from multiprocessing import Queue
 import socket
 import traceback
 import struct
@@ -40,7 +40,7 @@ class BcastSender(Thread):
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind(('', 0))
-        self.actions = Queue.Queue()
+        self.actions = Queue()
         self.data = data
 
     def stop():
@@ -100,7 +100,7 @@ class HTTPRequestHandler(SimpleHTTPRequestHandler):
 class HTTPListener(Thread):
     def __init__(self, controller):
         Thread.__init__(self)
-        self.actions = Queue.Queue()
+        self.actions = Queue()
         self.messages = []
         self.lock = thread.allocate_lock()
         self.controller = controller
@@ -121,7 +121,7 @@ class McastListener(Thread):
     """Multicast listening thread"""
     def __init__(self):
         Thread.__init__(self)
-        self.actions = Queue.Queue()
+        self.actions = Queue()
         self.messages = []
         self.lock = thread.allocate_lock()
 
@@ -188,8 +188,8 @@ class BcastListener(Thread):
         Thread.__init__(self)
         self.port = port
         self.datagram_size = datagram_size
-        self.actions = Queue.Queue()
-        self.messages = Queue.Queue()
+        self.actions = Queue()
+        self.messages = Queue()
         self.lock = thread.allocate_lock()
 
     def get_msg(self):
@@ -277,6 +277,22 @@ class TcpClient:
         except:
             traceback.print_exc()
             return None
+# }}}
+
+# {{{ McastSender
+class McastSender:
+    """Multicast socket for sending stuff"""
+    def __init__(self):
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_IP)
+        s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.socket = s
+
+    def send(self, data, addr=MCASTADDR, port=MCASTPORT):
+        """Sends stuff via multicast"""
+        print addr
+        print port
+        self.socket.sendto(bytes(data), (addr, port))
 # }}}
 
 class ReusableForkingTCPServer(SocketServer.ForkingTCPServer):

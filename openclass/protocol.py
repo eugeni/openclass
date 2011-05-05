@@ -6,6 +6,13 @@ OPENCLASS_VERSION_MAJOR=0
 OPENCLASS_VERSION_MINOR=1
 OPENCLASS_BUILD=1
 
+# protocol commands
+ACTION_NOOP="noop"
+ACTION_MSG="msg"
+ACTION_ATTENTION="attention"
+ACTION_PROJECTION="projection"
+ACTION_SHOT="shot"
+
 import struct
 import traceback
 
