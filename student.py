@@ -136,6 +136,7 @@ class Student:
         vbox.pack_start(self.attention_label)
 
         # drawing
+        self.gc = self.style.fg_gc[gtk.STATE_NORMAL]
         self.drawing = gtk.DrawingArea()
         self.drawing.set_size_request(self.screen.width, self.screen.height)
         vbox.pack_start(self.drawing)
@@ -263,7 +264,7 @@ class Student:
                 loader.close()
                 pb = loader.get_pixbuf()
 
-                self.drawing.draw_pixbuf(None, pb, 0, 0, pos_x, pos_y, step_x, step_y)
+                self.drawing.draw_drawable(self.gc, pb, 0, 0, pos_x, pos_y, step_x, step_y)
             except:
                 traceback.print_exc()
 
