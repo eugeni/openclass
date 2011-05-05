@@ -72,11 +72,12 @@ class Protocol:
     def pack_chunk(self, chunk):
         """Packs a chunk into network-specific format for sending"""
         pos_x, pos_y, step_x, step_y, img = chunk
-        data = struct.pack("!iiiip", pos_x, pos_y, step_x, step_y, img)
-        return data
+        data = struct.pack("!iiii", pos_x, pos_y, step_x, step_y)
+        return data + img
 
     def unpack_chunk(self, data):
         """Unpacks a chunk of data"""
-        pos_x, pos_y, step_x, step_y, img = struct.unpack("!iiiip", data)
-        return pos_x, pos_y, step_x, step_y, img
+        pos_x, pos_y, step_x, step_y, img_size = struct.unpack("!iiii", data)
+        head_size = struct.calcsize("!iiii")
+        return pos_x, pos_y, step_x, step_y, data[head_size:]
 

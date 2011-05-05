@@ -24,6 +24,7 @@ import gtk
 import gtk.glade
 import pygtk
 import gobject
+from gtk import gdk
 
 from threading import Thread
 import thread
@@ -152,11 +153,22 @@ class Student:
 
     def ask_attention(self, message=_("Teacher asked you for attention")):
         """Asks for attention"""
+        self.drawing.set_visible(False)
         self.attention_label.set_markup("<big><b>%s</b></big>" % message)
         self.attention_label.set_visible(True)
         self.projection_window.fullscreen()
         self.projection_window.stick()
         self.projection_window.show_all()
+
+    def start_projection(self):
+        """Starts screen projection"""
+        self.projection_window.visible = True
+        self.attention_label.set_visible(True)
+        self.projection_window.fullscreen()
+        self.projection_window.stick()
+        self.projection_window.show_all()
+        self.attention_label.set_visible(False)
+        self.drawing.set_visible(True)
 
     def noop(self):
         """Back to noop state"""
@@ -197,6 +209,10 @@ class Student:
             commands = self.send_command("actions")
             if commands == protocol.ACTION_PROJECTION:
                 print "Projecting"
+                self.start_projection()
+            else:
+                # noop
+                self.noop()
             print commands
         gobject.timeout_add(1000, self.monitor_teacher)
 
@@ -232,6 +248,17 @@ class Student:
         while not self.mcast.messages.empty():
             message = self.mcast.messages.get()
             pos_x, pos_y, step_x, step_y, img = self.protocol.unpack_chunk(message)
+            print len(img)
+            try:
+                loader = gdk.PixbufLoader(image_type="jpeg")
+                loader.write(img)
+                loader.close()
+                pb = loader.get_pixbuf()
+
+                self.drawing.draw_pixbuf(None, pb, 0, 0, pos_x, pos_y, step_x, step_y)
+            except:
+                traceback.print_exc()
+
             print "%d %d - %d %d" % (pos_x, pos_y, step_x, step_y)
         gobject.timeout_add(1000, self.monitor_mcast)
 
