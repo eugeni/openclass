@@ -207,7 +207,11 @@ class Student:
         if self.teacher_addr:
             # connect to teacher for instructions
             commands = self.send_command("actions")
-            command, params = commands.split(" ", 1)
+            try:
+                command, params = commands.split(" ", 1)
+            except:
+                command = commands
+                params = None
             if command == protocol.ACTION_PROJECTION:
                 print "Projecting"
                 self.start_projection()
