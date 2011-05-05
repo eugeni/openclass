@@ -83,7 +83,7 @@ class TeacherRunner(Thread):
         elif request == "/actions":
             # checking actions for the client
             if client not in self.clients_actions:
-                return protocol.ACTION_NOOP
+                return self.gui.current_action
             else:
                 return self.clients_actions[client]
 
@@ -172,8 +172,6 @@ class TeacherGui:
         # Configura os botoes
         # TODO: disable all buttons when one of them is active (projection, capture, message, attention)
         self.QuitButton.connect('clicked', self.on_MainWindow_destroy)
-        self.SelectAllButton.connect('clicked', self.select_all)
-        self.UnselectAllButton.connect('clicked', self.unselect_all)
         self.SendScreen.connect('clicked', self.send_screen)
         self.LockScreen.connect('clicked', self.lock_screen)
         #self.StopCapture.connect('clicked', self.stop_capture)
@@ -196,8 +194,9 @@ class TeacherGui:
         self.curtimestamp = 0
 
         # maquinas de estados
-        self.projection_running = False
-        self.screen_locked = False
+        self.current_action = protocol.ACTION_NOOP
+
+        # projection screen
         self.projection_screen = screen.Screen()
 
         # Configura os timers
@@ -281,7 +280,7 @@ class TeacherGui:
 
     def projection(self):
         """Grabs the screen for multicast projection when needed"""
-        if self.projection_running == True:
+        if self.current_action == protocol.ACTION_PROJECTION:
             print "Sending screens, yee-ha!"
             # we are projecting, grab stuff
             chunks = self.projection_screen.chunks()
@@ -338,16 +337,16 @@ class TeacherGui:
         """Starts screen sharing for selected machines"""
         machines = self.get_selected_machines()
         print "Sending screen to %s" % machines
-        if self.projection_running == False:
+        if self.current_action != protocol.ACTION_PROJECTION:
             print "Sending screens"
             self.SendScreen.set_label(_("Stop sending screen"))
-            self.projection_running = True
+            self.current_action = protocol.ACTION_PROJECTION
             for machine in machines:
                 self.service.add_client_action(machine, protocol.ACTION_PROJECTION)
         else:
             print "Stopping sending screens"
             self.SendScreen.set_label(_("Send Screen"))
-            self.projection_running = False
+            self.current_action = protocol.ACTION_NOOP
             for machine in machines:
                 self.service.add_client_action(machine, protocol.ACTION_NOOP)
 
@@ -355,16 +354,16 @@ class TeacherGui:
         """Starts screen locking for selected machines"""
         machines = self.get_selected_machines()
         print "Locking screen on %s" % machines
-        if self.screen_locked == False:
+        if self.current_action != protocol.ACTION_ATTENTION:
             print "Locking screens"
             self.LockScreen.set_label(_("Stop locking screen"))
-            self.screen_locked = True
+            self.current_action = protocol.ACTION_ATTENTION
             for machine in machines:
                 self.service.add_client_action(machine, protocol.ACTION_ATTENTION)
         else:
             print "Stopping locking screens"
             self.LockScreen.set_label(_("Lock Screen"))
-            self.screen_locked = False
+            self.current_action = protocol.ACTION_NOOP
             for machine in machines:
                 self.service.add_client_action(machine, protocol.ACTION_NOOP)
 
@@ -377,16 +376,6 @@ class TeacherGui:
             if img == machine.button.img_on:
                 machines.append(z)
         return machines
-
-    def select_all(self, widget):
-        """Selects all machines"""
-        for z in self.machines.values():
-            z.button.set_image(z.button.img_on)
-
-    def unselect_all(self, widget):
-        """Selects all machines"""
-        for z in self.machines.values():
-            z.button.set_image(z.button.img_off)
 
     def __getattr__(self, attr):
         """Requests an attribute from Glade"""
