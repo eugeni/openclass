@@ -61,8 +61,31 @@ class Student:
         self.main_vbox = gtk.VBox()
         self.window.add(self.main_vbox)
 
-        self.window.show_all()
+        # login
+        hbox = gtk.HBox()
+        hbox.pack_start(gtk.Label(_("Your name:")), False, False)
+        self.name_label = gtk.Label(_("Not logged in"))
+        hbox.pack_start(self.name_label, False, False)
+        self.login_button = gtk.Button(_("Click here to login"))
+        self.login_button.connect('clicked', self.login)
+        hbox.pack_start(self.login_button, False, False)
+        self.main_vbox.pack_start(hbox, False, False)
 
+        # teacher
+        hbox = gtk.HBox()
+        hbox.pack_start(gtk.Label(_("Current teacher:")), False, False)
+        self.teacher_label = gtk.Label(_("No teacher found"))
+        hbox.pack_start(self.teacher_label, False, False)
+        self.leave_button = gtk.Button(_("Click here to leave this class"))
+        self.leave_button.connect('clicked', self.leave_class)
+        self.leave_button.set_sensitive(False)
+        hbox.pack_start(self.leave_button, False, False)
+        self.main_vbox.pack_start(hbox, False, False)
+
+        self.teacher_view = gtk.Label()
+        self.main_vbox.pack_start(self.teacher_view)
+
+        self.window.show_all()
 
         # tooltips
         self.tooltip = gtk.Tooltips()
@@ -74,13 +97,12 @@ class Student:
         gobject.timeout_add(1000, self.monitor)
 
         self.teacher = None
+        self.name = None
         self.outfile = None
         # Inicializa as threads
         self.bcast = network.BcastListener(network.LISTENPORT)
         self.log( _("Starting broadcasting service.."))
         self.bcast.start()
-
-        self.login()
 
     def quit(self, widget, param):
         """Main window was closed"""
@@ -88,7 +110,11 @@ class Student:
         self.bcast.actions.put(1)
         sys.exit(0)
 
-    def login(self):
+    def leave_class(self, widget):
+        """Leave a class"""
+        pass
+
+    def login(self, widget):
         """Asks student to login"""
         dialog = gtk.Dialog(_("Login"), self.window, 0,
                 (gtk.STOCK_OK, gtk.RESPONSE_OK,
@@ -106,20 +132,22 @@ class Student:
         dialog.show_all()
         response = dialog.run()
         if response == gtk.RESPONSE_OK:
-            self.class_name = entry_login.get_text()
-            print "Login: %s" % self.class_name
+            self.name = entry_login.get_text()
+            print "Login: %s" % self.name
+            self.name_label.set_text(self.name)
+            self.login_button.set_label(_("Login as different user"))
             dialog.destroy()
-            # Starting broadcasting service
-            return True
         else:
             dialog.destroy()
-            return None
 
     def monitor(self):
         """Monitors WIFI status"""
         if self.bcast.has_msgs():
             msg = self.protocol.parse_header(self.bcast.get_msg())
-            print "Got a message: %s" % self.protocol.parse_announce(msg)
+            name, flags = self.protocol.parse_announce(msg)
+            # TODO: support multiple teachers
+            self.teacher = name
+            self.teacher_label.set_text(name)
         #self.StatusLabel.set_markup("<b>Link:</b> %s, <b>Signal:</b> %s, <b>Noise:</b> %s" % (link, level, noise))
         gobject.timeout_add(1000, self.monitor)
 

@@ -44,7 +44,7 @@ class Protocol:
     def create_announce(self, class_name, restricted=False):
         """Creates announce message."""
         header = self.header
-        header += struct.pack("128s", class_name)
+        header += struct.pack("64p", class_name)
         flags = 0
         if restricted:
             flags |= ANNOUNCE_RESTRICTED
@@ -54,9 +54,10 @@ class Protocol:
     def parse_announce(self, announce):
         """Parses a class announcment"""
         try:
-            name, flags = struct.unpack("!128si", announce)
+            name, flags = struct.unpack("!64pi", announce)
             print name
-            return {"name": name, "flags": flags}
+            # strip trailing null bytes
+            return (name, flags)
         except:
             traceback.print_exc()
             return None

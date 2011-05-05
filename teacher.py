@@ -200,10 +200,10 @@ class TeacherGui:
         dialog.vbox.add(dialogLabel)
         dialog.vbox.set_border_width(8)
         hbox = gtk.HBox()
-        login = gtk.Label(_("Class name:"))
+        login = gtk.Label(_("Your name (teacher or class name):"))
         hbox.pack_start(login)
         entry_login = gtk.Entry()
-        entry_login.set_text(_("My class"))
+        entry_login.set_text(_("My name"))
         hbox.pack_start(entry_login)
         dialog.vbox.pack_start(hbox)
         dialog.show_all()
@@ -433,7 +433,7 @@ class TeacherGui:
 
 if __name__ == "__main__":
     # configura o timeout padrao para sockets
-    socket.setdefaulttimeout(5)
+    socket.setdefaulttimeout(2)
     gtk.gdk.threads_init()
     gtk.gdk.threads_enter()
     print _("Starting broadcast..")
