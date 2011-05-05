@@ -37,7 +37,7 @@ import gettext
 import __builtin__
 __builtin__._ = gettext.gettext
 
-from openclass import network, system, protocol
+from openclass import network, system, protocol, screen
 
 DEBUG=False
 
@@ -103,10 +103,32 @@ class Student:
         self.teacher_addr = None
         self.name = None
         self.outfile = None
+
         # Inicializa as threads
         self.bcast = network.BcastListener(network.LISTENPORT)
         self.log( _("Starting broadcasting service.."))
         self.bcast.start()
+
+        self.screen = screen.Screen()
+        self.projection_window = gtk.Window()
+        self.projection_window.set_default_size(self.screen.width, self.screen.height)
+        self.projection_window.show_all()
+        self.projection_window.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DESKTOP)
+        self.projection_window.set_resizable(False)
+        self.projection_window.set_geometry_hints(min_width = self.screen.width, min_height=self.screen.height)
+        self.projection_window.set_has_frame(False)
+        self.projection_window.set_decorated(False)
+        self.projection_window.set_keep_above(True)
+        self.projection_window.connect('delete-event', lambda *w: True)
+        self.projection_window.visible = False
+        self.projection_window.hide()
+
+        vbox = gtk.VBox()
+        self.projection_window.add(vbox)
+
+        self.attention_label = gtk.Label()
+        self.attention_label.set_use_markup(True)
+        vbox.add(self.attention_label)
 
     def quit(self, widget, param):
         """Main window was closed"""
@@ -117,6 +139,20 @@ class Student:
     def leave_class(self, widget):
         """Leave a class"""
         pass
+
+    def ask_attention(self, message=_("Teacher asked you for attention")):
+        """Asks for attention"""
+        self.attention_label.set_markup("<big><b>%s</b></big>" % message)
+        self.attention_label.set_visible(True)
+        self.projection_window.fullscreen()
+        self.projection_window.stick()
+        self.projection_window.show_all()
+
+    def noop(self):
+        """Back to noop state"""
+        if self.projection_window.visible == True:
+            self.projection_window.visible = False
+            self.projection_window.hide()
 
     def login(self, widget):
         """Asks student to login"""
@@ -144,11 +180,15 @@ class Student:
         else:
             dialog.destroy()
 
+        self.ask_attention()
+
     def monitor_teacher(self):
         """Periodically checks for teacher commands"""
         if self.teacher_addr:
             # connect to teacher for instructions
             commands = self.send_command("actions")
+            if commands == protocol.ACTION_PROJECTION:
+                print "Projecting"
             print commands
         gobject.timeout_add(1000, self.monitor_teacher)
 
