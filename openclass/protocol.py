@@ -69,15 +69,15 @@ class Protocol:
             traceback.print_exc()
             return None
 
-    def pack_chunk(self, chunk):
+    def pack_chunk(self, screen_width, screen_height, chunk):
         """Packs a chunk into network-specific format for sending"""
         pos_x, pos_y, step_x, step_y, img = chunk
-        data = struct.pack("!iiii", pos_x, pos_y, step_x, step_y)
+        data = struct.pack("!iiiiii", screen_width, screen_height, pos_x, pos_y, step_x, step_y)
         return data + img
 
     def unpack_chunk(self, data):
         """Unpacks a chunk of data"""
-        head_size = struct.calcsize("!iiii")
-        pos_x, pos_y, step_x, step_y = struct.unpack("!iiii", data[:head_size])
-        return pos_x, pos_y, step_x, step_y, data[head_size:]
+        head_size = struct.calcsize("!iiiiii")
+        screen_width, screen_height, pos_x, pos_y, step_x, step_y = struct.unpack("!iiiiii", data[:head_size])
+        return screen_width, screen_height, pos_x, pos_y, step_x, step_y, data[head_size:]
 

@@ -258,7 +258,7 @@ class Student:
         """Monitor for multicast messages"""
         while not self.mcast.messages.empty():
             message = self.mcast.messages.get()
-            pos_x, pos_y, step_x, step_y, img = self.protocol.unpack_chunk(message)
+            screen_width, screen_height, pos_x, pos_y, step_x, step_y, img = self.protocol.unpack_chunk(message)
             try:
                 loader = gdk.PixbufLoader(image_type="jpeg")
                 loader.write(img)

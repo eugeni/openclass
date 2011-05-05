@@ -114,10 +114,10 @@ class TeacherRunner(Thread):
         self.class_name = class_name
         self.bcast.start()
 
-    def send_projection(self, chunks):
+    def send_projection(self, width, height, chunks):
         """Send chunks of projection over multicast"""
         for chunk in chunks:
-            self.mcast.send(self.protocol.pack_chunk(chunk))
+            self.mcast.send(self.protocol.pack_chunk(width, height, chunk))
 
     def run(self):
         """Starts a background thread"""
@@ -282,7 +282,7 @@ class TeacherGui:
             print "Sending screens, yee-ha!"
             # we are projecting, grab stuff
             chunks = self.projection_screen.chunks()
-            self.service.send_projection(chunks)
+            self.service.send_projection(self.projection_screen.width, self.projection_screen.height, chunks)
         gobject.timeout_add(500, self.projection)
 
     def monitor(self):
