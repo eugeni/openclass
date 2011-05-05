@@ -77,7 +77,7 @@ class Protocol:
 
     def unpack_chunk(self, data):
         """Unpacks a chunk of data"""
-        pos_x, pos_y, step_x, step_y, img_size = struct.unpack("!iiii", data)
+        pos_x, pos_y, step_x, step_y = struct.unpack("!iiii", data)
         head_size = struct.calcsize("!iiii")
         return pos_x, pos_y, step_x, step_y, data[head_size:]
 
