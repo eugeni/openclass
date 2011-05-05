@@ -42,7 +42,7 @@ class TeacherRunner(Thread):
     selected_machines = 0
     """Teacher service"""
     def __init__(self):
-        """Initializes the benchmarking thread"""
+        """Initializes the teacher thread"""
         Thread.__init__(self)
 
         # connected machines
@@ -56,6 +56,10 @@ class TeacherRunner(Thread):
 
         # new clients
         self.new_clients_queue = Queue.Queue()
+
+        # listening server
+        self.server = network.HTTPListener()
+        self.server.start()
 
     def set_gui(self, gui):
         """Associates a GUI to this service"""
@@ -232,16 +236,6 @@ class TeacherGui:
         """Adds a new client"""
         self.new_clients_queue.put(client)
 
-    def set_service(self, service):
-        """Determines the active benchmarking service"""
-        self.service = service
-
-    def show_progress(self, message):
-        """Shows a message :)"""
-        gtk.gdk.threads_enter()
-        self.StatusLabel.set_text(message)
-        gtk.gdk.threads_leave()
-
     def put_machine(self, machine):
         """Puts a client machine in an empty spot"""
         for y in range(0, MACHINES_Y):
@@ -287,31 +281,7 @@ class TeacherGui:
         gtk.gdk.threads_leave()
 
     def multicast(self, widget, type="multicast"):
-        """Inicia o teste de multicast"""
-        num_msgs = self.question(_("How many multicast messages to send?"), "1000")
-        if not num_msgs:
-            return
-        try:
-            num_msgs = int(num_msgs)
-        except:
-            return
-
-        bandwidth = self.question(_("Maximum bandwidth in Kbps (0 for no limit)\nor\nBandwidth range (format: minimum bandwidth, maximum bandwidth, interval)"), "0")
-        if not bandwidth:
-            return
-        try:
-            try:
-                band_min, band_max, band_int = bandwidth.split(",", 3)
-                band_min = int(band_min.strip())
-                band_max = int(band_max.strip())
-                band_int = int(band_int.strip())
-                steps = (band_max - band_min) / band_int + 1
-                bandwidth = [band_min + (band_int * step) for step in range(steps)]
-            except:
-                bandwidth = [int(bandwidth)]
-        except:
-            return
-
+        """Inicia transmissao de multicast"""
         print "Bandwidth to estimate: %s Kbps" % (bandwidth)
 
         machines = []

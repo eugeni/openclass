@@ -13,6 +13,9 @@ import thread
 import ssl
 from threading import Thread
 
+import BaseHTTPServer
+from SimpleHTTPServer import SimpleHTTPRequestHandler
+
 # constants
 LISTENPORT = 40000
 MCASTPORT = 40001
@@ -59,6 +62,36 @@ class BcastSender(Thread):
                 self.gui.log("Error sending broadcast message: %s" % sys.exc_value)
                 traceback.print_exc()
                 time.sleep(1)
+# }}}
+
+# {{{ HTTPListener
+class HTTPRequestHandler(SimpleHTTPRequestHandler):
+    """Handles HTTP requests"""
+    listener = None
+
+    def do_GET(self):
+        """GET request"""
+        print self.path
+        print self.listener
+
+class HTTPListener(Thread):
+    def __init__(self):
+        Thread.__init__(self)
+        self.actions = Queue.Queue()
+        self.messages = []
+        self.lock = thread.allocate_lock()
+
+        HTTPRequestHandler.listener = self
+        self.socket = ReusableForkingTCPServer(("", LISTENPORT), HTTPRequestHandler)
+
+    def run(self):
+        while 1:
+            if not self.actions.empty():
+                print "Finishing server listening"
+                self.socket.close()
+                return
+            print "Handling request"
+            self.socket.handle_request()
 # }}}
 
 # {{{ McastListener
@@ -224,7 +257,9 @@ class TcpClient:
             return None
 # }}}
 
+class ReusableForkingTCPServer(SocketServer.ForkingTCPServer):
+    allow_reuse_address = True
+
 class ReusableSocketServer(SocketServer.TCPServer):
-    # TODO: allow address reuse
     allow_reuse_address = True
 
