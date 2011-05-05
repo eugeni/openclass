@@ -170,6 +170,7 @@ class TeacherGui:
         self.MachineLayout.modify_bg(gtk.STATE_NORMAL, self.color_background)
 
         # Configura os botoes
+        # TODO: disable all buttons when one of them is active (projection, capture, message, attention)
         self.QuitButton.connect('clicked', self.on_MainWindow_destroy)
         self.SelectAllButton.connect('clicked', self.select_all)
         self.UnselectAllButton.connect('clicked', self.unselect_all)
