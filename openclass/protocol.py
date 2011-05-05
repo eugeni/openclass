@@ -68,3 +68,15 @@ class Protocol:
         except:
             traceback.print_exc()
             return None
+
+    def pack_chunk(self, chunk):
+        """Packs a chunk into network-specific format for sending"""
+        pos_x, pos_y, step_x, step_y, img = chunk
+        data = struct.pack("!iiiip", pos_x, pos_y, step_x, step_y, img)
+        return data
+
+    def unpack_chunk(self, data):
+        """Unpacks a chunk of data"""
+        pos_x, pos_y, step_x, step_y, img = struct.unpack("!iiiip", data)
+        return pos_x, pos_y, step_x, step_y, img
+

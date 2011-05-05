@@ -117,7 +117,7 @@ class TeacherRunner(Thread):
     def send_projection(self, chunks):
         """Send chunks of projection over multicast"""
         for chunk in chunks:
-            self.mcast.send(chunk)
+            self.mcast.send(self.protocol.pack_chunk(chunk))
 
     def run(self):
         """Starts a background thread"""

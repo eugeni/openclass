@@ -119,18 +119,12 @@ class HTTPListener(Thread):
 # {{{ McastListener
 class McastListener(Thread):
     """Multicast listening thread"""
-    def __init__(self):
+    def __init__(self, addr=MCASTADDR, port=MCASTPORT):
         Thread.__init__(self)
         self.actions = Queue()
-        self.messages = []
-        self.lock = thread.allocate_lock()
-
-    def get_log(self):
-        """Returns the execution log"""
-        self.lock.acquire()
-        msgs = "\n".join(self.messages)
-        return "# received msgs: %d msg_size: %d\n%s" % (len(self.messages), DATAGRAM_SIZE, msgs)
-        self.lock.release()
+        self.messages = Queue()
+        self.addr = addr
+        self.port = port
 
     def stop(self):
         """Stops the execution"""
@@ -141,18 +135,12 @@ class McastListener(Thread):
         # Configura o socket
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        s.bind(('', MCASTPORT))
+        s.bind(('', self.port))
         # configura para multicast
-        mreq = struct.pack("4sl", socket.inet_aton(MCASTADDR), socket.INADDR_ANY)
+        mreq = struct.pack("4sl", socket.inet_aton(self.addr), socket.INADDR_ANY)
         s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
         # configura timeout para 1 segundo
         s.settimeout(1)
-        # configura o mecanismo de captura de tempo
-        if get_os() == "Windows":
-            timefunc = time.clock
-        else:
-            timefunc = time.time
-        last_ts = None
         while 1:
             if not self.actions.empty():
                 print "Finishing multicast capture"
@@ -161,18 +149,7 @@ class McastListener(Thread):
                 return
             try:
                 data = s.recv(DATAGRAM_SIZE + 1024)
-                count = struct.unpack("<I", data[:struct.calcsize("<I")])[0]
-                self.lock.acquire()
-                curtime = timefunc()
-                walltime = time.time()
-                if not last_ts:
-                    last_ts = curtime
-                    timediff = 0
-                else:
-                    timediff = curtime - last_ts
-                    last_ts = curtime
-                self.messages.append("%d %f %f %f" % (count, timediff, curtime, walltime))
-                self.lock.release()
+                self.messages.put(data)
             except socket.timeout:
                 #print "Timeout!"
                 pass

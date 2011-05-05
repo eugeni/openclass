@@ -97,6 +97,7 @@ class Student:
 
         # Configura o timer
         gobject.timeout_add(1000, self.monitor_bcast)
+        gobject.timeout_add(500, self.monitor_mcast)
         gobject.timeout_add(1000, self.monitor_teacher)
 
         self.teacher = None
@@ -109,6 +110,9 @@ class Student:
         self.log( _("Starting broadcasting service.."))
         self.bcast.start()
 
+        self.mcast = network.McastListener()
+        self.mcast.start()
+
         self.screen = screen.Screen()
         self.projection_window = gtk.Window()
         self.projection_window.set_default_size(self.screen.width, self.screen.height)
@@ -116,24 +120,30 @@ class Student:
         self.projection_window.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DESKTOP)
         self.projection_window.set_resizable(False)
         self.projection_window.set_geometry_hints(min_width = self.screen.width, min_height=self.screen.height)
-        self.projection_window.set_has_frame(False)
+        #self.projection_window.set_has_frame(False)
         self.projection_window.set_decorated(False)
         self.projection_window.set_keep_above(True)
         self.projection_window.connect('delete-event', lambda *w: True)
         self.projection_window.visible = False
         self.projection_window.hide()
 
+        # attention
         vbox = gtk.VBox()
         self.projection_window.add(vbox)
-
         self.attention_label = gtk.Label()
         self.attention_label.set_use_markup(True)
-        vbox.add(self.attention_label)
+        vbox.pack_start(self.attention_label)
+
+        # drawing
+        self.drawing = gtk.DrawingArea()
+        self.drawing.set_size_request(self.screen.width, self.screen.height)
+        vbox.pack_start(self.drawing)
 
     def quit(self, widget, param):
         """Main window was closed"""
         gtk.main_quit()
         self.bcast.actions.put(1)
+        self.mcast.actions.put(1)
         sys.exit(0)
 
     def leave_class(self, widget):
@@ -180,8 +190,6 @@ class Student:
         else:
             dialog.destroy()
 
-        self.ask_attention()
-
     def monitor_teacher(self):
         """Periodically checks for teacher commands"""
         if self.teacher_addr:
@@ -218,6 +226,14 @@ class Student:
             self.teacher = None
             self.teacher_addr = None
             traceback.print_exc()
+
+    def monitor_mcast(self):
+        """Monitor for multicast messages"""
+        while not self.mcast.messages.empty():
+            message = self.mcast.messages.get()
+            pos_x, pos_y, step_x, step_y, img = self.protocol.unpack_chunk(message)
+            print "%d %d - %d %d" % (pos_x, pos_y, step_x, step_y)
+        gobject.timeout_add(1000, self.monitor_mcast)
 
     def monitor_bcast(self):
         """Monitors broadcast teacher status"""
