@@ -148,6 +148,8 @@ class Student:
         self.drawing.set_size_request(self.screen.width, self.screen.height)
         vbox.pack_start(self.drawing)
 
+        self.login(None)
+
     def disconnect(self):
         """Disconnected from teacher"""
         self.icon.set_from_file("iface/machine_off.png")
