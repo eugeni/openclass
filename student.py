@@ -212,13 +212,7 @@ class Student:
         """Periodically checks for teacher commands"""
         if self.teacher_addr:
             # connect to teacher for instructions
-            commands = self.send_command("actions")
-            try:
-                command, params = commands.split(" ", 1)
-            except:
-                traceback.print_exc()
-                command = commands
-                params = None
+            command, params = self.send_command("actions")
             if command == protocol.ACTION_PROJECTION:
                 print "Projecting"
                 self.start_projection()
@@ -230,10 +224,11 @@ class Student:
                 print "Message: %s" % params
                 self.show_message(params)
                 self.noop()
-            else:
-                # noop
+            elif command == protocol.ACTION_NOOP:
+                print "Stopping everything"
                 self.noop()
-            print commands
+            else:
+                print "Unknown command %s" % command
         gobject.timeout_add(1000, self.monitor_teacher)
 
     def show_message(self, message):
@@ -257,24 +252,32 @@ class Student:
         url = "http://%s:%d/%s" % (teacher, network.LISTENPORT, command)
         if params:
             url += "?%s" % urllib.urlencode(params)
-        print url
         headers = {'User-Agent': 'openclass'}
 
+        command = None
+        params = None
         try:
             req = urllib2.Request(url, None, headers)
             response = urllib2.urlopen(req)
-            return response.read()
+            ret = response.read()
+            try:
+                command, params = ret.split(" ", 1)
+            except:
+                command = ret
+                params = None
         except:
             # something went wrong, disconnect
             self.teacher = None
             self.teacher_addr = None
-            traceback.print_exc()
+            print "Unable to talk to teacher: %s" % sys.exc_value
+        return command, params
 
     def monitor_mcast(self):
         """Monitor for multicast messages"""
         while not self.mcast.messages.empty():
             message = self.mcast.messages.get()
             screen_width, screen_height, pos_x, pos_y, step_x, step_y, img = self.protocol.unpack_chunk(message)
+            print "Received image at %dx%d-%dx%d" % (pos_x, pos_y, step_x, step_y)
             try:
                 loader = gdk.PixbufLoader(image_type="jpeg")
                 loader.write(img)
@@ -301,8 +304,7 @@ class Student:
                 # TODO: support multiple teachers
                 if not self.teacher:
                     # register on teacher
-                    res = self.send_command("register", {"name": self.name}, teacher=source)
-                    ret, params = res.split(" ", 1)
+                    ret, params = self.send_command("register", {"name": self.name}, teacher=source)
                     if ret == "registered":
                         # registered successfully
                         self.teacher = name
@@ -311,7 +313,7 @@ class Student:
                     elif ret == "rejected":
                         print "rejected by teacher"
                     else:
-                        print "Unknown answer: %s" % res
+                        print "Unknown answer: %s" % ret
 
                 elif self.teacher != name:
                     print "ERROR: Multiple teachers not yet supported"
