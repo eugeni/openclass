@@ -84,6 +84,7 @@ class TeacherRunner(Thread):
             return "registered", None
         elif request == "/actions":
             # checking actions for the client
+            # TODO: check whether client needs to re-register
             if client not in self.clients_actions:
                 return self.gui.current_action, None
             else:
