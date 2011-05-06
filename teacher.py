@@ -96,6 +96,7 @@ class TeacherRunner(Thread):
         self.actions.put(("quit", None))
         if self.bcast:
             self.bcast.actions.put(1)
+        self.mcast.quit()
         self.server.actions.put(1)
 
     def set_gui(self, gui):
@@ -112,6 +113,10 @@ class TeacherRunner(Thread):
         # TODO: implement seqnos
         self.clients_actions[client] = (action, params)
 
+    def start_multicast(self):
+        """Starts multicast thread"""
+        self.mcast.start()
+
     def start_broadcast(self, class_name):
         """Start broadcasting service"""
         self.bcast = network.BcastSender(network.LISTENPORT, self.protocol.create_announce(class_name))
@@ -121,7 +126,7 @@ class TeacherRunner(Thread):
     def send_projection(self, width, height, chunks):
         """Send chunks of projection over multicast"""
         for chunk in chunks:
-            self.mcast.send(self.protocol.pack_chunk(width, height, chunk))
+            self.mcast.put(self.protocol.pack_chunk(width, height, chunk))
 
     def run(self):
         """Starts a background thread"""
@@ -235,6 +240,7 @@ class TeacherGui:
             dialog.destroy()
             # Starting broadcasting service
             self.service.start_broadcast(self.class_name)
+            self.service.start_multicast()
             self.service.server.start()
             return True
         else:

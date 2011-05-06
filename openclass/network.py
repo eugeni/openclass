@@ -30,6 +30,11 @@ DATAGRAM_SIZE=65000
 
 DEBUG=False
 
+# helper functions
+def timefunc():
+    # TODO: if windows, return time.clock(); otherwise return time.time()
+    return time.time()
+
 # {{{ BcastSender
 class BcastSender(Thread):
     """Sends broadcast requests"""
@@ -257,19 +262,50 @@ class TcpClient:
 # }}}
 
 # {{{ McastSender
-class McastSender:
+class McastSender(Thread):
     """Multicast socket for sending stuff"""
-    def __init__(self):
+    def __init__(self, interval=0.1):
+        """Configures multicast sender. Interval is the minimum interval between packets"""
+        Thread.__init__(self)
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_IP)
         s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.queue = Queue()
         self.socket = s
+        self.interval = interval
 
     def send(self, data, addr=MCASTADDR, port=MCASTPORT):
         """Sends stuff via multicast"""
         print addr
         print port
         self.socket.sendto(bytes(data), (addr, port))
+
+    def run(self):
+        """Runs the thread, waiting for instructions via queue interface"""
+        lasttime = timefunc()
+        curtime = lasttime
+        while 1:
+            command, payload = self.queue.get()
+            if command == "quit":
+                return
+            elif command == "send":
+                curtime = timefunc()
+                curdelay = curtime - lasttime
+                if curdelay < self.interval:
+                    delay = self.interval - curdelay
+                    print "Sending too fast, sleeping for %f" % curdelay
+                    time.sleep(curdelay)
+                # do the sending
+                self.send(payload)
+                lasttime = curtime
+
+    def put(self, payload):
+        """Queues a packet for multicast sending"""
+        self.queue.put(("send", payload))
+
+    def quit(self):
+        """Tells thread to leave"""
+        self.queue.put(("quit", None))
 # }}}
 
 class ReusableForkingTCPServer(SocketServer.ForkingTCPServer):
