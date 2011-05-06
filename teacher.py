@@ -79,13 +79,15 @@ class TeacherRunner(Thread):
             print "Registering %s (%s)" % (client, name)
             print params
             self.add_client(client, name)
-            return "registered"
+            return "registered", None
         elif request == "/actions":
             # checking actions for the client
             if client not in self.clients_actions:
-                return self.gui.current_action
+                return self.gui.current_action, None
             else:
-                return self.clients_actions[client]
+                action, params = self.clients_actions[client]
+                # TODO: Remove processed actions via seqno
+                return action, params
 
     def quit(self):
         """Tells everything to quit"""
@@ -103,10 +105,10 @@ class TeacherRunner(Thread):
         self.gui.add_client(client, name)
         self.add_client_action(client, protocol.ACTION_NOOP)
 
-    def add_client_action(self, client, action):
+    def add_client_action(self, client, action, params=None):
         """Adds an action for a client into a list"""
         # TODO: implement seqnos
-        self.clients_actions[client] = action
+        self.clients_actions[client] = (action, params)
 
     def start_broadcast(self, class_name):
         """Start broadcasting service"""
@@ -186,6 +188,7 @@ class TeacherGui:
             self.machine_layout[x] = [None] * MACHINES_Y
 
         self.machines = {}
+        self.machines_map = {}
 
         # Mostra as maquinas
         self.MachineLayout.show_all()
@@ -252,9 +255,10 @@ class TeacherGui:
         dialog.show_all()
         response = dialog.run()
         if response == gtk.RESPONSE_OK:
+            res = entry.get_text()
             dialog.destroy()
-            if input:
-                return entry.get_text()
+            if res:
+                return res
             else:
                 return True
         else:
@@ -301,6 +305,7 @@ class TeacherGui:
                     machine.button.connect('clicked', self.cb_machine, machine)
                     self.put_machine(machine)
                     self.machines[addr] = machine
+                    self.machines_map[machine] = addr
                     machine.show_all()
                     self.StatusLabel.set_text("Found %s (%d machines connected)!" % (addr, len(self.machines)))
                     gtk.gdk.threads_leave()
@@ -439,13 +444,12 @@ class TeacherGui:
 
     def cb_machine(self, widget, machine):
         """Callback when clicked on a client machine"""
-        img = machine.button.get_image()
-        if img == machine.button.img_off:
-            machine.button.set_image(machine.button.img_on)
-        else:
-            machine.button.set_image(machine.button.img_off)
-
-        # muda o texto
+        print machine
+        if machine in self.machines_map:
+            addr = self.machines_map[machine]
+            message = self.question(_("Send a message to student"), _("Please, pay attention!"))
+            print "Will send: %s" % message
+            self.service.add_client_action(addr, protocol.ACTION_MSG, message)
 
     def mkbutton(self, img, img2, text, action, color_normal, color_active):
         """Creates a callable button"""

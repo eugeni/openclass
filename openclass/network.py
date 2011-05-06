@@ -89,13 +89,13 @@ class HTTPRequestHandler(SimpleHTTPRequestHandler):
             params = cgi.parse_qs(p[1], True, True)
         else:
             params = {}
-        results = self.controller.process_request(client, path, params, seqno)
+        results, params = self.controller.process_request(client, path, params, seqno)
 
         self.send_response(200)
         self.end_headers()
 
         if results:
-            self.wfile.write(results)
+            self.wfile.write("%s %s" % (results, params))
 
 class HTTPListener(Thread):
     def __init__(self, controller):

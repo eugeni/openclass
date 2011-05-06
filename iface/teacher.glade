@@ -108,21 +108,6 @@
               </packing>
             </child>
             <child>
-              <widget class="GtkButton" id="SendMessage">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="label" translatable="yes">Send Message</property>
-                <property name="response_id">0</property>
-              </widget>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="padding">5</property>
-                <property name="position">5</property>
-              </packing>
-            </child>
-            <child>
               <widget class="GtkButton" id="SendFile">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>

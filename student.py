@@ -31,6 +31,7 @@ import thread
 import socket
 import traceback
 import time
+import pynotify
 
 import urllib, urllib2
 
@@ -57,7 +58,7 @@ class Student:
         self.color_background = gtk.gdk.color_parse("#FFFFFF")
 
         self.window = gtk.Window()
-        self.window.set_title("Support client")
+        self.window.set_title("OpenClass student")
         self.window.set_default_size(640, 480)
         self.window.connect('delete-event', self.quit)
 
@@ -95,6 +96,9 @@ class Student:
 
         # protocol handler
         self.protocol = protocol.Protocol()
+
+        # notification
+        pynotify.init("OpenClass student")
 
         # Configura o timer
         gobject.timeout_add(1000, self.monitor_bcast)
@@ -212,6 +216,7 @@ class Student:
             try:
                 command, params = commands.split(" ", 1)
             except:
+                traceback.print_exc()
                 command = commands
                 params = None
             if command == protocol.ACTION_PROJECTION:
@@ -221,11 +226,22 @@ class Student:
                 print "Attention!"
                 self.ask_attention()
                 print params
+            elif command == protocol.ACTION_MSG:
+                print "Message: %s" % params
+                self.show_message(params)
+                self.noop()
             else:
                 # noop
                 self.noop()
             print commands
         gobject.timeout_add(1000, self.monitor_teacher)
+
+    def show_message(self, message):
+        """Shows a message to student"""
+        n = pynotify.Notification(_("Message received from teacher"), message)
+        n.set_timeout(0)
+        n.show()
+        return
 
     def send_command(self, command, params={}, teacher=None):
         """Sends a command to teacher"""
@@ -286,12 +302,13 @@ class Student:
                 if not self.teacher:
                     # register on teacher
                     res = self.send_command("register", {"name": self.name}, teacher=source)
-                    if res == "registered":
+                    ret, params = res.split(" ", 1)
+                    if ret == "registered":
                         # registered successfully
                         self.teacher = name
                         self.teacher_addr = source
                         self.teacher_label.set_text("%s (%s)" % (name, source))
-                    elif res == "rejected":
+                    elif ret == "rejected":
                         print "rejected by teacher"
                     else:
                         print "Unknown answer: %s" % res
