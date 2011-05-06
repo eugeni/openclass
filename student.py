@@ -50,7 +50,7 @@ iface_selected = 0
 class Student:
     selected_machines = 0
     """Teacher GUI main class"""
-    def __init__(self, guifile):
+    def __init__(self, guifile, max_missed_commands=30):
         """Initializes the interface"""
         # colors
         self.color_normal = gtk.gdk.color_parse("#99BFEA")
@@ -109,6 +109,8 @@ class Student:
         self.teacher_addr = None
         self.name = None
         self.outfile = None
+        self.missed_commands = 0
+        self.max_missed_commands = max_missed_commands
 
         # Inicializa as threads
         self.bcast = network.BcastListener(network.LISTENPORT)
@@ -228,7 +230,16 @@ class Student:
                 print "Stopping everything"
                 self.noop()
             else:
+                # TODO: count for missed commands, and if exceedes threshold, reset to NOOP and leave teacher
                 print "Unknown command %s" % command
+                self.missed_commands += 1
+                if self.missed_commands > self.max_missed_commands:
+                    print "Too many missing commands, leaving this teacher"
+                    self.noop()
+                    self.teacher = None
+                    self.teacher_addr = None
+                    self.teacher_label.set_text(_("No teacher found"))
+                    print "Unable to talk to teacher: %s" % sys.exc_value
         gobject.timeout_add(1000, self.monitor_teacher)
 
     def show_message(self, message):
