@@ -230,16 +230,7 @@ class Student:
                 print "Stopping everything"
                 self.noop()
             else:
-                # TODO: count for missed commands, and if exceedes threshold, reset to NOOP and leave teacher
                 print "Unknown command %s" % command
-                self.missed_commands += 1
-                if self.missed_commands > self.max_missed_commands:
-                    print "Too many missing commands, leaving this teacher"
-                    self.noop()
-                    self.teacher = None
-                    self.teacher_addr = None
-                    self.teacher_label.set_text(_("No teacher found"))
-                    print "Unable to talk to teacher: %s" % sys.exc_value
         gobject.timeout_add(1000, self.monitor_teacher)
 
     def show_message(self, message):
@@ -276,11 +267,18 @@ class Student:
             except:
                 command = ret
                 params = None
+            self.missed_commands = 0
         except:
             # something went wrong, disconnect
-            self.teacher = None
-            self.teacher_addr = None
-            print "Unable to talk to teacher: %s" % sys.exc_value
+            self.missed_commands += 1
+            if self.missed_commands > self.max_missed_commands:
+                print "Too many missing commands, leaving this teacher"
+                self.noop()
+                self.teacher = None
+                self.teacher_addr = None
+                self.teacher_label.set_text(_("No teacher found"))
+                print "Unable to talk to teacher: %s" % sys.exc_value
+            print "Unable to talk to teacher for %d time: %s" % (self.missed_commands, sys.exc_value)
         return command, params
 
     def monitor_mcast(self):
