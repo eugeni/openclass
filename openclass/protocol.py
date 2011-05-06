@@ -13,6 +13,11 @@ ACTION_ATTENTION="attention"
 ACTION_PROJECTION="projection"
 ACTION_SHOT="shot"
 
+# requests
+REQUEST_REGISTER="register"
+REQUEST_ACTIONS="actions"
+REQUEST_RAISEHAND="raisehand"
+
 import struct
 import traceback
 

@@ -89,7 +89,8 @@ class HTTPRequestHandler(SimpleHTTPRequestHandler):
         seqno = self.headers.get('seqno', "0")
         seqno = int(seqno)
         p = self.path.split("?")
-        path = p[0]
+        # strip leading /
+        path = p[0][1:]
         if len(p) > 1:
             params = cgi.parse_qs(p[1], True, True)
         else:

@@ -21,6 +21,7 @@ import gtk
 import gtk.glade
 import pygtk
 import gobject
+import pynotify
 
 from multiprocessing import Queue
 import SocketServer
@@ -72,7 +73,7 @@ class TeacherRunner(Thread):
         """Gets pending actions for a client, starting with seqno"""
         print "Processing requests for %s (%s)" % (client, request)
         print request
-        if request == "/register":
+        if request == protocol.REQUEST_REGISTER:
             # registering
             if "name" in params:
                 name = params["name"][0]
@@ -82,7 +83,7 @@ class TeacherRunner(Thread):
             print params
             self.add_client(client, name)
             return "registered", None
-        elif request == "/actions":
+        elif request == protocol.REQUEST_ACTIONS:
             # checking actions for the client
             # TODO: check whether client needs to re-register
             if client not in self.clients_actions:
@@ -91,6 +92,18 @@ class TeacherRunner(Thread):
                 action, params = self.clients_actions[client]
                 # TODO: Remove processed actions via seqno
                 return action, params
+        elif request == protocol.REQUEST_RAISEHAND:
+            # student raised his hand
+            print "Student called your attention"
+            print request
+            print params
+
+    def show_message(self, message):
+        """Shows a message to student"""
+        n = pynotify.Notification(_("Message received from teacher"), message)
+        n.set_timeout(0)
+        n.show()
+        return
 
     def quit(self):
         """Tells everything to quit"""
@@ -516,6 +529,9 @@ if __name__ == "__main__":
     # Main interface
     gui = TeacherGui("iface/teacher.glade", service)
     service.start()
+
+    # notification
+    pynotify.init("OpenClass student")
 
     print _("Starting main loop..")
     gtk.main()

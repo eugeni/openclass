@@ -99,9 +99,6 @@ class Student:
         # protocol handler
         self.protocol = protocol.Protocol()
 
-        # notification
-        pynotify.init("OpenClass student")
-
         # Configura o timer
         gobject.timeout_add(1000, self.monitor_bcast)
         gobject.timeout_add(500, self.monitor_mcast)
@@ -258,7 +255,7 @@ class Student:
         """Periodically checks for teacher commands"""
         if self.teacher_addr:
             # connect to teacher for instructions
-            command, params = self.send_command("actions")
+            command, params = self.send_command(protocol.REQUEST_ACTIONS)
             if command == protocol.ACTION_PROJECTION:
                 print "Projecting"
                 self.start_projection()
@@ -357,7 +354,7 @@ class Student:
                 # TODO: support multiple teachers
                 if not self.teacher:
                     # register on teacher
-                    ret, params = self.send_command("register", {"name": self.name}, teacher=source)
+                    ret, params = self.send_command(protocol.REQUEST_REGISTER, {"name": self.name}, teacher=source)
                     if ret == "registered":
                         # registered successfully
                         self.teacher = name
@@ -385,6 +382,9 @@ if __name__ == "__main__":
     # Atualizando a lista de interfaces
     gtk.gdk.threads_init()
     gtk.gdk.threads_enter()
+
+    # notification
+    pynotify.init("OpenClass student")
 
     print _("Starting GUI..")
     gui = Student("iface/student.glade")
