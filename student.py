@@ -90,7 +90,7 @@ class Student:
         search.get_children()[0].set_markup('<b>_Login...</b>')
         search.get_children()[0].set_use_underline(True)
         search.get_children()[0].set_use_markup(True)
-        self.icon.set_from_stock(gtk.STOCK_FIND)
+        self.icon.set_from_file("iface/machine.png")
         self.icon.set_tooltip(_('OpenClass student'))
         self.icon.set_visible(True)
         self.icon.connect('activate', self.on_activate)
