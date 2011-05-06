@@ -154,6 +154,8 @@ class Student:
         teacher_label = self.manager.get_widget('/Menubar/Menu/Teacher')
         teacher_label.get_children()[0].set_markup(_("Disconnected from teacher"))
         teacher_label.get_children()[0].set_use_markup(True)
+        self.teacher = None
+        self.teacher_addr = None
 
     def connect_to_teacher(self, teacher):
         """Disconnected from teacher"""
@@ -270,6 +272,10 @@ class Student:
             elif command == protocol.ACTION_NOOP:
                 print "Stopping everything"
                 self.noop()
+            elif command == protocol.ACTION_PLEASEREGISTER:
+                print "Students needs to register again"
+                self.noop()
+                self.disconnect()
             else:
                 print "Unknown command %s" % command
         gobject.timeout_add(1000, self.monitor_teacher)
@@ -306,6 +312,7 @@ class Student:
             try:
                 command, params = ret.split(" ", 1)
             except:
+                traceback.print_exc()
                 command = ret
                 params = None
             self.missed_commands = 0

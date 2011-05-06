@@ -6,6 +6,7 @@ import socket
 import traceback
 import struct
 import SocketServer
+import time
 
 def get_user_name():
     """Returns current user name"""
@@ -22,3 +23,7 @@ def get_os():
         return "Linux"
     except:
         return "Windows"
+
+def timefunc():
+    # TODO: if windows, return time.clock(); otherwise return time.time()
+    return time.time()

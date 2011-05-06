@@ -48,11 +48,11 @@ class TeacherRunner(Thread):
         """Initializes the teacher thread"""
         Thread.__init__(self)
 
-        # connected machines
-        self.machines = []
-
         # actions
         self.actions = Queue()
+
+        # connected machines
+        self.clients = []
 
         # actions for clients
         self.clients_actions = {}
@@ -69,10 +69,12 @@ class TeacherRunner(Thread):
         # multicast sender
         self.mcast = network.McastSender()
 
-    def process_request(self, client, request, params, seqno):
-        """Gets pending actions for a client, starting with seqno"""
+    def process_request(self, client, request, params):
+        """Gets pending actions for a client"""
         print "Processing requests for %s (%s)" % (client, request)
         print request
+        response = None
+        response_params = None
         if request == protocol.REQUEST_REGISTER:
             # registering
             if "name" in params:
@@ -82,21 +84,28 @@ class TeacherRunner(Thread):
             print "Registering %s (%s)" % (client, name)
             print params
             self.add_client(client, name)
-            return "registered", None
+            response = "registered"
+            self.clients.append(client)
+            print self.clients
         elif request == protocol.REQUEST_ACTIONS:
-            # checking actions for the client
-            # TODO: check whether client needs to re-register
-            if client not in self.clients_actions:
-                return self.gui.current_action, None
+            print self.clients
+            if client not in self.clients:
+                # not registered yet
+                response = protocol.ACTION_PLEASEREGISTER
             else:
-                action, params = self.clients_actions[client]
-                # TODO: Remove processed actions via seqno
-                return action, params
+                # checking actions for the client
+                response = self.gui.current_action
+                if client in self.clients_actions:
+                    if len(self.clients_actions[client]) > 0:
+                        print len(self.clients_actions[client])
+                        response, response_params = self.clients_actions[client].pop(0)
+                        print len(self.clients_actions[client])
         elif request == protocol.REQUEST_RAISEHAND:
             # student raised his hand
             print "Student called your attention"
             print request
             print params
+        return response, response_params
 
     def show_message(self, message):
         """Shows a message to student"""
@@ -124,8 +133,9 @@ class TeacherRunner(Thread):
 
     def add_client_action(self, client, action, params=None):
         """Adds an action for a client into a list"""
-        # TODO: implement seqnos
-        self.clients_actions[client] = (action, params)
+        if client not in self.clients_actions:
+            self.clients_actions[client]=[]
+        self.clients_actions[client].append((action, params))
 
     def start_multicast(self):
         """Starts multicast thread"""
@@ -151,10 +161,7 @@ class TeacherRunner(Thread):
             # chegou ALGO
             name, parameters = action
             print "Running %s" % name
-            if name == "multicast":
-                machines, num_msgs, bandwidth = parameters
-                self.multicast(machines, num_msgs, bandwidth, type="broadcast")
-            elif name == "quit":
+            if name == "quit":
                 return
             else:
                 print "Unknown action %s" % name

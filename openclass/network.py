@@ -30,10 +30,7 @@ DATAGRAM_SIZE=65000
 
 DEBUG=False
 
-# helper functions
-def timefunc():
-    # TODO: if windows, return time.clock(); otherwise return time.time()
-    return time.time()
+import system
 
 # {{{ BcastSender
 class BcastSender(Thread):
@@ -85,9 +82,6 @@ class HTTPRequestHandler(SimpleHTTPRequestHandler):
         client = self.client_address[0]
 
         # find out what to reply
-        # TODO: count sequence numbers
-        seqno = self.headers.get('seqno', "0")
-        seqno = int(seqno)
         p = self.path.split("?")
         # strip leading /
         path = p[0][1:]
@@ -95,7 +89,7 @@ class HTTPRequestHandler(SimpleHTTPRequestHandler):
             params = cgi.parse_qs(p[1], True, True)
         else:
             params = {}
-        results, params = self.controller.process_request(client, path, params, seqno)
+        results, params = self.server.controller.process_request(client, path, params)
 
         self.send_response(200)
         self.end_headers()
@@ -109,10 +103,9 @@ class HTTPListener(Thread):
         self.actions = Queue()
         self.messages = []
         self.lock = thread.allocate_lock()
-        self.controller = controller
 
-        HTTPRequestHandler.controller = controller
-        self.socket = ReusableForkingTCPServer(("", LISTENPORT), HTTPRequestHandler)
+        self.socket = ReusableTCPServer(("", LISTENPORT), HTTPRequestHandler)
+        self.socket.set_controller(controller)
 
     def run(self):
         while 1:
@@ -283,14 +276,14 @@ class McastSender(Thread):
 
     def run(self):
         """Runs the thread, waiting for instructions via queue interface"""
-        lasttime = timefunc()
+        lasttime = system.timefunc()
         curtime = lasttime
         while 1:
             command, payload = self.queue.get()
             if command == "quit":
                 return
             elif command == "send":
-                curtime = timefunc()
+                curtime = system.timefunc()
                 curdelay = curtime - lasttime
                 if curdelay < self.interval:
                     delay = self.interval - curdelay
@@ -311,6 +304,17 @@ class McastSender(Thread):
 
 class ReusableForkingTCPServer(SocketServer.ForkingTCPServer):
     allow_reuse_address = True
+
+    def set_controller(self, controller):
+        """Sets a fallback countroller"""
+        self.controller = controller
+
+class ReusableTCPServer(SocketServer.TCPServer):
+    allow_reuse_address = True
+
+    def set_controller(self, controller):
+        """Sets a fallback countroller"""
+        self.controller = controller
 
 class ReusableSocketServer(SocketServer.TCPServer):
     allow_reuse_address = True

@@ -12,6 +12,7 @@ ACTION_MSG="msg"
 ACTION_ATTENTION="attention"
 ACTION_PROJECTION="projection"
 ACTION_SHOT="shot"
+ACTION_PLEASEREGISTER="pleaseregister"
 
 # requests
 REQUEST_REGISTER="register"
