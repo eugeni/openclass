@@ -39,7 +39,7 @@ import gettext
 import __builtin__
 __builtin__._ = gettext.gettext
 
-from openclass import network, system, protocol, screen
+from openclass import network, protocol, screen
 
 DEBUG=False
 

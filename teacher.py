@@ -33,7 +33,7 @@ MACHINES_X = 8
 MACHINES_Y = 8
 
 # configuration
-from openclass import network, system, protocol, screen
+from openclass import network, protocol, screen
 
 # helper functions
 
