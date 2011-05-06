@@ -57,42 +57,44 @@ class Student:
         self.color_active = gtk.gdk.color_parse("#FFBBFF")
         self.color_background = gtk.gdk.color_parse("#FFFFFF")
 
-        self.window = gtk.Window()
-        self.window.set_title("OpenClass student")
-        self.window.set_default_size(640, 480)
-        self.window.connect('delete-event', self.quit)
+        self.icon = gtk.StatusIcon()
 
-        self.main_vbox = gtk.VBox()
-        self.window.add(self.main_vbox)
-
-        # login
-        hbox = gtk.HBox()
-        hbox.pack_start(gtk.Label(_("Your name:")), False, False)
-        self.name_label = gtk.Label(_("Not logged in"))
-        hbox.pack_start(self.name_label, False, False)
-        self.login_button = gtk.Button(_("Click here to login"))
-        self.login_button.connect('clicked', self.login)
-        hbox.pack_start(self.login_button, False, False)
-        self.main_vbox.pack_start(hbox, False, False)
-
-        # teacher
-        hbox = gtk.HBox()
-        hbox.pack_start(gtk.Label(_("Current teacher:")), False, False)
-        self.teacher_label = gtk.Label(_("No teacher found"))
-        hbox.pack_start(self.teacher_label, False, False)
-        self.leave_button = gtk.Button(_("Click here to leave this class"))
-        self.leave_button.connect('clicked', self.leave_class)
-        self.leave_button.set_sensitive(False)
-        hbox.pack_start(self.leave_button, False, False)
-        self.main_vbox.pack_start(hbox, False, False)
-
-        self.teacher_view = gtk.Label()
-        self.main_vbox.pack_start(self.teacher_view)
-
-        self.window.show_all()
-
-        # tooltips
-        self.tooltip = gtk.Tooltips()
+        menu = '''
+            <ui>
+             <menubar name="Menubar">
+              <menu action="Menu">
+               <menuitem action="Login"/>
+               <menuitem action="Teacher"/>
+               <separator/>
+               <menuitem action="About"/>
+               <separator/>
+               <menuitem action="Quit"/>
+              </menu>
+             </menubar>
+            </ui>
+        '''
+        actions = [
+            ('Menu',  None, 'Menu'),
+            ('Login', None, _('_Login'), None, _('Identify yourself to the teacher'), self.login),
+            ('Teacher', gtk.STOCK_PREFERENCES, _('_Teacher'), None, _('Select your teacher'), self.choose_teacher),
+            ('About', gtk.STOCK_ABOUT, _('_About'), None, _('About OpenClass'), self.on_about),
+            ('Quit', gtk.STOCK_QUIT, _('_Quit'), None, _('Quit class'), lambda *w: self.quit(None, None))
+            ]
+        ag = gtk.ActionGroup('Actions')
+        ag.add_actions(actions)
+        self.manager = gtk.UIManager()
+        self.manager.insert_action_group(ag, 0)
+        self.manager.add_ui_from_string(menu)
+        self.menu = self.manager.get_widget('/Menubar/Menu/About').props.parent
+        search = self.manager.get_widget('/Menubar/Menu/Login')
+        search.get_children()[0].set_markup('<b>_Login...</b>')
+        search.get_children()[0].set_use_underline(True)
+        search.get_children()[0].set_use_markup(True)
+        self.icon.set_from_stock(gtk.STOCK_FIND)
+        self.icon.set_tooltip(_('OpenClass student'))
+        self.icon.set_visible(True)
+        self.icon.connect('activate', self.on_activate)
+        self.icon.connect('popup-menu', self.on_popup_menu)
 
         # protocol handler
         self.protocol = protocol.Protocol()
@@ -146,6 +148,28 @@ class Student:
         self.drawing.set_size_request(self.screen.width, self.screen.height)
         vbox.pack_start(self.drawing)
 
+    def on_activate(self, data):
+        """Tray icon is clicked"""
+        pass
+
+    def on_popup_menu(self, status, button, time):
+        """Right mouse button is clicked on tray icon"""
+        print button
+        print time
+        self.menu.popup(None, None, None, button, time)
+
+    def choose_teacher(self, data):
+        print 'No way to choose multiple teachers yet, sorry'
+
+    def on_about(self, data):
+        dialog = gtk.AboutDialog()
+        dialog.set_name('OpenClass')
+        dialog.set_version('0.0.1')
+        dialog.set_comments('A Simple and Small class control application. ')
+        dialog.set_website('github.com/eugeni/openclass')
+        dialog.run()
+        dialog.destroy()
+
     def quit(self, widget, param):
         """Main window was closed"""
         gtk.main_quit()
@@ -183,7 +207,7 @@ class Student:
 
     def login(self, widget):
         """Asks student to login"""
-        dialog = gtk.Dialog(_("Login"), self.window, 0,
+        dialog = gtk.Dialog(_("Login"), None, 0,
                 (gtk.STOCK_OK, gtk.RESPONSE_OK,
                 gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
         dialogLabel = gtk.Label(_("Please login"))
@@ -201,11 +225,13 @@ class Student:
         if response == gtk.RESPONSE_OK:
             self.name = entry_login.get_text()
             print "Login: %s" % self.name
-            self.name_label.set_text(self.name)
-            self.login_button.set_label(_("Login as different user"))
+            name_label = self.manager.get_widget('/Menubar/Menu/Login')
+            name_label.get_children()[0].set_markup(_("Logged in as <b>%s</b>") % self.name)
+            name_label.get_children()[0].set_use_markup(True)
 
             # start threads
-            self.mcast.start()
+            if not self.mcast.isAlive():
+                self.mcast.start()
             dialog.destroy()
         else:
             dialog.destroy()
@@ -276,7 +302,9 @@ class Student:
                 self.noop()
                 self.teacher = None
                 self.teacher_addr = None
-                self.teacher_label.set_text(_("No teacher found"))
+                name_label = self.manager.get_widget('/Menubar/Menu/Teacher')
+                teacher_label.get_children()[0].set_markup(_("Connected to <b>%s</b>") % self.teacher)
+                teacher_label.get_children()[0].set_use_markup(True)
                 print "Unable to talk to teacher: %s" % sys.exc_value
             print "Unable to talk to teacher for %d time: %s" % (self.missed_commands, sys.exc_value)
         return command, params
@@ -318,7 +346,9 @@ class Student:
                         # registered successfully
                         self.teacher = name
                         self.teacher_addr = source
-                        self.teacher_label.set_text("%s (%s)" % (name, source))
+                        teacher_label = self.manager.get_widget('/Menubar/Menu/Teacher')
+                        teacher_label.get_children()[0].set_markup(_("Connected to <b>%s</b>") % self.teacher)
+                        teacher_label.get_children()[0].set_use_markup(True)
                     elif ret == "rejected":
                         print "rejected by teacher"
                     else:
