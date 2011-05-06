@@ -327,11 +327,6 @@ class Student:
         print text
 
 if __name__ == "__main__":
-    if system.get_os() == "Linux":
-        print "Rodando em Linux"
-    else:
-        print "Rodando em Windows"
-
     # configura o timeout padrao para sockets
     socket.setdefaulttimeout(5)
     # Atualizando a lista de interfaces
