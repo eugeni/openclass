@@ -1,10 +1,12 @@
 #!/usr/bin/python
 """
-Teacher GUI using GLADE
-"""
+OpenClass teacher module.
 
-# TODO: detectar quando conexoes nao sao estabelecidas
-# TODO: tirar redundancias entre multicast e broadcast
+Copyright, (C) Eugeni Dodonov <eugeni@dodonov.net>, 2008-2011
+
+Distributed under GPLv2 license, please see COPYING for details.
+
+"""
 
 import sys
 import traceback

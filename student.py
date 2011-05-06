@@ -1,12 +1,12 @@
 #!/usr/bin/python
 """
-Traffic analysis client.
-"""
+OpenClass student module.
 
-# TODO:
-# - adicionar wireshark no path (!!)
-# - imprimir mensagens no log
-# - pedir para escolher a interface logo na inicializacao
+Copyright, (C) Eugeni Dodonov <eugeni@dodonov.net>, 2008-2011
+
+Distributed under GPLv2 license, please see COPYING for details.
+
+"""
 
 import sys
 import traceback
