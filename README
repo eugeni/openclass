@@ -1,1 +1,59 @@
-This is OpenClass, a small and simple class control solution.
+OpenClass is a simple open-source solution for class control, designed with the
+following features in mind:
+ - small footprint
+ - light-weight functionality
+ - minimum of non-essential features
+
+If you already know how italc, bluelab, mythware, iClass and similar solutions
+work, you already know what OpenClass is. If you do not, here is some
+introduction.
+
+Introduction
+------------
+
+OpenClass is a small class control solution, which helps teacher to control his
+activities in the classroom. Among such activities, the most commonly used are:
+
+(From teacher to student)
+ - screen projection (send content of teacher screen to all the students)
+ - student attention request (blocking student activities and asking them to
+look at teacher)
+ - messaging to student
+ - file sharing and URL sharing to enrich class activities [not available in
+current version]
+
+(From student to teacher)
+ - automatic teacher discovery via broadcast
+ - receiving of teacher screen projection via multicasting protocol, suitable
+for both wired and wireless environments
+ - possibility to select teacher to connect to [not available in current
+version]
+ - "raise hand" functionality to call teacher attention [not available in
+current version]
+
+Usage
+-----
+
+For teacher, execute teacher.py script. It will open the teacher interface and
+will ask you to identify yourself. This identification can be either your name
+or your class name, and the students will be able to identify your class via
+this name.
+
+When a student connects, he will automatically appear in your teacher view. If
+you click on his icon, you can send him an individual message.
+
+To start a screen projection, just click "Send screen" button. It will start
+the screen sharing activity to all the students, and will continue until you
+click this button again.
+
+To block students screens and call their attention, click the "Block screen"
+button.
+
+On student side, it is necessary to run the student.py application. It will
+load itself into tray area, and will ask you to login. Alternatively, if you do
+not want to login straight away, you could right-click on the icon and login
+when needed.
+
+After the student is logged in, it will automatically connect to the first
+available teacher (this functionality can be altered in next versions), or
+select the teacher to connect to manually (not available yet).
