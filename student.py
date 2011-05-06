@@ -90,8 +90,8 @@ class Student:
         search.get_children()[0].set_markup('<b>_Login...</b>')
         search.get_children()[0].set_use_underline(True)
         search.get_children()[0].set_use_markup(True)
-        self.icon.set_from_file("iface/machine.png")
-        self.icon.set_tooltip(_('OpenClass student'))
+        # disconnected by default
+        self.disconnect()
         self.icon.set_visible(True)
         self.icon.connect('activate', self.on_activate)
         self.icon.connect('popup-menu', self.on_popup_menu)
@@ -147,6 +147,22 @@ class Student:
         self.drawing = gtk.DrawingArea()
         self.drawing.set_size_request(self.screen.width, self.screen.height)
         vbox.pack_start(self.drawing)
+
+    def disconnect(self):
+        """Disconnected from teacher"""
+        self.icon.set_from_file("iface/machine_off.png")
+        self.icon.set_tooltip(_('OpenClass student (disconnected)'))
+        teacher_label = self.manager.get_widget('/Menubar/Menu/Teacher')
+        teacher_label.get_children()[0].set_markup(_("Disconnected from teacher"))
+        teacher_label.get_children()[0].set_use_markup(True)
+
+    def connect_to_teacher(self, teacher):
+        """Disconnected from teacher"""
+        self.icon.set_from_file("iface/machine.png")
+        self.icon.set_tooltip(_('OpenClass student (connected to %s)') % teacher)
+        teacher_label = self.manager.get_widget('/Menubar/Menu/Teacher')
+        teacher_label.get_children()[0].set_markup(_("Connected to <b>%s</b>") % teacher)
+        teacher_label.get_children()[0].set_use_markup(True)
 
     def on_activate(self, data):
         """Tray icon is clicked"""
@@ -302,9 +318,7 @@ class Student:
                 self.noop()
                 self.teacher = None
                 self.teacher_addr = None
-                name_label = self.manager.get_widget('/Menubar/Menu/Teacher')
-                teacher_label.get_children()[0].set_markup(_("Connected to <b>%s</b>") % self.teacher)
-                teacher_label.get_children()[0].set_use_markup(True)
+                self.disconnect()
                 print "Unable to talk to teacher: %s" % sys.exc_value
             print "Unable to talk to teacher for %d time: %s" % (self.missed_commands, sys.exc_value)
         return command, params
@@ -346,9 +360,7 @@ class Student:
                         # registered successfully
                         self.teacher = name
                         self.teacher_addr = source
-                        teacher_label = self.manager.get_widget('/Menubar/Menu/Teacher')
-                        teacher_label.get_children()[0].set_markup(_("Connected to <b>%s</b>") % self.teacher)
-                        teacher_label.get_children()[0].set_use_markup(True)
+                        self.connect_to_teacher(self.teacher)
                     elif ret == "rejected":
                         print "rejected by teacher"
                     else:
