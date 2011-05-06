@@ -39,7 +39,7 @@ import gettext
 import __builtin__
 __builtin__._ = gettext.gettext
 
-from openclass import network, protocol, screen
+from openclass import network, system, protocol, screen
 
 DEBUG=False
 
@@ -233,7 +233,7 @@ class Student:
         login = gtk.Label(_("Your name:"))
         hbox.pack_start(login)
         entry_login = gtk.Entry()
-        entry_login.set_text(_("Meu nome"))
+        entry_login.set_text(system.get_user_name())
         hbox.pack_start(entry_login)
         dialog.vbox.pack_start(hbox)
         dialog.show_all()

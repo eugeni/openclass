@@ -35,7 +35,7 @@ MACHINES_X = 8
 MACHINES_Y = 8
 
 # configuration
-from openclass import network, protocol, screen
+from openclass import network, system, protocol, screen
 
 # helper functions
 
@@ -230,7 +230,7 @@ class TeacherGui:
         login = gtk.Label(_("Your name (teacher or class name):"))
         hbox.pack_start(login)
         entry_login = gtk.Entry()
-        entry_login.set_text(_("My name"))
+        entry_login.set_text(system.get_user_name())
         hbox.pack_start(entry_login)
         dialog.vbox.pack_start(hbox)
         dialog.show_all()
