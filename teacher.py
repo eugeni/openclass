@@ -340,7 +340,7 @@ class TeacherGui:
                     gtk.gdk.threads_leave()
                 else:
                     machine = self.machines[addr]
-                    self.tooltip.set_tip(machine, _("Updated on %s" % (time.asctime())))
+                    self.tooltip.set_tip(machine, _("Updated on %s") % (time.asctime()))
 
         gobject.timeout_add(1000, self.monitor)
 
