@@ -1,0 +1,156 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2011-05-09 11:37+BRT\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ../student.py:78
+msgid "Identify yourself to the teacher"
+msgstr ""
+
+#: ../student.py:78
+msgid "_Login"
+msgstr ""
+
+#: ../student.py:79
+msgid "Select your teacher"
+msgstr ""
+
+#: ../student.py:79
+msgid "_Teacher"
+msgstr ""
+
+#: ../student.py:80
+msgid "About OpenClass"
+msgstr ""
+
+#: ../student.py:80
+msgid "_About"
+msgstr ""
+
+#: ../student.py:81
+msgid "Quit class"
+msgstr ""
+
+#: ../student.py:81
+msgid "_Quit"
+msgstr ""
+
+#: ../student.py:116
+msgid "Starting broadcasting service.."
+msgstr ""
+
+#: ../student.py:153
+msgid "OpenClass student (disconnected)"
+msgstr ""
+
+#: ../student.py:155
+msgid "Disconnected from teacher"
+msgstr ""
+
+#: ../student.py:163
+msgid "OpenClass student (connected to %s)"
+msgstr ""
+
+#: ../student.py:165
+msgid "Connected to <b>%s</b>"
+msgstr ""
+
+#: ../student.py:201
+msgid "Teacher asked you for attention"
+msgstr ""
+
+#: ../student.py:227 ../teacher.py:243
+msgid "Login"
+msgstr ""
+
+#: ../student.py:230 ../teacher.py:246
+msgid "Please login"
+msgstr ""
+
+#: ../student.py:234
+msgid "Your name:"
+msgstr ""
+
+#: ../student.py:246
+msgid "Logged in as <b>%s</b>"
+msgstr ""
+
+#: ../student.py:285 ../teacher.py:112
+msgid "Message received from teacher"
+msgstr ""
+
+#: ../student.py:396
+msgid "Starting GUI.."
+msgstr ""
+
+#: ../student.py:399
+msgid ""
+"\n"
+"Welcome to OpenClass Student!!\n"
+"\n"
+msgstr ""
+
+#: ../teacher.py:250
+msgid "Your name (teacher or class name):"
+msgstr ""
+
+#: ../teacher.py:274
+msgid "Question"
+msgstr ""
+
+#: ../teacher.py:343
+msgid "Updated on %s"
+msgstr ""
+
+#: ../teacher.py:355
+msgid "%s\\%s!"
+msgstr ""
+
+#: ../teacher.py:376
+msgid "Stop sending screen"
+msgstr ""
+
+#: ../teacher.py:382
+msgid "Send Screen"
+msgstr ""
+
+#: ../teacher.py:393
+msgid "Stop locking screen"
+msgstr ""
+
+#: ../teacher.py:399
+msgid "Lock Screen"
+msgstr ""
+
+#: ../teacher.py:459
+msgid "name"
+msgstr ""
+
+#: ../teacher.py:479
+msgid "Please, pay attention!"
+msgstr ""
+
+#: ../teacher.py:479
+msgid "Send a message to student"
+msgstr ""
+
+#: ../teacher.py:533
+msgid "Starting broadcast.."
+msgstr ""
+
+#: ../teacher.py:543
+msgid "Starting main loop.."
+msgstr ""
+
