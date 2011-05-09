@@ -92,6 +92,7 @@
                 <property name="position">8</property>
               </packing>
             </child>
+            <!--
             <child>
               <widget class="GtkButton" id="ViewScreen">
                 <property name="visible">True</property>
@@ -107,6 +108,7 @@
                 <property name="position">4</property>
               </packing>
             </child>
+            -->
             <child>
               <widget class="GtkButton" id="QuitButton">
                 <property name="visible">True</property>
