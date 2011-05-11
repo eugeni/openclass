@@ -42,3 +42,5 @@ rm -rf $RPM_BUILD_ROOT
 %_bindir/openclass-student
 %_bindir/openclass-teacher
 %_datadir/openclass/
+%_datadir/applications/openclass-student.desktop
+%_datadir/applications/openclass-teacher.desktop
