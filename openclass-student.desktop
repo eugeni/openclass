@@ -1,0 +1,11 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=OpenClass Student
+GenericName=OpenClass Student
+GenericName[pt_BR]=OpenClass Aluno
+Comment=Student module for OpenClass - open-source class control
+Icon=/usr/share/openclass/iface/machine_attention.png
+Exec=/usr/bin/openclass-student
+Type=Application
+Terminal=false
+Categories=Qt;KDE;Education;X-KDE-Edu-Teaching;

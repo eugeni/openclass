@@ -12,6 +12,10 @@ install:
 	cp -a teacher.py student.py iface openclass $(RPM_BUILD_ROOT)/usr/share/openclass/
 	# locale
 	$(MAKE) -C po $@
+	# desktop
+	mkdir -p $(RPM_BUILD_ROOT)/usr/share/applications/
+	install -m644 openclass-teacher.desktop $(RPM_BUILD_ROOT)/usr/share/applications/
+	install -m644 openclass-student.desktop $(RPM_BUILD_ROOT)/usr/share/applications/
 
 cleandist:
 	rm -rf $(PACKAGE)-$(VERSION) $(PACKAGE)-$(VERSION).tar.bz2

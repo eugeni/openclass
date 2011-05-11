@@ -1,0 +1,11 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=OpenClass Teacher
+GenericName=OpenClass Teacher
+GenericName[pt_BR]=OpenClass Professor
+Comment=Teacher module for OpenClass - open-source class control
+Icon=/usr/share/openclass/iface/machine.png
+Exec=/usr/bin/openclass-teacher
+Type=Application
+Terminal=false
+Categories=Qt;KDE;Education;X-KDE-Edu-Teaching;
