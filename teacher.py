@@ -402,7 +402,7 @@ class TeacherGui:
                     gtk.gdk.threads_enter()
                     name = params.get("name", addr)
                     machine = self.mkmachine(name)
-                    machine.button.connect('clicked', self.cb_machine, machine)
+                    machine.button.connect('button_press_event', self.cb_machine, machine)
                     self.put_machine(machine)
                     self.machines[addr] = machine
                     self.machines_map[machine] = addr
@@ -541,14 +541,37 @@ class TeacherGui:
         box.wifi = None
         return box
 
-    def cb_machine(self, widget, machine):
-        """Callback when clicked on a client machine"""
-        print machine
+    def send_msg_student(self, widget, machine):
+        """Send a message to student"""
         if machine in self.machines_map:
             addr = self.machines_map[machine]
             message = self.question(_("Send a message to student"), _("Please, pay attention!"))
             print "Will send: %s" % message
             self.service.add_client_action(addr, protocol.ACTION_MSG, message)
+
+    def cb_machine(self, widget, event, machine):
+        """Callback when clicked on a client machine"""
+        # popup menu
+        popup_menu = gtk.Menu()
+        menu_msg = gtk.MenuItem(_("Send message to student"))
+        menu_msg.connect("activate", self.send_msg_student, machine)
+        popup_menu.append(menu_msg)
+
+        menu_view = gtk.MenuItem(_("View student screen"))
+        menu_view.set_sensitive(False)
+        popup_menu.append(menu_view)
+
+        menu_control = gtk.MenuItem(_("Remote control student computer"))
+        menu_control.set_sensitive(False)
+        popup_menu.append(menu_control)
+
+        menu_disconnect = gtk.MenuItem(_("Remove student from class"))
+        menu_disconnect.set_sensitive(False)
+        popup_menu.append(menu_disconnect)
+
+        popup_menu.show_all()
+        popup_menu.popup(None, None, None, event.button, event.time)
+        return
 # }}}
 
 if __name__ == "__main__":
