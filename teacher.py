@@ -288,8 +288,8 @@ class TeacherGui:
         dialog.show_all()
         response = dialog.run()
         # desired width and hight
-        width = None
-        height = None
+        width = self.projection_screen.width
+        height = self.projection_screen.height
         if response == gtk.RESPONSE_OK:
             exp = combobox.get_active_text()
             print exp
@@ -303,7 +303,6 @@ class TeacherGui:
                     traceback.print_exc()
             self.projection_width = width
             self.projection_height = height
-            print "Projecting at %dx%d" % (self.projection_width, self.projection_height)
             return True
         else:
             dialog.destroy()

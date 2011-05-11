@@ -343,10 +343,10 @@ class Student:
                     self.projection_window.set_size_request(screen_width, screen_height)
                     self.drawing.set_size_request(screen_width, screen_height)
                     # do we need to go fullscreen?
-                    if width == self.screen.width and height == self.screen.height:
-                        if self.projection_window.visible:
-                            print "Going fullscreen"
-                            self.projection_window.fullscreen()
+                if width >= self.screen.width and height >= self.screen.height:
+                    if self.projection_window.visible:
+                        print "Going fullscreen"
+                        self.projection_window.fullscreen()
 
                 gc = self.drawing.get_style().fg_gc[gtk.STATE_NORMAL]
                 self.drawing.window.draw_pixbuf(gc, pb, 0, 0, pos_x, pos_y, step_x, step_y)
