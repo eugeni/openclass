@@ -229,6 +229,8 @@ class TeacherGui:
 
         # projection screen
         self.projection_screen = screen.Screen()
+        self.projection_width = None
+        self.projection_height = None
 
         # Configura os timers
         # monitora os eventos
@@ -263,6 +265,45 @@ class TeacherGui:
             self.service.start_broadcast(self.class_name)
             self.service.start_multicast()
             self.service.server.start()
+            return True
+        else:
+            dialog.destroy()
+            return None
+
+    def ask_resolution(self, title=_("Please select screen size for projection")):
+        """Determines resolution of screen projection"""
+        # cria a janela do dialogo
+        dialog = gtk.Dialog(title, self.MainWindow, 0,
+                (gtk.STOCK_OK, gtk.RESPONSE_OK,
+                gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+        dialogLabel = gtk.Label(title)
+        dialog.vbox.add(dialogLabel)
+        dialog.vbox.set_border_width(8)
+        combobox = gtk.combo_box_new_text()
+        combobox.append_text(_("Full screen size"))
+        for res in screen.RESOLUTIONS:
+            combobox.append_text(res)
+        combobox.set_active(0)
+        dialog.vbox.add(combobox)
+        dialog.show_all()
+        response = dialog.run()
+        # desired width and hight
+        width = None
+        height = None
+        if response == gtk.RESPONSE_OK:
+            exp = combobox.get_active_text()
+            print exp
+            dialog.destroy()
+            if exp != _("Full screen size"):
+                try:
+                    width, height = exp.split("x", 1)
+                    width = int(width)
+                    height = int(height)
+                except:
+                    traceback.print_exc()
+            self.projection_width = width
+            self.projection_height = height
+            print "Projecting at %dx%d" % (self.projection_width, self.projection_height)
             return True
         else:
             dialog.destroy()
@@ -316,8 +357,8 @@ class TeacherGui:
         if self.current_action == protocol.ACTION_PROJECTION:
             print "Sending screens, yee-ha!"
             # we are projecting, grab stuff
-            chunks = self.projection_screen.chunks()
-            self.service.send_projection(self.projection_screen.width, self.projection_screen.height, chunks)
+            chunks = self.projection_screen.chunks(scale_x=self.projection_width, scale_y=self.projection_height)
+            self.service.send_projection(self.projection_width, self.projection_height, chunks)
         gobject.timeout_add(500, self.projection)
 
     def monitor(self):
@@ -373,6 +414,9 @@ class TeacherGui:
         print "Sending screen to %s" % machines
         if self.current_action != protocol.ACTION_PROJECTION:
             print "Sending screens"
+            res = self.ask_resolution()
+            if not res:
+                return
             self.SendScreen.set_label(_("Stop sending screen"))
             self.current_action = protocol.ACTION_PROJECTION
             for machine in machines:

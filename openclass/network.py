@@ -258,7 +258,7 @@ class TcpClient:
 # {{{ McastSender
 class McastSender(Thread):
     """Multicast socket for sending stuff"""
-    def __init__(self, interval=0.1):
+    def __init__(self, interval=0.05):
         """Configures multicast sender. Interval is the minimum interval between packets"""
         Thread.__init__(self)
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_IP)
@@ -270,8 +270,6 @@ class McastSender(Thread):
 
     def send(self, data, addr=MCASTADDR, port=MCASTPORT):
         """Sends stuff via multicast"""
-        print addr
-        print port
         self.socket.sendto(bytes(data), (addr, port))
 
     def run(self):

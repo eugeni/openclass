@@ -36,10 +36,10 @@ class Screen:
             screenshot.save_to_callback(lambda buf, image: image.append(buf), "jpeg", {"quality": str(quality)}, image)
             return scale_x, scale_y, "".join(image)
 
-    def chunks(self, chunks_x=4, chunks_y=4, quality=75):
+    def chunks(self, chunks_x=4, chunks_y=4, scale_x=None, scale_y=None, quality=75):
         """Captures a screenshot and converts it into a serie of smaller shots"""
 
-        width, height, image = self.capture(raw=True)
+        width, height, image = self.capture(scale_x=scale_x, scale_y=scale_y, raw=True)
 
         step_x = width / chunks_x
         step_y = height / chunks_y
@@ -57,3 +57,5 @@ class Screen:
                 chunk.save_to_callback(lambda buf, img: img.append(buf), "jpeg", {"quality": str(quality)}, img)
                 chunks.append((pos_x, pos_y, step_x, step_y, "".join(img)))
         return chunks
+
+RESOLUTIONS=["320x240", "640x480", "800x480", "800x600", "1024x600", "1024x768"]
