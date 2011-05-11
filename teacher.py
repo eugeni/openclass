@@ -418,12 +418,14 @@ class TeacherGui:
                 return
             self.SendScreen.set_label(_("Stop sending screen"))
             self.current_action = protocol.ACTION_PROJECTION
+            self.LockScreen.set_sensitive(False)
             for machine in machines:
                 self.service.add_client_action(machine, protocol.ACTION_PROJECTION)
         else:
             print "Stopping sending screens"
             self.SendScreen.set_label(_("Send Screen"))
             self.current_action = protocol.ACTION_NOOP
+            self.LockScreen.set_sensitive(True)
             for machine in machines:
                 self.service.add_client_action(machine, protocol.ACTION_NOOP)
 
@@ -435,12 +437,14 @@ class TeacherGui:
             print "Locking screens"
             self.LockScreen.set_label(_("Stop locking screen"))
             self.current_action = protocol.ACTION_ATTENTION
+            self.SendScreen.set_sensitive(False)
             for machine in machines:
                 self.service.add_client_action(machine, protocol.ACTION_ATTENTION)
         else:
             print "Stopping locking screens"
             self.LockScreen.set_label(_("Lock Screen"))
             self.current_action = protocol.ACTION_NOOP
+            self.SendScreen.set_sensitive(True)
             for machine in machines:
                 self.service.add_client_action(machine, protocol.ACTION_NOOP)
 
