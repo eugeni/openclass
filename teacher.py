@@ -225,7 +225,7 @@ class TeacherGui:
         MachinesScrollWindow = gtk.ScrolledWindow()
         MachinesScrollWindow.set_property("width_request", 580)
         MachinesScrollWindow.set_property("height_request", 520)
-        MainLayout.put(MachinesScrollWindow, 200, 40)
+        MainLayout.put(MachinesScrollWindow, 200, 30)
 
         self.MachineLayout = gtk.Layout()
         MachinesScrollWindow.add(self.MachineLayout)
@@ -546,6 +546,8 @@ class TeacherGui:
         if machine in self.machines_map:
             addr = self.machines_map[machine]
             message = self.question(_("Send a message to student"), _("Please, pay attention!"))
+            if not message:
+                return
             print "Will send: %s" % message
             self.service.add_client_action(addr, protocol.ACTION_MSG, message)
 
