@@ -39,6 +39,12 @@ import gettext
 import __builtin__
 __builtin__._ = gettext.gettext
 
+try:
+    gettext.install("openclass")
+except IOError:
+    _ = str
+    traceback.print_exc()
+
 from openclass import network, system, protocol, screen
 
 DEBUG=False

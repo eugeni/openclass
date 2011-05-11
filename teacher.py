@@ -32,6 +32,12 @@ import gettext
 import __builtin__
 __builtin__._ = gettext.gettext
 
+try:
+    gettext.install("openclass")
+except IOError:
+    _ = str
+    traceback.print_exc()
+
 MACHINES_X = 8
 MACHINES_Y = 8
 
