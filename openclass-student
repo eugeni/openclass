@@ -1,0 +1,7 @@
+#!/bin/sh
+#
+# Runs openclass student
+#
+
+cd /usr/share/openclass
+./student.py
