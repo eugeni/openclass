@@ -72,6 +72,8 @@ class Student:
                <menuitem action="Login"/>
                <menuitem action="Teacher"/>
                <separator/>
+               <menuitem action="RaiseHand"/>
+               <separator/>
                <menuitem action="About"/>
                <separator/>
                <menuitem action="Quit"/>
@@ -83,6 +85,7 @@ class Student:
             ('Menu',  None, 'Menu'),
             ('Login', None, _('_Login'), None, _('Identify yourself to the teacher'), self.login),
             ('Teacher', gtk.STOCK_PREFERENCES, _('_Teacher'), None, _('Select your teacher'), self.choose_teacher),
+            ('RaiseHand', gtk.STOCK_INFO, _('_Call attention'), None, _('Raise your hand to call teacher attention'), self.raise_hand),
             ('About', gtk.STOCK_ABOUT, _('_About'), None, _('About OpenClass'), self.on_about),
             ('Quit', gtk.STOCK_QUIT, _('_Quit'), None, _('Quit class'), lambda *w: self.quit(None, None))
             ]
@@ -191,7 +194,13 @@ class Student:
         self.menu.popup(None, None, None, button, time)
 
     def choose_teacher(self, data):
+        """Select different teacher or disconnection from current one"""
         print 'No way to choose multiple teachers yet, sorry'
+
+    def raise_hand(self, data):
+        """Raise your hand to teacher"""
+        command, params = self.send_command(protocol.REQUEST_RAISEHAND)
+        print command
 
     def on_about(self, data):
         dialog = gtk.AboutDialog()
@@ -288,6 +297,9 @@ class Student:
                 print "Students needs to register again"
                 self.noop()
                 self.disconnect()
+            elif command == protocol.ACTION_SHOT:
+                print "Teacher requested our screenshot"
+                self.shot()
             else:
                 print "Unknown command %s" % command
         gobject.timeout_add(1000, self.monitor_teacher)
@@ -299,16 +311,25 @@ class Student:
         n.show()
         return
 
+    def shot(self):
+        """Send a screenshot to teacher"""
+        width, height, shot = self.screen.capture()
+        params = {"width": width,
+                "height": height,
+                "shot": shot
+                }
+        self.send_command(protocol.REQUEST_SHOWSCREEN, params=params)
+
     def send_command(self, command, params={}, teacher=None):
         """Sends a command to teacher"""
         if not teacher:
             teacher = self.teacher_addr
         if not teacher:
             print "Error: no teacher yet!"
-            return
+            return None, None
         if not self.name:
             print "Error: not logged in yet!"
-            return
+            return None, None
         # TODO: proper user-agent
         url = "http://%s:%d/%s" % (teacher, network.LISTENPORT, command)
         if params:
@@ -322,7 +343,8 @@ class Student:
             response = urllib2.urlopen(req)
             ret = response.read()
             try:
-                command, params = ret.split(" ", 1)
+                if ret:
+                    command, params = ret.split(" ", 1)
             except:
                 traceback.print_exc()
                 command = ret

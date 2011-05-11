@@ -18,6 +18,7 @@ ACTION_PLEASEREGISTER="pleaseregister"
 REQUEST_REGISTER="register"
 REQUEST_ACTIONS="actions"
 REQUEST_RAISEHAND="raisehand"
+REQUEST_SHOWSCREEN="showscreen"
 
 import struct
 import traceback

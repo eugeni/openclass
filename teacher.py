@@ -20,6 +20,7 @@ import logging
 import gtk
 import pygtk
 import gobject
+from gtk import gdk
 import pynotify
 
 from multiprocessing import Queue
@@ -110,6 +111,16 @@ class TeacherRunner(Thread):
             print "Student called your attention"
             print request
             print params
+        elif request == protocol.REQUEST_SHOWSCREEN:
+            # student wants to show his screen
+            print "Student wants to show his screen to you"
+            try:
+                width = int(params["width"][0])
+                height = int(params["height"][0])
+                shot = params["shot"][0]
+                self.gui.show_screenshot(client, width, height, shot)
+            except:
+                traceback.print_exc()
         return response, response_params
 
     def show_message(self, message, title=_("Message received from teacher"), timeout=0):
@@ -230,6 +241,31 @@ class TeacherGui:
         self.MachineLayout = gtk.Layout()
         MachinesScrollWindow.add(self.MachineLayout)
 
+        # screenshot view
+        self.shot_window = gtk.Window()
+        self.shot_window.set_title(_("Student view"))
+        self.shot_window.connect('destroy', lambda *w: self.shot_window.hide())
+        vbox = gtk.VBox()
+        self.shot_window.add(vbox)
+        hbox = gtk.HBox()
+        vbox.pack_start(hbox, False, False)
+        self.shot_label = gtk.Label()
+        hbox.pack_start(self.shot_label, False, False)
+
+        self.shot_refresh = gtk.Button(_("Refresh"))
+        self.shot_refresh.connect('clicked', self.refresh_shot)
+        # mark currently refreshed client
+        self.shot_refresh.current_client = None
+        hbox.pack_start(self.shot_refresh)
+
+        button = gtk.Button(_("Close"))
+        button.connect('clicked', lambda *w: self.shot_window.hide())
+        hbox.pack_start(button)
+
+        self.shot_drawing = gtk.Image()
+        vbox.pack_start(self.shot_drawing)
+
+
         # tooltips
         self.tooltip = gtk.Tooltips()
 
@@ -268,6 +304,11 @@ class TeacherGui:
         self.window.show_all()
 
         self.login()
+
+    def show_screenshot(self, client, width, height, shot):
+        """Show a screenshot for a client"""
+        print "Adding %s" % client
+        self.clients_queue.put(("shot", client, {"width": width, "height": height, "shot": shot}))
 
     def login(self):
         """Asks teacher to login"""
@@ -391,6 +432,25 @@ class TeacherGui:
             self.service.send_projection(self.projection_width, self.projection_height, chunks)
         gobject.timeout_add(500, self.projection)
 
+    def refresh_shot(self, widget):
+        """Refreshes a screenshot"""
+        self.service.add_client_action(self.shot_refresh.current_client, protocol.ACTION_SHOT)
+
+    def show_screenshot(self, client, width, height, shot):
+        """Displays a student screenshot"""
+        self.shot_window.resize(width, height)
+        self.shot_label.set_text(_("Viewing display of %s") % client)
+        self.shot_refresh.current_client = client
+
+        loader = gdk.PixbufLoader(image_type="jpeg")
+        loader.write(shot)
+        loader.close()
+        pb = loader.get_pixbuf()
+
+        self.shot_drawing.set_from_pixbuf(pb)
+
+        self.shot_window.show_all()
+
     def monitor(self):
         """Monitors new machines connections"""
         while not self.clients_queue.empty():
@@ -411,6 +471,13 @@ class TeacherGui:
                 else:
                     machine = self.machines[addr]
                     self.tooltip.set_tip(machine, _("Updated on %s") % (time.asctime()))
+            elif action == "shot":
+                # show a student screenshot
+                width = params["width"]
+                height = params["height"]
+                shot = params["shot"]
+
+                self.show_screenshot(addr, width, height, shot)
 
         gobject.timeout_add(1000, self.monitor)
 
@@ -550,6 +617,17 @@ class TeacherGui:
                 return
             print "Will send: %s" % message
             self.service.add_client_action(addr, protocol.ACTION_MSG, message)
+        else:
+            print "Unknown machine!"
+
+    def request_screenshot(self, widget, machine):
+        """Request screenshot from student"""
+        if machine in self.machines_map:
+            addr = self.machines_map[machine]
+            self.service.add_client_action(addr, protocol.ACTION_SHOT)
+            print "Sending request to %s" % addr
+        else:
+            print "Unknown machine!"
 
     def cb_machine(self, widget, event, machine):
         """Callback when clicked on a client machine"""
@@ -560,7 +638,7 @@ class TeacherGui:
         popup_menu.append(menu_msg)
 
         menu_view = gtk.MenuItem(_("View student screen"))
-        menu_view.set_sensitive(False)
+        menu_view.connect("activate", self.request_screenshot, machine)
         popup_menu.append(menu_view)
 
         menu_control = gtk.MenuItem(_("Remote control student computer"))
