@@ -190,31 +190,57 @@ class TeacherGui:
         self.color_active = gtk.gdk.color_parse("#FFBBFF")
         self.color_background = gtk.gdk.color_parse("#FFFFFF")
 
-        self.wTree = gtk.glade.XML(guifile)
+        # building the interface
+        self.window = gtk.Window()
+        self.window.set_resizable(False)
+        self.window.set_default_size(800, 600)
+        self.window.set_position(gtk.WIN_POS_CENTER)
+        self.window.connect('destroy', self.on_MainWindow_destroy)
 
-        # Callbacks
-        dic = {
-                "on_MainWindow_destroy": self.on_MainWindow_destroy # fecha a janela principal
-                }
-        self.wTree.signal_autoconnect(dic)
+        # main layout
+        MainLayout = gtk.Fixed()
+        MainLayout.set_property("width_request", 640)
+        MainLayout.set_property("height_request", 480)
+        self.window.add(MainLayout)
+
+        # title
+        title = gtk.Label()
+        title.set_markup("<big><b>"+_("OpenClass teacher")+"</b></big>")
+        MainLayout.put(title, 10, 10)
+
+        MenuVBox = gtk.VBox()
+        MenuVBox.set_property("width_request", 160)
+        MenuVBox.set_property("height_request", 520)
+        MainLayout.put(MenuVBox, 10, 40)
+        self.SendScreen = gtk.Button(_("Send Screen"))
+        self.SendScreen.connect('clicked', self.send_screen)
+        MenuVBox.pack_start(self.SendScreen, False, False, 5)
+
+        self.LockScreen = gtk.Button(_("Lock Screens"))
+        self.LockScreen.connect('clicked', self.lock_screen)
+        MenuVBox.pack_start(self.LockScreen, False, False, 5)
+
+        MenuVBox.pack_start(gtk.Label(), False, False, 140)
+
+        self.QuitButton = gtk.Button(_("Quit"))
+        self.QuitButton.connect('clicked', self.on_MainWindow_destroy)
+        MenuVBox.pack_start(self.QuitButton, False, False, 5)
+
+        # scrolling machine view
+        MachinesScrollWindow = gtk.ScrolledWindow()
+        MachinesScrollWindow.set_property("width_request", 580)
+        MachinesScrollWindow.set_property("height_request", 520)
+        MainLayout.put(MachinesScrollWindow, 200, 40)
+
+        self.MachineLayout = gtk.Layout()
+        MachinesScrollWindow.add(self.MachineLayout)
 
         # tooltips
         self.tooltip = gtk.Tooltips()
 
         # Muda o background
-        self.MainWindow.modify_bg(gtk.STATE_NORMAL, self.color_background)
+        self.window.modify_bg(gtk.STATE_NORMAL, self.color_background)
         self.MachineLayout.modify_bg(gtk.STATE_NORMAL, self.color_background)
-
-        # Configura os botoes
-        # TODO: disable all buttons when one of them is active (projection, capture, message, attention)
-        self.QuitButton.connect('clicked', self.on_MainWindow_destroy)
-        self.SendScreen.connect('clicked', self.send_screen)
-        self.LockScreen.connect('clicked', self.lock_screen)
-        #self.StopCapture.connect('clicked', self.stop_capture)
-        #self.BandwidthButton.connect('clicked', self.bandwidth)
-        #self.MulticastButton.connect('clicked', self.multicast)
-        #self.BroadcastButton.connect('clicked', self.multicast, "broadcast")
-        #self.AnalyzeButton.connect('clicked', self.analyze)
 
         # Inicializa a matriz de maquinas
         self.machine_layout = [None] * MACHINES_X
@@ -244,11 +270,13 @@ class TeacherGui:
         # monitora a projecao
         gobject.timeout_add(500, self.projection)
 
+        self.window.show_all()
+
         self.login()
 
     def login(self):
         """Asks teacher to login"""
-        dialog = gtk.Dialog(_("Login"), self.MainWindow, 0,
+        dialog = gtk.Dialog(_("Login"), self.window, 0,
                 (gtk.STOCK_OK, gtk.RESPONSE_OK,
                 gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
         dialogLabel = gtk.Label(_("Please login"))
@@ -279,7 +307,7 @@ class TeacherGui:
     def ask_resolution(self, title=_("Please select screen size for projection")):
         """Determines resolution of screen projection"""
         # cria a janela do dialogo
-        dialog = gtk.Dialog(title, self.MainWindow, 0,
+        dialog = gtk.Dialog(title, self.window, 0,
                 (gtk.STOCK_OK, gtk.RESPONSE_OK,
                 gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
         dialogLabel = gtk.Label(title)
@@ -317,7 +345,7 @@ class TeacherGui:
     def question(self, title, input=None):
         """Asks a question :)"""
         # cria a janela do dialogo
-        dialog = gtk.Dialog(_("Question"), self.MainWindow, 0,
+        dialog = gtk.Dialog(_("Question"), self.window, 0,
                 (gtk.STOCK_OK, gtk.RESPONSE_OK,
                 gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
         dialogLabel = gtk.Label(title)
@@ -382,7 +410,6 @@ class TeacherGui:
                     self.machines[addr] = machine
                     self.machines_map[machine] = addr
                     machine.show_all()
-                    self.StatusLabel.set_text("Found %s (%d machines connected)!" % (addr, len(self.machines)))
                     gtk.gdk.threads_leave()
                 else:
                     machine = self.machines[addr]
@@ -463,14 +490,6 @@ class TeacherGui:
             if img == machine.button.img_on:
                 machines.append(z)
         return machines
-
-    def __getattr__(self, attr):
-        """Requests an attribute from Glade"""
-        obj = self.wTree.get_widget(attr)
-        if not obj:
-            return None
-        else:
-            return obj
 
     def on_MainWindow_destroy(self, widget):
         """Main window was closed"""
