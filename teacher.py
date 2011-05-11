@@ -18,7 +18,6 @@ import struct
 import os
 import logging
 import gtk
-import gtk.glade
 import pygtk
 import gobject
 import pynotify
@@ -113,10 +112,10 @@ class TeacherRunner(Thread):
             print params
         return response, response_params
 
-    def show_message(self, message):
+    def show_message(self, message, title=_("Message received from teacher"), timeout=0):
         """Shows a message to student"""
-        n = pynotify.Notification(_("Message received from teacher"), message)
-        n.set_timeout(0)
+        n = pynotify.Notification(title, message)
+        n.set_timeout(timeout)
         n.show()
         return
 
@@ -177,7 +176,7 @@ class TeacherRunner(Thread):
 class TeacherGui:
     selected_machines = 0
     """Teacher GUI main class"""
-    def __init__(self, guifile, service):
+    def __init__(self, service):
         """Initializes the interface"""
         # internal variables
         self.class_name = None
@@ -195,7 +194,8 @@ class TeacherGui:
         self.window.set_resizable(False)
         self.window.set_default_size(800, 600)
         self.window.set_position(gtk.WIN_POS_CENTER)
-        self.window.connect('destroy', self.on_MainWindow_destroy)
+        self.window.set_title(_("OpenClass Teacher"))
+        self.window.connect('destroy', self.quit)
 
         # main layout
         MainLayout = gtk.Fixed()
@@ -203,15 +203,10 @@ class TeacherGui:
         MainLayout.set_property("height_request", 480)
         self.window.add(MainLayout)
 
-        # title
-        title = gtk.Label()
-        title.set_markup("<big><b>"+_("OpenClass teacher")+"</b></big>")
-        MainLayout.put(title, 10, 10)
-
         MenuVBox = gtk.VBox()
         MenuVBox.set_property("width_request", 160)
         MenuVBox.set_property("height_request", 520)
-        MainLayout.put(MenuVBox, 10, 40)
+        MainLayout.put(MenuVBox, 10, 20)
         self.SendScreen = gtk.Button(_("Send Screen"))
         self.SendScreen.connect('clicked', self.send_screen)
         MenuVBox.pack_start(self.SendScreen, False, False, 5)
@@ -220,10 +215,10 @@ class TeacherGui:
         self.LockScreen.connect('clicked', self.lock_screen)
         MenuVBox.pack_start(self.LockScreen, False, False, 5)
 
-        MenuVBox.pack_start(gtk.Label(), False, False, 140)
+        MenuVBox.pack_start(gtk.Label(), False, False, 160)
 
         self.QuitButton = gtk.Button(_("Quit"))
-        self.QuitButton.connect('clicked', self.on_MainWindow_destroy)
+        self.QuitButton.connect('clicked', self.quit)
         MenuVBox.pack_start(self.QuitButton, False, False, 5)
 
         # scrolling machine view
@@ -277,8 +272,8 @@ class TeacherGui:
     def login(self):
         """Asks teacher to login"""
         dialog = gtk.Dialog(_("Login"), self.window, 0,
-                (gtk.STOCK_OK, gtk.RESPONSE_OK,
-                gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+                (gtk.STOCK_OK, gtk.RESPONSE_OK)
+                )
         dialogLabel = gtk.Label(_("Please login"))
         dialog.vbox.add(dialogLabel)
         dialog.vbox.set_border_width(8)
@@ -302,6 +297,8 @@ class TeacherGui:
             return True
         else:
             dialog.destroy()
+            sys.exit(0)
+            print "leaving.."
             return None
 
     def ask_resolution(self, title=_("Please select screen size for projection")):
@@ -491,11 +488,12 @@ class TeacherGui:
                 machines.append(z)
         return machines
 
-    def on_MainWindow_destroy(self, widget):
+    def quit(self, widget):
         """Main window was closed"""
-        gtk.main_quit()
         print "Closing pending threads.."
         self.service.quit()
+        gtk.main_quit()
+        print "done"
 
     def get_img(self, imgpath):
         """Returns image widget if exists"""
@@ -606,11 +604,11 @@ if __name__ == "__main__":
     # Main service service
     service = TeacherRunner()
     # Main interface
-    gui = TeacherGui("iface/teacher.glade", service)
+    gui = TeacherGui(service)
     service.start()
 
     # notification
-    pynotify.init("OpenClass student")
+    pynotify.init("OpenClass teacher")
 
     print _("Starting main loop..")
     gtk.main()
