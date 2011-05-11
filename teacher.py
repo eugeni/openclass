@@ -549,50 +549,6 @@ class TeacherGui:
             message = self.question(_("Send a message to student"), _("Please, pay attention!"))
             print "Will send: %s" % message
             self.service.add_client_action(addr, protocol.ACTION_MSG, message)
-
-    def mkbutton(self, img, img2, text, action, color_normal, color_active):
-        """Creates a callable button"""
-        box = gtk.HBox(homogeneous=False)
-        # Imagem 1
-        imgpath = "%s/%s" % (self.appdir, img)
-        # Verifica se arquivo existe
-        try:
-            fd = open(imgpath)
-            fd.close()
-        except:
-            imgpath=None
-        if imgpath:
-            img = gtk.Image()
-            img.set_from_file(imgpath)
-            box.pack_start(img, expand=False)
-
-        # Verifica se arquivo existe
-        try:
-            fd = open(imgpath)
-            fd.close()
-        except:
-            imgpath=None
-        if imgpath:
-            img2 = gtk.Image()
-            img2.set_from_file(imgpath)
-
-        # Texto
-        label = gtk.Label(text)
-        label.set_use_markup(True)
-        label.set_markup("<b>%s</b>" % text)
-        box.pack_start(label, expand=False)
-
-        button = gtk.Button()
-        button.modify_bg(gtk.STATE_NORMAL, color_normal)
-        button.modify_bg(gtk.STATE_PRELIGHT, color_active)
-
-        button.add(box)
-
-        # callback
-        if action:
-            button.connect('clicked', action, "")
-        button.show_all()
-        return button
 # }}}
 
 if __name__ == "__main__":
