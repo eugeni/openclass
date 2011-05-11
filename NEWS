@@ -1,0 +1,7 @@
+ - support viewing student screens
+
+0.0.1:
+ - initial version
+ - support screen sharing and screen locking
+ - broadcast-based teacher discovery
+ - multicast-based screen projection
