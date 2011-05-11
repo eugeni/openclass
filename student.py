@@ -119,6 +119,8 @@ class Student:
         self.mcast = network.McastListener()
 
         self.screen = screen.Screen()
+
+        # drawing
         self.projection_window = gtk.Window()
         self.projection_window.set_resizable(False)
         #self.projection_window.set_has_frame(False)
@@ -126,21 +128,31 @@ class Student:
         self.projection_window.set_keep_above(True)
         self.projection_window.connect('delete-event', lambda *w: True)
         self.projection_window.visible = False
-        self.projection_window.show_all()
-        self.projection_window.hide()
-
-        # attention
         vbox = gtk.VBox()
         self.projection_window.add(vbox)
-        self.attention_label = gtk.Label()
-        self.attention_label.set_use_markup(True)
-        vbox.pack_start(self.attention_label)
-
-        # drawing
         self.gc = None
         self.drawing = gtk.DrawingArea()
         self.drawing.set_size_request(self.screen.width, self.screen.height)
         vbox.pack_start(self.drawing)
+        self.projection_window.hide()
+
+
+        # attention
+        self.attention_window = gtk.Window()
+        self.attention_window.set_resizable(False)
+        self.attention_window.set_has_frame(False)
+        self.attention_window.set_decorated(False)
+        self.attention_window.set_keep_above(True)
+        self.attention_window.connect('delete-event', lambda *w: True)
+        self.attention_window.visible = False
+
+        vbox = gtk.VBox()
+        self.attention_window.add(vbox)
+        self.attention_label = gtk.Label()
+        self.attention_label.set_use_markup(True)
+        vbox.pack_start(self.attention_label)
+
+        self.attention_window.hide()
 
         self.login(None)
 
@@ -197,25 +209,24 @@ class Student:
 
     def ask_attention(self, message=_("Teacher asked you for attention")):
         """Asks for attention"""
-        self.drawing.set_visible(False)
         self.attention_label.set_markup("<big><b>%s</b></big>" % message)
-        self.attention_label.set_visible(True)
-        self.projection_window.fullscreen()
-        self.projection_window.stick()
-        self.projection_window.show_all()
+        self.attention_window.set_size_request(self.screen.width, self.screen.height)
+        self.attention_window.show_all()
+        self.attention_window.stick()
+        self.attention_window.fullscreen()
 
     def start_projection(self):
         """Starts screen projection"""
-        self.attention_label.set_visible(False)
         self.projection_window.visible = True
         self.projection_window.stick()
-        self.drawing.set_visible(True)
         self.projection_window.show_all()
 
     def noop(self):
         """Back to noop state"""
         self.projection_window.visible = False
         self.projection_window.hide()
+        self.attention_window.visible = False
+        self.attention_window.hide()
 
     def login(self, widget):
         """Asks student to login"""
@@ -342,8 +353,8 @@ class Student:
                     print "Need scaling: %dx%d vs %dx%d" % (width, height, screen_width, screen_height)
                     self.projection_window.set_size_request(screen_width, screen_height)
                     self.drawing.set_size_request(screen_width, screen_height)
-                    # do we need to go fullscreen?
-                if width >= self.screen.width and height >= self.screen.height:
+                # do we need to go fullscreen?
+                if screen_width >= self.screen.width and screen_height >= self.screen.height:
                     if self.projection_window.visible:
                         print "Going fullscreen"
                         self.projection_window.fullscreen()
