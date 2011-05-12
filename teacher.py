@@ -492,18 +492,6 @@ class TeacherGui:
             self.tooltip.set_tip(self.machines[machine], _("%s\%s!") % (time.asctime(), message))
         gtk.gdk.threads_leave()
 
-    def multicast(self, widget, type="multicast"):
-        """Inicia transmissao de multicast"""
-        print "Bandwidth to estimate: %s Kbps" % (bandwidth)
-
-        machines = []
-        for z in self.machines:
-            img = self.machines[z].button.get_image()
-            if img == self.machines[z].button.img_on:
-                machines.append(z)
-
-        self.service.actions.put((type, (machines, num_msgs, bandwidth)))
-
     def send_screen(self, widget):
         """Starts screen sharing for selected machines"""
         machines = self.get_selected_machines()
