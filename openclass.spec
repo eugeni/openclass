@@ -1,6 +1,6 @@
 Summary:	OpenClass is a simple open-source solution for class control
 Name:		openclass
-Version:	0.0.1
+Version:	0.0.3
 Release:	%mkrel 1
 Source0:	%name-%version.tar.bz2
 License:	GPLv2
