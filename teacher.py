@@ -26,6 +26,7 @@ import pynotify
 from multiprocessing import Queue
 import SocketServer
 import socket
+import urllib
 from threading import Thread
 
 import gettext
@@ -62,6 +63,9 @@ class TeacherRunner(Thread):
 
         # actions for clients
         self.clients_actions = {}
+
+        # authorized files for transfer
+        self.authorized_files = []
 
         # protocol
         self.protocol = protocol.Protocol()
@@ -122,6 +126,22 @@ class TeacherRunner(Thread):
                 self.gui.show_screenshot(client, width, height, shot)
             except:
                 traceback.print_exc()
+        elif request == protocol.REQUEST_GETFILE:
+            if 'file' not in params:
+                response = _("Bad request for file")
+            else:
+                filename = urllib.unquote(params['file'][0])
+                print "Asked to open %s" % filename
+                if filename not in self.authorized_files:
+                    print "Error: %s not authorized for transfer to %s" % (filename, client)
+                    response = _("File not authorized for transfer")
+                else:
+                    try:
+                        with open(filename) as fd:
+                            response = fd.read()
+                            response_params = ""
+                    except:
+                        response = _("Unable to transfer %s: %s") % (filename, sys.exc_value)
         return response, response_params
 
     def quit(self):
@@ -150,6 +170,10 @@ class TeacherRunner(Thread):
         if client not in self.clients_actions:
             self.clients_actions[client]=[]
         self.clients_actions[client].append((action, params))
+
+    def authorize_file_transfer(self, filename):
+        """Authorizes a local file for sharing with students"""
+        self.authorized_files.append(filename)
 
     def start_multicast(self):
         """Starts multicast thread"""
@@ -224,7 +248,11 @@ class TeacherGui:
         self.LockScreen.connect('clicked', self.lock_screen)
         MenuVBox.pack_start(self.LockScreen, False, False, 5)
 
-        MenuVBox.pack_start(gtk.Label(), False, False, 160)
+        self.ShareFile = gtk.Button(_("Share files"))
+        self.ShareFile.connect('clicked', self.share_files)
+        MenuVBox.pack_start(self.ShareFile, False, False, 5)
+
+        MenuVBox.pack_start(gtk.Label(), False, False, 140)
 
         self.QuitButton = gtk.Button(_("Quit"))
         self.QuitButton.connect('clicked', self.quit)
@@ -530,6 +558,23 @@ class TeacherGui:
             self.LockScreen.set_sensitive(True)
             for machine in machines:
                 self.service.add_client_action(machine, protocol.ACTION_NOOP)
+
+    def share_files(self, widget):
+        """Shares a file with students"""
+        chooser = gtk.FileChooserDialog(title=_("Select a file to share with students"),action=gtk.FILE_CHOOSER_ACTION_OPEN,
+                      buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_SAVE,gtk.RESPONSE_OK))
+        response = chooser.run()
+        if response != gtk.RESPONSE_OK:
+            dialog.destroy()
+            return
+        filename = chooser.get_filename()
+        self.service.authorize_file_transfer(filename)
+        chooser.destroy()
+        machines = self.get_selected_machines()
+        for machine in machines:
+            self.service.add_client_action(machine, protocol.ACTION_OPENFILE, filename)
+        pass
+
 
     def lock_screen(self, widget):
         """Starts screen locking for selected machines"""

@@ -298,6 +298,11 @@ class Student:
             elif command == protocol.ACTION_SHOT:
                 print "Teacher requested our screenshot"
                 self.shot()
+            elif command == protocol.ACTION_OPENFILE:
+                filename = urllib.quote(params)
+                print "Teacher requested us to open his file %s" % filename
+                url = "http://%s:%d/%s?file=%s" % (self.teacher_addr, network.LISTENPORT, protocol.REQUEST_GETFILE, filename)
+                system.open_url(url)
             else:
                 print "Unknown command %s" % command
         gobject.timeout_add(1000, self.monitor_teacher)

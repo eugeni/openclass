@@ -13,12 +13,15 @@ ACTION_ATTENTION="attention"
 ACTION_PROJECTION="projection"
 ACTION_SHOT="shot"
 ACTION_PLEASEREGISTER="pleaseregister"
+ACTION_OPENFILE="openfile"
+ACTION_OPENURL="openurl"
 
 # requests
 REQUEST_REGISTER="register"
 REQUEST_ACTIONS="actions"
 REQUEST_RAISEHAND="raisehand"
 REQUEST_SHOWSCREEN="showscreen"
+REQUEST_GETFILE="getfile"
 
 import struct
 import traceback

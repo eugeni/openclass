@@ -27,3 +27,11 @@ def get_os():
 def timefunc():
     # TODO: if windows, return time.clock(); otherwise return time.time()
     return time.time()
+
+def open_url(url):
+    """Attempts to open an url"""
+    if get_os() == "Linux":
+        return os.system("xdg-open %s &" % url)
+    else:
+        # TODO: make it work on windows
+        return os.system(url)
