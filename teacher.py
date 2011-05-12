@@ -111,6 +111,7 @@ class TeacherRunner(Thread):
             print "Student called your attention"
             print request
             print params
+            self.raise_hand(client)
         elif request == protocol.REQUEST_SHOWSCREEN:
             # student wants to show his screen
             print "Student wants to show his screen to you"
@@ -122,13 +123,6 @@ class TeacherRunner(Thread):
             except:
                 traceback.print_exc()
         return response, response_params
-
-    def show_message(self, message, title=_("Message received from teacher"), timeout=0):
-        """Shows a message to student"""
-        n = pynotify.Notification(title, message)
-        n.set_timeout(timeout)
-        n.show()
-        return
 
     def quit(self):
         """Tells everything to quit"""
@@ -146,6 +140,10 @@ class TeacherRunner(Thread):
         """Adds a new client"""
         self.gui.add_client(client, name)
         self.add_client_action(client, protocol.ACTION_NOOP)
+
+    def raise_hand(self, client, message=_("The student asks for your attention")):
+        """Calls teacher attention"""
+        self.gui.queue_raise_hand(client, message)
 
     def add_client_action(self, client, action, params=None):
         """Adds an action for a client into a list"""
@@ -406,10 +404,22 @@ class TeacherGui:
             dialog.destroy()
             return None
 
+    def show_message(self, title, message, timeout=0):
+        """Shows a message to student"""
+        n = pynotify.Notification(title, message)
+        n.set_timeout(timeout)
+        n.show()
+        return
+
     def add_client(self, client, name):
         """Adds a new client"""
         print "Adding %s" % client
         self.clients_queue.put(("new", client, {"name": name}))
+
+    def queue_raise_hand(self, client, message):
+        """A student calls for attention"""
+        print "Student %s asks for attention: %s" % (client, message)
+        self.clients_queue.put(("raisehand", client, {"message": message}))
 
     def put_machine(self, machine):
         """Puts a client machine in an empty spot"""
@@ -478,6 +488,13 @@ class TeacherGui:
                 shot = params["shot"]
 
                 self.show_screenshot(addr, width, height, shot)
+            elif action == "raisehand":
+                message = params["message"]
+                # shows a raisehand request from students
+                name = addr
+                if addr in self.machines:
+                    name = self.machines[addr].machine
+                self.show_message(_("Message received from %s") % name, message, timeout=0)
 
         gobject.timeout_add(1000, self.monitor)
 
