@@ -26,10 +26,9 @@ current version]
  - automatic teacher discovery via broadcast
  - receiving of teacher screen projection via multicasting protocol, suitable
 for both wired and wireless environments
+ - "raise hand" functionality to call teacher attention
  - possibility to select teacher to connect to [not available in current
 version]
- - "raise hand" functionality to call teacher attention [not available in
-current version]
 
 Usage
 -----
