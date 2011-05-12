@@ -303,6 +303,10 @@ class Student:
                 print "Teacher requested us to open his file %s" % filename
                 url = "http://%s:%d/%s?file=%s" % (self.teacher_addr, network.LISTENPORT, protocol.REQUEST_GETFILE, filename)
                 system.open_url(url)
+            elif command == protocol.ACTION_OPENURL:
+                url = params
+                print "Teacher requested us to open the link at %s" % url
+                system.open_url(url)
             else:
                 print "Unknown command %s" % command
         gobject.timeout_add(1000, self.monitor_teacher)

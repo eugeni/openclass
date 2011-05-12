@@ -252,7 +252,11 @@ class TeacherGui:
         self.ShareFile.connect('clicked', self.share_files)
         MenuVBox.pack_start(self.ShareFile, False, False, 5)
 
-        MenuVBox.pack_start(gtk.Label(), False, False, 140)
+        self.ShareFile = gtk.Button(_("Share a web page"))
+        self.ShareFile.connect('clicked', self.share_url)
+        MenuVBox.pack_start(self.ShareFile, False, False, 5)
+
+        MenuVBox.pack_start(gtk.Label(), False, False, 120)
 
         self.QuitButton = gtk.Button(_("Quit"))
         self.QuitButton.connect('clicked', self.quit)
@@ -559,6 +563,15 @@ class TeacherGui:
             for machine in machines:
                 self.service.add_client_action(machine, protocol.ACTION_NOOP)
 
+    def share_url(self, widget):
+        """Shares an URL with students"""
+        url = self.question(_("Share a web page with students"), _("http://"))
+        if not url:
+            return
+        machines = self.get_selected_machines()
+        for machine in machines:
+            self.service.add_client_action(machine, protocol.ACTION_OPENURL, url)
+
     def share_files(self, widget):
         """Shares a file with students"""
         chooser = gtk.FileChooserDialog(title=_("Select a file to share with students"),action=gtk.FILE_CHOOSER_ACTION_OPEN,
@@ -573,8 +586,6 @@ class TeacherGui:
         machines = self.get_selected_machines()
         for machine in machines:
             self.service.add_client_action(machine, protocol.ACTION_OPENFILE, filename)
-        pass
-
 
     def lock_screen(self, widget):
         """Starts screen locking for selected machines"""

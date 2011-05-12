@@ -18,9 +18,8 @@ activities in the classroom. Among such activities, the most commonly used are:
  - screen projection (send content of teacher screen to all the students)
  - student attention request (blocking student activities and asking them to
 look at teacher)
- - messaging to student
- - file sharing and URL sharing to enrich class activities [not available in
-current version]
+ - direct messaging to students
+ - file sharing and URL sharing to enrich class activities
 
 (From student to teacher)
  - automatic teacher discovery via broadcast
