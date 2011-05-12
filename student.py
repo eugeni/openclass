@@ -189,8 +189,6 @@ class Student:
 
     def on_popup_menu(self, status, button, time):
         """Right mouse button is clicked on tray icon"""
-        print button
-        print time
         self.menu.popup(None, None, None, button, time)
 
     def choose_teacher(self, data):
