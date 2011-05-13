@@ -407,10 +407,10 @@ class Student:
                 # drawing or scaling
                 if scaling_ratio_x != 1 or scaling_ratio_y != 1:
                     # scaling received stuff
-                    new_pos_x = pos_x * scaling_ratio_x
-                    new_pos_y = pos_y * scaling_ratio_y
-                    new_step_x = step_x * scaling_ratio_x
-                    new_step_y = step_y * scaling_ratio_y
+                    new_pos_x = int(pos_x * scaling_ratio_x)
+                    new_pos_y = int(pos_y * scaling_ratio_y)
+                    new_step_x = int(step_x * scaling_ratio_x)
+                    new_step_y = int(step_y * scaling_ratio_y)
                     pb2 = pb.scale_simple(new_step_x, new_step_y, gtk.gdk.INTERP_BILINEAR)
                     self.drawing.window.draw_pixbuf(gc, pb2, 0, 0, new_pos_x, new_pos_y, new_step_x, new_step_y)
                 else:
