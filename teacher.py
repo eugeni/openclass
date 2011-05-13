@@ -582,7 +582,7 @@ class TeacherGui:
                       buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_SAVE,gtk.RESPONSE_OK))
         response = chooser.run()
         if response != gtk.RESPONSE_OK:
-            dialog.destroy()
+            chooser.destroy()
             return
         filename = chooser.get_filename()
         self.service.authorize_file_transfer(filename)
