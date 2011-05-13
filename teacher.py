@@ -185,10 +185,10 @@ class TeacherRunner(Thread):
         self.class_name = class_name
         self.bcast.start()
 
-    def send_projection(self, width, height, chunks):
+    def send_projection(self, width, height, fullscreen, chunks):
         """Send chunks of projection over multicast"""
         for chunk in chunks:
-            self.mcast.put(self.protocol.pack_chunk(width, height, chunk))
+            self.mcast.put(self.protocol.pack_chunk(width, height, fullscreen, chunk))
 
     def run(self):
         """Starts a background thread"""
@@ -396,6 +396,7 @@ class TeacherGui:
             exp = combobox.get_active_text()
             print exp
             dialog.destroy()
+            fullscreen = 0
             if exp != _("Full screen size"):
                 try:
                     width, height = exp.split("x", 1)
@@ -403,8 +404,11 @@ class TeacherGui:
                     height = int(height)
                 except:
                     traceback.print_exc()
+            else:
+                    fullscreen = 1
             self.projection_width = width
             self.projection_height = height
+            self.projection_fullscreen = fullscreen
             return True
         else:
             dialog.destroy()
@@ -471,7 +475,7 @@ class TeacherGui:
             print "Sending screens, yee-ha!"
             # we are projecting, grab stuff
             chunks = self.projection_screen.chunks(scale_x=self.projection_width, scale_y=self.projection_height)
-            self.service.send_projection(self.projection_width, self.projection_height, chunks)
+            self.service.send_projection(self.projection_width, self.projection_height, self.projection_fullscreen, chunks)
         gobject.timeout_add(500, self.projection)
 
     def refresh_shot(self, widget):

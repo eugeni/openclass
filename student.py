@@ -374,28 +374,48 @@ class Student:
         """Monitor for multicast messages"""
         while not self.mcast.messages.empty():
             message = self.mcast.messages.get()
-            screen_width, screen_height, pos_x, pos_y, step_x, step_y, img = self.protocol.unpack_chunk(message)
-            print "Received image at %dx%d-%dx%d" % (pos_x, pos_y, step_x, step_y)
+            screen_width, screen_height, fullscreen, pos_x, pos_y, step_x, step_y, img = self.protocol.unpack_chunk(message)
+            print "Received image at %dx%d-%dx%d (fullscreen=%s)" % (pos_x, pos_y, step_x, step_y, fullscreen)
             try:
                 loader = gdk.PixbufLoader(image_type="jpeg")
                 loader.write(img)
                 loader.close()
                 pb = loader.get_pixbuf()
 
-                # do we need scaling?
-                width, height = self.projection_window.get_size()
-                if width != screen_width or height != screen_height:
-                    print "Need scaling: %dx%d vs %dx%d" % (width, height, screen_width, screen_height)
-                    self.projection_window.set_size_request(screen_width, screen_height)
-                    self.drawing.set_size_request(screen_width, screen_height)
-                # do we need to go fullscreen?
-                if screen_width >= self.screen.width and screen_height >= self.screen.height:
-                    if self.projection_window.visible:
-                        print "Going fullscreen"
-                        self.projection_window.fullscreen()
-
                 gc = self.drawing.get_style().fg_gc[gtk.STATE_NORMAL]
-                self.drawing.window.draw_pixbuf(gc, pb, 0, 0, pos_x, pos_y, step_x, step_y)
+                # are we in fullscreen mode ?
+                if fullscreen == 1:
+                    width = self.screen.width
+                    height = self.screen.height
+                    if width != screen_width or height != screen_height:
+                        self.projection_window.set_size_request(screen_width, screen_height)
+                        self.drawing.set_size_request(screen_width, screen_height)
+                    self.projection_window.set_has_frame(False)
+                    self.projection_window.set_decorated(False)
+                    self.projection_window.fullscreen()
+                    scaling_ratio_x = 1.0 * width / screen_width
+                    scaling_ratio_y = 1.0 * height / screen_height
+                else:
+                    width, height = self.projection_window.get_size()
+                    if width != screen_width or height != screen_height:
+                        self.projection_window.set_size_request(screen_width, screen_height)
+                        self.drawing.set_size_request(screen_width, screen_height)
+                    self.projection_window.set_has_frame(True)
+                    self.projection_window.set_decorated(True)
+                    scaling_ratio_x = 1
+                    scaling_ratio_y = 1
+                # drawing or scaling
+                if scaling_ratio_x != 1 or scaling_ratio_y != 1:
+                    # scaling received stuff
+                    new_pos_x = pos_x * scaling_ratio_x
+                    new_pos_y = pos_y * scaling_ratio_y
+                    new_step_x = step_x * scaling_ratio_x
+                    new_step_y = step_y * scaling_ratio_y
+                    pb2 = pb.scale_simple(new_step_x, new_step_y, gtk.gdk.INTERP_BILINEAR)
+                    self.drawing.window.draw_pixbuf(gc, pb2, 0, 0, new_pos_x, new_pos_y, new_step_x, new_step_y)
+                else:
+                    self.drawing.window.draw_pixbuf(gc, pb, 0, 0, pos_x, pos_y, step_x, step_y)
+
             except:
                 traceback.print_exc()
 

@@ -8,12 +8,19 @@ OPENCLASS_BUILD=1
 
 # protocol commands
 ACTION_NOOP="noop"
+# message from teacher
 ACTION_MSG="msg"
+# attention
 ACTION_ATTENTION="attention"
+# full-screen projection
 ACTION_PROJECTION="projection"
+# ask for screen shot
 ACTION_SHOT="shot"
+# students needs to register again
 ACTION_PLEASEREGISTER="pleaseregister"
+# open a file from teacher
 ACTION_OPENFILE="openfile"
+# open an url from teacher
 ACTION_OPENURL="openurl"
 
 # requests
@@ -79,15 +86,16 @@ class Protocol:
             traceback.print_exc()
             return None
 
-    def pack_chunk(self, screen_width, screen_height, chunk):
+    def pack_chunk(self, screen_width, screen_height, fullscreen, chunk):
         """Packs a chunk into network-specific format for sending"""
+        # TODO: instead of passing fullscreen as an integer, use Flags-like structure
         pos_x, pos_y, step_x, step_y, img = chunk
-        data = struct.pack("!iiiiii", screen_width, screen_height, pos_x, pos_y, step_x, step_y)
+        data = struct.pack("!iiiiiii", screen_width, screen_height, fullscreen, pos_x, pos_y, step_x, step_y)
         return data + img
 
     def unpack_chunk(self, data):
         """Unpacks a chunk of data"""
-        head_size = struct.calcsize("!iiiiii")
-        screen_width, screen_height, pos_x, pos_y, step_x, step_y = struct.unpack("!iiiiii", data[:head_size])
-        return screen_width, screen_height, pos_x, pos_y, step_x, step_y, data[head_size:]
+        head_size = struct.calcsize("!iiiiiii")
+        screen_width, screen_height, fullscreen, pos_x, pos_y, step_x, step_y = struct.unpack("!iiiiiii", data[:head_size])
+        return screen_width, screen_height, fullscreen, pos_x, pos_y, step_x, step_y, data[head_size:]
 
