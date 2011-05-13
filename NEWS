@@ -1,4 +1,5 @@
 0.0.4:
+ - properly close file selection dialog
  - implemented automatic screen sharing when in fullscreen mode
 
 0.0.3:
