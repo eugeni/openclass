@@ -569,7 +569,7 @@ class TeacherGui:
 
     def share_url(self, widget):
         """Shares an URL with students"""
-        url = self.question(_("Share a web page with students"), _("http://"))
+        url = self.question(_("Share a web page with students"), "http://")
         if not url:
             return
         machines = self.get_selected_machines()
