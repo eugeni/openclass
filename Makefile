@@ -1,5 +1,5 @@
 PACKAGE = openclass
-VERSION = 0.0.3
+VERSION = 0.0.4
 
 version:
 	echo "version='$(VERSION)'" > version.py
