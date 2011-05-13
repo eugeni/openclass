@@ -137,6 +137,7 @@ class Student:
         self.projection_window.set_keep_above(True)
         self.projection_window.connect('delete-event', lambda *w: True)
         self.projection_window.visible = False
+        self.projection_window.is_fullscreen = False
         vbox = gtk.VBox()
         self.projection_window.add(vbox)
         self.gc = None
@@ -390,9 +391,11 @@ class Student:
                     if width != screen_width or height != screen_height:
                         self.projection_window.set_size_request(screen_width, screen_height)
                         self.drawing.set_size_request(screen_width, screen_height)
-                    self.projection_window.set_has_frame(False)
-                    self.projection_window.set_decorated(False)
-                    self.projection_window.fullscreen()
+                    if self.projection_window.is_fullscreen == False:
+                        self.projection_window.set_has_frame(False)
+                        self.projection_window.set_decorated(False)
+                        self.projection_window.fullscreen()
+                        self.projection_window.is_fullscreen = True
                     scaling_ratio_x = 1.0 * width / screen_width
                     scaling_ratio_y = 1.0 * height / screen_height
                 else:
@@ -400,8 +403,11 @@ class Student:
                     if width != screen_width or height != screen_height:
                         self.projection_window.set_size_request(screen_width, screen_height)
                         self.drawing.set_size_request(screen_width, screen_height)
-                    self.projection_window.set_has_frame(True)
-                    self.projection_window.set_decorated(True)
+                    if self.projection_window.is_fullscreen:
+                        self.projection_window.set_has_frame(True)
+                        self.projection_window.set_decorated(True)
+                        self.projection_window.unfullscreen()
+                        self.projection_window.is_fullscreen = False
                     scaling_ratio_x = 1
                     scaling_ratio_y = 1
                 # drawing or scaling
