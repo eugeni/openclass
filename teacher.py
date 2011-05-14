@@ -39,7 +39,7 @@ except IOError:
     _ = str
     traceback.print_exc()
 
-MACHINES_X = 8
+MACHINES_X = 5
 MACHINES_Y = 8
 
 # configuration
