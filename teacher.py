@@ -615,7 +615,7 @@ class TeacherGui:
             return
         machines = self.get_selected_machines()
         for machine in machines:
-            self.service.add_client_action(machine, protocol.ACTION_SHUTDOWN, url)
+            self.service.add_client_action(machine, protocol.ACTION_SHUTDOWN)
 
     def share_files(self, widget):
         """Shares a file with students"""
