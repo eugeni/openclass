@@ -599,25 +599,34 @@ class TeacherGui:
             for machine in machines:
                 self.service.add_client_action(machine, protocol.ACTION_NOOP)
 
-    def share_url(self, widget):
+    def share_url(self, widget, client=None):
         """Shares an URL with students"""
         url = self.question(_("Share a web page with students"), "http://")
         if not url:
             return
-        machines = self.get_selected_machines()
+        if not client:
+            machines = self.get_selected_machines()
+        else:
+            machines = [client]
         for machine in machines:
             self.service.add_client_action(machine, protocol.ACTION_OPENURL, url)
 
-    def shutdown(self, widget):
+    def shutdown(self, widget, client=None):
         """Shares an URL with students"""
-        confirm = self.confirm(_("Please confirm the shutdown request"), _("Are you sure you want to turn off all the student computers?"))
+        if not client:
+            confirm = self.confirm(_("Please confirm the shutdown request"), _("Are you sure you want to turn off all the student computers?"))
+        else:
+            confirm = self.confirm(_("Please confirm the shutdown request"), _("Are you sure you want to turn off this computer?"))
         if not confirm:
             return
-        machines = self.get_selected_machines()
+        if not client:
+            machines = self.get_selected_machines()
+        else:
+            machines = [client]
         for machine in machines:
             self.service.add_client_action(machine, protocol.ACTION_SHUTDOWN)
 
-    def share_files(self, widget):
+    def share_files(self, widget, client=None):
         """Shares a file with students"""
         chooser = gtk.FileChooserDialog(title=_("Select a file to share with students"),action=gtk.FILE_CHOOSER_ACTION_OPEN,
                       buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_SAVE,gtk.RESPONSE_OK))
@@ -628,7 +637,10 @@ class TeacherGui:
         filename = chooser.get_filename()
         self.service.authorize_file_transfer(filename)
         chooser.destroy()
-        machines = self.get_selected_machines()
+        if not client:
+            machines = self.get_selected_machines()
+        else:
+            machines = [client]
         for machine in machines:
             self.service.add_client_action(machine, protocol.ACTION_OPENFILE, filename)
 
@@ -716,27 +728,27 @@ class TeacherGui:
 
     def send_msg_student(self, widget, machine):
         """Send a message to student"""
-        if machine in self.machines_map:
-            addr = self.machines_map[machine]
-            message = self.question(_("Send a message to student"), _("Please, pay attention!"))
-            if not message:
-                return
-            print "Will send: %s" % message
-            self.service.add_client_action(addr, protocol.ACTION_MSG, message)
-        else:
-            print "Unknown machine!"
+        message = self.question(_("Send a message to student"), _("Please, pay attention!"))
+        if not message:
+            return
+        print "Will send: %s" % message
+        self.service.add_client_action(machine, protocol.ACTION_MSG, message)
 
     def request_screenshot(self, widget, machine):
         """Request screenshot from student"""
-        if machine in self.machines_map:
-            addr = self.machines_map[machine]
-            self.service.add_client_action(addr, protocol.ACTION_SHOT)
-            print "Sending request to %s" % addr
-        else:
-            print "Unknown machine!"
+        self.service.add_client_action(machine, protocol.ACTION_SHOT)
+        print "Sending request to %s" % machine
 
     def cb_machine(self, widget, event, machine):
         """Callback when clicked on a client machine"""
+
+        if machine in self.machines_map:
+            machine = self.machines_map[machine]
+        else:
+            # unknown machine?
+            print "Error: unknown machine!"
+            return
+
         # popup menu
         popup_menu = gtk.Menu()
         menu_msg = gtk.MenuItem(_("Send message to student"))
@@ -747,6 +759,14 @@ class TeacherGui:
         menu_view.connect("activate", self.request_screenshot, machine)
         popup_menu.append(menu_view)
 
+        menu_url = gtk.MenuItem(_("Send a web page to student"))
+        menu_url.connect("activate", self.share_url, machine)
+        popup_menu.append(menu_url)
+
+        menu_file = gtk.MenuItem(_("Send a file to student"))
+        menu_file.connect("activate", self.share_files, machine)
+        popup_menu.append(menu_file)
+
         menu_control = gtk.MenuItem(_("Remote control student computer"))
         menu_control.set_sensitive(False)
         popup_menu.append(menu_control)
@@ -754,6 +774,10 @@ class TeacherGui:
         menu_disconnect = gtk.MenuItem(_("Remove student from class"))
         menu_disconnect.set_sensitive(False)
         popup_menu.append(menu_disconnect)
+
+        menu_shutdown = gtk.MenuItem(_("Turn off student computer"))
+        menu_shutdown.connect("activate", self.shutdown, machine)
+        popup_menu.append(menu_shutdown)
 
         popup_menu.show_all()
         popup_menu.popup(None, None, None, event.button, event.time)
