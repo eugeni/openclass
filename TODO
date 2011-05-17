@@ -8,3 +8,8 @@ TODO list for openclass
 - Mosaic view
 - Individual messaging from student to teacher
 - Multimedia streaming
+- Implement possibility for teacher to change class name/re-login
+- Allow teacher to re-transmit one student's screen to the class
+- Allow teacher to grab student's webcam
+- Allow teacher to transmit his webcam
+- Allow teacher to reject unwanted students
