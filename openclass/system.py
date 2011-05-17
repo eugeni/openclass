@@ -49,3 +49,12 @@ def open_url(url):
     else:
         # TODO: make it work on windows
         return os.system(url)
+
+def shutdown():
+    """Shuts down the machine"""
+    if get_os() == "Linux":
+        # shutdown
+        return os.system("shutdown now")
+    else:
+        # TODO: no shutdown yet on windows
+        return None

@@ -319,6 +319,9 @@ class Student:
                 url = params
                 print "Teacher requested us to open the link at %s" % url
                 system.open_url(url)
+            elif command == protocol.ACTION_SHUTDOWN:
+                # TODO: show a confirmation window with a timeout
+                system.shutdown()
             else:
                 print "Unknown command %s" % command
         gobject.timeout_add(1000, self.monitor_teacher)

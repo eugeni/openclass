@@ -36,6 +36,8 @@ ACTION_PLEASEREGISTER="pleaseregister"
 ACTION_OPENFILE="openfile"
 # open an url from teacher
 ACTION_OPENURL="openurl"
+# shut down the machine
+ACTION_SHUTDOWN="shutdown"
 
 # requests
 REQUEST_REGISTER="register"

@@ -267,7 +267,11 @@ class TeacherGui:
         self.ShareFile.connect('clicked', self.share_url)
         MenuVBox.pack_start(self.ShareFile, False, False, 5)
 
-        MenuVBox.pack_start(gtk.Label(), False, False, 120)
+        self.ShareFile = gtk.Button(_("Turn off students"))
+        self.ShareFile.connect('clicked', self.shutdown)
+        MenuVBox.pack_start(self.ShareFile, False, False, 5)
+
+        MenuVBox.pack_start(gtk.Label(), False, False, 100)
 
         self.QuitButton = gtk.Button(_("Quit"))
         self.QuitButton.connect('clicked', self.quit)
@@ -424,6 +428,23 @@ class TeacherGui:
         else:
             dialog.destroy()
             return None
+
+    def confirm(self, title, content):
+        """Displays a confirmation dialog"""
+        dialog = gtk.Dialog(title, self.window, 0,
+                (gtk.STOCK_OK, gtk.RESPONSE_OK,
+                gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+        dialogLabel = gtk.Label(content)
+        dialog.vbox.add(dialogLabel)
+        dialog.vbox.set_border_width(8)
+        dialog.show_all()
+        response = dialog.run()
+        dialog.destroy()
+        if response == gtk.RESPONSE_OK:
+            return True
+        else:
+            return False
+
 
     def question(self, title, input=None):
         """Asks a question :)"""
@@ -586,6 +607,15 @@ class TeacherGui:
         machines = self.get_selected_machines()
         for machine in machines:
             self.service.add_client_action(machine, protocol.ACTION_OPENURL, url)
+
+    def shutdown(self, widget):
+        """Shares an URL with students"""
+        confirm = self.confirm(_("Please confirm the shutdown request"), _("Are you sure you want to turn off all the student computers?"))
+        if not confirm:
+            return
+        machines = self.get_selected_machines()
+        for machine in machines:
+            self.service.add_client_action(machine, protocol.ACTION_SHUTDOWN, url)
 
     def share_files(self, widget):
         """Shares a file with students"""
