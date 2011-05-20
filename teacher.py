@@ -109,18 +109,20 @@ class TeacherRunner(Thread):
             self.clients.append(client)
             print self.clients
         elif request == protocol.REQUEST_ACTIONS:
-            print self.clients
+            # student could send us additional params
             if client not in self.clients:
                 # not registered yet
                 response = protocol.ACTION_PLEASEREGISTER
             else:
+                # update client with new information (if any)
+                name = params.get("name", None)
+                shot = params.get("shot", None)
+                self.add_client(client, name, shot)
                 # checking actions for the client
                 response = self.gui.current_action
                 if client in self.clients_actions:
                     if len(self.clients_actions[client]) > 0:
-                        print len(self.clients_actions[client])
                         response, response_params = self.clients_actions[client].pop(0)
-                        print len(self.clients_actions[client])
         elif request == protocol.REQUEST_RAISEHAND:
             # student raised his hand
             print "Student called your attention"
@@ -167,9 +169,9 @@ class TeacherRunner(Thread):
         """Associates a GUI to this service"""
         self.gui = gui
 
-    def add_client(self, client, name):
+    def add_client(self, client, name, shot=None):
         """Adds a new client"""
-        self.gui.add_client(client, name)
+        self.gui.add_client(client, name, shot)
         self.add_client_action(client, protocol.ACTION_NOOP)
 
     def raise_hand(self, client, message=_("The student asks for your attention")):
@@ -479,10 +481,10 @@ class TeacherGui:
         n.show()
         return
 
-    def add_client(self, client, name):
+    def add_client(self, client, name, shot=None):
         """Adds a new client"""
         print "Adding %s" % client
-        self.clients_queue.put(("new", client, {"name": name}))
+        self.clients_queue.put(("new", client, {"name": name, "shot": shot}))
 
     def queue_raise_hand(self, client, message):
         """A student calls for attention"""
@@ -538,7 +540,9 @@ class TeacherGui:
                 if addr not in self.machines:
                     # Maquina nova
                     gtk.gdk.threads_enter()
+                    print params
                     name = params.get("name", addr)
+
                     machine = self.mkmachine(name)
                     machine.button.connect('button_press_event', self.cb_machine, machine)
                     self.put_machine(machine)
@@ -548,6 +552,19 @@ class TeacherGui:
                     gtk.gdk.threads_leave()
                 else:
                     machine = self.machines[addr]
+                    shot = params.get("shot")
+                    if shot:
+                        loader = gdk.PixbufLoader(image_type="jpeg")
+                        loader.write(shot[0])
+                        loader.close()
+                        pb = loader.get_pixbuf()
+                        img = gtk.Image()
+                        img.set_from_pixbuf(pb)
+                        print img
+                        machine.button.set_image(img)
+                    name = params.get("name")
+                    if name:
+                        machine.label.set_markup("<small>%s</small>" % name[0])
                     self.tooltip.set_tip(machine, _("Updated on %s") % (time.asctime()))
             elif action == "shot":
                 # show a student screenshot
@@ -682,13 +699,11 @@ class TeacherGui:
 
     def get_img(self, imgpath):
         """Returns image widget if exists"""
+        img = gtk.Image()
         try:
-            fd = open(imgpath)
-            fd.close()
-            img = gtk.Image()
             img.set_from_file(imgpath)
         except:
-            img=None
+            traceback.print_exc()
         return img
 
     def mkmachine(self, name, img="machine.png", img_offline="machine_off.png", status="online"):

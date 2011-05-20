@@ -287,8 +287,13 @@ class Student:
     def monitor_teacher(self):
         """Periodically checks for teacher commands"""
         if self.teacher_addr:
+            # send some parameters with the request
+            params = {}
+            params["name"] = self.name
+            width, height, shot = self.screen.capture(scale_x=64, scale_y=64, quality=25)
+            params["shot"] = shot
             # connect to teacher for instructions
-            command, params = self.send_command(protocol.REQUEST_ACTIONS)
+            command, params = self.send_command(protocol.REQUEST_ACTIONS, params)
             if command == protocol.ACTION_PROJECTION:
                 print "Projecting"
                 self.start_projection()

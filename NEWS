@@ -1,3 +1,5 @@
+ - allow teacher to see when students change names
+ - display students screen on global view
  - allow to send actions to individual students
  - implemented class shutdown
  - ceiling scaling values
