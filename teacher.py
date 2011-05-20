@@ -706,24 +706,15 @@ class TeacherGui:
             traceback.print_exc()
         return img
 
-    def mkmachine(self, name, img="machine.png", img_offline="machine_off.png", status="online"):
+    def mkmachine(self, name):
         """Creates a client representation"""
         box = gtk.VBox(homogeneous=False)
 
-        imgpath = "iface/%s" % (img)
-        imgpath_off = "iface/%s" % (img_offline)
-
-        img = self.get_img(imgpath)
-        img_off = self.get_img(imgpath_off)
+        img = gtk.Image()
+        img.set_size_request(64, 64)
 
         button = gtk.Button()
-        button.img_on = img
-        button.img_off = img_off
-        button.machine = name
-        if status=="online":
-            button.set_image(button.img_on)
-        else:
-            button.set_image(button.img_off)
+        button.set_image(img)
         box.pack_start(button, expand=False)
 
         label = gtk.Label(_("name"))
@@ -732,7 +723,6 @@ class TeacherGui:
         box.pack_start(label, expand=False)
 
         self.tooltip.set_tip(box, name)
-#        box.set_size_request(52, 52)
 
         # Sets private variables
         box.machine = name
