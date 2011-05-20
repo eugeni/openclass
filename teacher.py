@@ -723,7 +723,6 @@ class TeacherGui:
         box.machine = name
         box.button = button
         box.label = label
-        box.wifi = None
         return box
 
     def send_msg_student(self, widget, machine):
