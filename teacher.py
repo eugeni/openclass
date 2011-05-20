@@ -685,9 +685,9 @@ class TeacherGui:
         machines = []
         for z in self.machines:
             machine = self.machines[z]
-            img = machine.button.get_image()
-            if img == machine.button.img_on:
-                machines.append(z)
+            # TODO: when machines will be removed from the class, remove them
+            # from this array as well. For now, we add everything
+            machines.append(z)
         return machines
 
     def quit(self, widget):
