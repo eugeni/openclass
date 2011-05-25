@@ -400,7 +400,7 @@ class TeacherGui:
         entry_login = gtk.Entry()
         entry_login.set_text(system.get_user_name())
         hbox.pack_start(entry_login)
-        dialog.set_response_sensitive(gtk.RESPONSE_OK, False)
+        dialog.set_default_response(gtk.RESPONSE_OK)
         dialog.vbox.pack_start(hbox)
         dialog.show_all()
         response = dialog.run()
@@ -433,7 +433,7 @@ class TeacherGui:
         for res in screen.RESOLUTIONS:
             combobox.append_text(res)
         combobox.set_active(0)
-        dialog.set_response_sensitive(gtk.RESPONSE_OK, False)
+        dialog.set_default_response(gtk.RESPONSE_OK)
         dialog.vbox.add(combobox)
         dialog.show_all()
         response = dialog.run()
@@ -470,7 +470,7 @@ class TeacherGui:
         dialogLabel = gtk.Label(content)
         dialog.vbox.add(dialogLabel)
         dialog.vbox.set_border_width(8)
-        dialog.set_response_sensitive(gtk.RESPONSE_OK, False)
+        dialog.set_default_response(gtk.RESPONSE_OK)
         dialog.show_all()
         response = dialog.run()
         dialog.destroy()
@@ -489,7 +489,7 @@ class TeacherGui:
         dialogLabel = gtk.Label(title)
         dialog.vbox.add(dialogLabel)
         dialog.vbox.set_border_width(8)
-        dialog.set_response_sensitive(gtk.RESPONSE_OK, False)
+        dialog.set_default_response(gtk.RESPONSE_OK)
         if input:
             entry = gtk.Entry()
             entry.set_text(input)
@@ -717,7 +717,7 @@ class TeacherGui:
         """Shares a file with students"""
         chooser = gtk.FileChooserDialog(title=_("Select a file to share with students"),action=gtk.FILE_CHOOSER_ACTION_OPEN,
                       buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_SAVE,gtk.RESPONSE_OK))
-        chooser.set_response_sensitive(gtk.RESPONSE_OK, False)
+        chooser.set_default_response(gtk.RESPONSE_OK)
         response = chooser.run()
         if response != gtk.RESPONSE_OK:
             chooser.destroy()
