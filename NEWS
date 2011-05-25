@@ -1,3 +1,4 @@
+ - allow to send custom messages to teacher
  - implemented teacher selection
  - do not allow student to disconnect from teacher while in class
  - i18n: new localization: Russian
