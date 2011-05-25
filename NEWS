@@ -1,3 +1,4 @@
+ - implemented teacher selection
  - do not allow student to disconnect from teacher while in class
  - i18n: new localization: Russian
  - allow teacher to remove and re-add students from/to class

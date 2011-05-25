@@ -175,6 +175,11 @@ class Student:
 
         self.attention_window.hide()
 
+        # initialize list of teachers
+        self.teachers = gtk.combo_box_new_text()
+
+        # login dialog
+        self.create_login_dialog(None)
         self.login(None)
 
     def disconnect(self):
@@ -211,7 +216,7 @@ class Student:
 
     def choose_teacher(self, data):
         """Select different teacher or disconnection from current one"""
-        print 'No way to choose multiple teachers yet, sorry'
+        return self.login(data)
 
     def raise_hand(self, data):
         """Raise your hand to teacher"""
@@ -259,9 +264,9 @@ class Student:
         self.attention_window.visible = False
         self.attention_window.hide()
 
-    def login(self, widget):
+    def create_login_dialog(self, widget):
         """Asks student to login"""
-        dialog = gtk.Dialog(_("Login"), None, 0,
+        dialog = gtk.Dialog(_("Login"), None, gtk.DIALOG_DESTROY_WITH_PARENT,
                 (gtk.STOCK_OK, gtk.RESPONSE_OK,
                 gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
         dialogLabel = gtk.Label(_("Please login"))
@@ -270,25 +275,53 @@ class Student:
         hbox = gtk.HBox()
         login = gtk.Label(_("Your name:"))
         hbox.pack_start(login)
-        entry_login = gtk.Entry()
-        entry_login.set_text(system.get_user_name())
-        hbox.pack_start(entry_login)
+        self.entry_login = gtk.Entry()
+        self.entry_login.set_text(system.get_user_name())
+        hbox.pack_start(self.entry_login)
+        dialog.vbox.pack_start(hbox)
+        # list of teachers
+        hbox = gtk.HBox()
+        teacher = gtk.Label(_("Your teacher:"))
+        hbox.pack_start(teacher)
+        # list of teachers
+        hbox.pack_start(self.teachers)
         dialog.vbox.pack_start(hbox)
         dialog.show_all()
-        response = dialog.run()
-        if response == gtk.RESPONSE_OK:
-            self.name = entry_login.get_text()
-            print "Login: %s" % self.name
-            name_label = self.manager.get_widget('/Menubar/Menu/Login')
-            name_label.get_children()[0].set_markup(_("Logged in as <b>%s</b>") % self.name)
-            name_label.get_children()[0].set_use_markup(True)
+        self.login_dialog = dialog
 
-            # start threads
-            if not self.mcast.isAlive():
-                self.mcast.start()
-            dialog.destroy()
-        else:
-            dialog.destroy()
+    def login(self, widget):
+        """Shows the login dialog"""
+        dialog = self.login_dialog
+        while True:
+            response = dialog.run()
+            if response == gtk.RESPONSE_OK:
+                self.name = self.entry_login.get_text()
+                print "Login: %s" % self.name
+                source = self.teachers.get_active_text()
+                print "Will register on %s" % source
+                ret, params = self.send_command(protocol.REQUEST_REGISTER, {"name": self.name}, teacher=source)
+                if ret == "registered":
+                    # registered successfully
+                    self.teacher = source
+                    self.teacher_addr = source
+                    self.connect_to_teacher(self.teacher)
+                    # start threads
+                    if not self.mcast.isAlive():
+                        self.mcast.start()
+                    dialog.hide()
+                    name_label = self.manager.get_widget('/Menubar/Menu/Login')
+                    name_label.get_children()[0].set_markup(_("Logged in as <b>%s</b>") % self.name)
+                    name_label.get_children()[0].set_use_markup(True)
+                    break
+                elif ret == "pending":
+                    print "pending authorization from teacher"
+                elif ret == "rejected":
+                    print "rejected by teacher"
+                else:
+                    print "Unknown answer: %s" % ret
+            else:
+                break
+        dialog.hide()
 
     def monitor_teacher(self):
         """Periodically checks for teacher commands"""
@@ -457,32 +490,18 @@ class Student:
         if self.bcast.has_msgs():
             data, source = self.bcast.get_msg()
             # if there is an announce, but we are not yet logged in, skip
-            if not self.name:
-                print "ERROR: found teacher, but not yet logged in!"
+            msg = self.protocol.parse_header(data)
+            name, flags = self.protocol.parse_announce(msg)
+            # TODO: support multiple teachers
+            model = self.teachers.get_model()
+            if source not in [x[0] for x in model]:
+                self.teachers.append_text(source)
+                # should we enable the login dialog?
+                if len(model) > 0:
+                    self.teachers.set_active(0)
             else:
-                msg = self.protocol.parse_header(data)
-                name, flags = self.protocol.parse_announce(msg)
-                # TODO: support multiple teachers
-                if not self.teacher:
-                    # register on teacher
-                    ret, params = self.send_command(protocol.REQUEST_REGISTER, {"name": self.name}, teacher=source)
-                    if ret == "registered":
-                        # registered successfully
-                        self.teacher = name
-                        self.teacher_addr = source
-                        self.connect_to_teacher(self.teacher)
-                    elif ret == "pending":
-                        print "pending authorization from teacher"
-                    elif ret == "rejected":
-                        print "rejected by teacher"
-                    else:
-                        print "Unknown answer: %s" % ret
-
-                elif self.teacher != name:
-                    print "ERROR: Multiple teachers not yet supported"
-                else:
-                    # same teacher
-                    pass
+                # same teacher
+                pass
         gobject.timeout_add(1000, self.monitor_bcast)
 
     def log(self, text):
