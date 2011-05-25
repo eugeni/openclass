@@ -116,6 +116,10 @@ class Student:
         self.icon.connect('activate', self.on_activate)
         self.icon.connect('popup-menu', self.on_popup_menu)
 
+        # discover unique client ID (if any)
+        # specially useful for multi-seat configurations
+        self.client_id = system.get_client_id()
+
         # protocol handler
         self.protocol = protocol.Protocol()
 
@@ -156,7 +160,6 @@ class Student:
         self.drawing.set_size_request(self.screen.width, self.screen.height)
         vbox.pack_start(self.drawing)
         self.projection_window.hide()
-
 
         # attention
         self.attention_window = gtk.Window()
@@ -438,8 +441,8 @@ class Student:
             return None, None
         # TODO: proper user-agent
         url = "http://%s:%d/%s" % (teacher, network.LISTENPORT, command)
-        if params:
-            url += "?%s" % urllib.urlencode(params)
+        params["client_id"] = self.client_id
+        url += "?%s" % urllib.urlencode(params)
         headers = {'User-Agent': 'openclass'}
 
         command = None

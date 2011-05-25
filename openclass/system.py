@@ -58,3 +58,11 @@ def shutdown():
     else:
         # TODO: no shutdown yet on windows
         return None
+
+def get_client_id():
+    """Returns client id (if any)"""
+    if get_os() == "Linux":
+        client_id = os.getenv("DISPLAY")
+    else:
+        client_id = None
+    return client_id

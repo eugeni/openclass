@@ -103,6 +103,14 @@ class HTTPRequestHandler(SimpleHTTPRequestHandler):
             params = cgi.parse_qs(p[1], True, True)
         else:
             params = {}
+        # Support additional client identifiers, like $DISPLAY for multi-seat
+        # or windows login identifier for microsoft multi-seat version
+        if "client_id" in params:
+            try:
+                client_s = "%s%s" % (client, params["client_id"][0])
+                client = client_s
+            except:
+                traceback.print_exc()
         results, params = self.server.controller.process_request(client, path, params)
 
         self.send_response(200)
