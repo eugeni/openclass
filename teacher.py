@@ -70,7 +70,7 @@ class TeacherRunner(Thread):
         self.actions = Queue()
 
         # connected machines
-        self.clients = []
+        self.clients = {}
 
         # actions for clients
         self.clients_actions = {}
@@ -93,29 +93,41 @@ class TeacherRunner(Thread):
     def process_request(self, client, request, params):
         """Gets pending actions for a client"""
         print "Processing requests for %s (%s)" % (client, request)
-        print request
         response = None
         response_params = None
         if request == protocol.REQUEST_REGISTER:
             # registering
-            if "name" in params:
-                name = params["name"][0]
+            name = params.get("name", None)
+            # decompress parameters in form of url request
+            if name:
+                name = name[0]
             else:
                 name = client
-            print "Registering %s (%s)" % (client, name)
-            print params
-            self.add_client(client, name)
-            response = "registered"
-            self.clients.append(client)
-            print self.clients
+            client_status = self.clients.get(client, "pending")
+            if client_status == "pending":
+                # register student by default, and allow teacher to disconnect it later
+                self.add_client(client, name)
+                self.clients[client] = "registered"
+                response = "registered"
+            elif client_status == "rejected":
+                response = "rejected"
+                self.reject_client(client, name)
+            elif client_status == "registered":
+                response = "registered"
+            else:
+                print "Error: unknown status for %s: %s" % (client, self.clients[client])
         elif request == protocol.REQUEST_ACTIONS:
             # student could send us additional params
-            if client not in self.clients:
-                # not registered yet
+            # if client is still unknown, default it to "pending" state
+            client_status = self.clients.get(client, "pending")
+            if client_status == "pending" or client_status == "rejected":
+                # not registered yet, or not allowed in this class
                 response = protocol.ACTION_PLEASEREGISTER
-            else:
+            elif client_status == "registered":
                 # update client with new information (if any)
                 name = params.get("name", None)
+                if name:
+                    name = name[0]
                 shot = params.get("shot", None)
                 self.add_client(client, name, shot)
                 # checking actions for the client
@@ -123,11 +135,13 @@ class TeacherRunner(Thread):
                 if client in self.clients_actions:
                     if len(self.clients_actions[client]) > 0:
                         response, response_params = self.clients_actions[client].pop(0)
+            else:
+                    print "Error: unknown status for %s: %s" % (client, client_status)
+                    # don't know what to do with this student, tell it to go away
+                    response = protocol.ACTION_PLEASEREGISTER
         elif request == protocol.REQUEST_RAISEHAND:
             # student raised his hand
             print "Student called your attention"
-            print request
-            print params
             self.raise_hand(client)
         elif request == protocol.REQUEST_SHOWSCREEN:
             # student wants to show his screen
@@ -172,11 +186,22 @@ class TeacherRunner(Thread):
     def add_client(self, client, name, shot=None):
         """Adds a new client"""
         self.gui.add_client(client, name, shot)
-        self.add_client_action(client, protocol.ACTION_NOOP)
+
+    def reject_client(self, client, name):
+        """Rejects a client"""
+        self.gui.reject_client(client, name)
 
     def raise_hand(self, client, message=_("The student asks for your attention")):
         """Calls teacher attention"""
         self.gui.queue_raise_hand(client, message)
+
+    def disconnect_student(self, client, message=_("The teacher asked you to leave this class")):
+        """Disconnects a student"""
+        self.clients[client] = "rejected"
+
+    def reconnect_student(self, client):
+        """Allow the student to join the class again"""
+        self.clients[client] = "pending"
 
     def add_client_action(self, client, action, params=None):
         """Adds an action for a client into a list"""
@@ -230,6 +255,7 @@ class TeacherGui:
         self.clients_queue = Queue()
         self.service = service
         self.service.set_gui(self)
+
         # colors
         self.color_normal = gtk.gdk.color_parse("#99BFEA")
         self.color_active = gtk.gdk.color_parse("#FFBBFF")
@@ -288,6 +314,10 @@ class TeacherGui:
         self.MachineLayout = gtk.Layout()
         MachinesScrollWindow.add(self.MachineLayout)
 
+        # machines images
+        self.image_connected = self.get_img("iface/machine.png")
+        self.image_disconnected = self.get_img("iface/machine_off.png")
+
         # screenshot view
         self.shot_window = gtk.Window()
         self.shot_window.set_title(_("Student view"))
@@ -312,7 +342,6 @@ class TeacherGui:
         self.shot_drawing = gtk.Image()
         vbox.pack_start(self.shot_drawing)
 
-
         # tooltips
         self.tooltip = gtk.Tooltips()
 
@@ -327,6 +356,7 @@ class TeacherGui:
 
         self.machines = {}
         self.machines_map = {}
+        self.machines_status = {}
 
         # Mostra as maquinas
         self.MachineLayout.show_all()
@@ -354,7 +384,6 @@ class TeacherGui:
 
     def show_screenshot(self, client, width, height, shot):
         """Show a screenshot for a client"""
-        print "Adding %s" % client
         self.clients_queue.put(("shot", client, {"width": width, "height": height, "shot": shot}))
 
     def login(self):
@@ -481,9 +510,13 @@ class TeacherGui:
         n.show()
         return
 
+    def reject_client(self, client, name):
+        """Rejects a client"""
+        print "Rejecting %s" % client
+        self.clients_queue.put(("reject", client, {"name": name}))
+
     def add_client(self, client, name, shot=None):
         """Adds a new client"""
-        print "Adding %s" % client
         self.clients_queue.put(("new", client, {"name": name, "shot": shot}))
 
     def queue_raise_hand(self, client, message):
@@ -540,7 +573,6 @@ class TeacherGui:
                 if addr not in self.machines:
                     # Maquina nova
                     gtk.gdk.threads_enter()
-                    print params
                     name = params.get("name", addr)
 
                     machine = self.mkmachine(name)
@@ -548,9 +580,15 @@ class TeacherGui:
                     self.put_machine(machine)
                     self.machines[addr] = machine
                     self.machines_map[machine] = addr
+                    self.machines_status[addr] = "registered"
+                    # show default image
+                    machine.button.set_image(self.image_connected)
                     machine.show_all()
                     gtk.gdk.threads_leave()
                 else:
+                    # do not process events from already rejected machines
+                    if self.machines_status[addr] == "rejected":
+                        continue
                     machine = self.machines[addr]
                     shot = params.get("shot")
                     if shot:
@@ -560,12 +598,14 @@ class TeacherGui:
                         pb = loader.get_pixbuf()
                         img = gtk.Image()
                         img.set_from_pixbuf(pb)
-                        print img
                         machine.button.set_image(img)
                     name = params.get("name")
                     if name:
-                        machine.label.set_markup("<small>%s</small>" % name[0])
+                        machine.label.set_markup("<small>%s</small>" % name)
                     self.tooltip.set_tip(machine, _("Updated on %s") % (time.asctime()))
+            elif action == "reject":
+                machine = self.machines[addr]
+                machine.button.set_image(self.image_disconnected)
             elif action == "shot":
                 # show a student screenshot
                 width = params["width"]
@@ -582,17 +622,6 @@ class TeacherGui:
                 self.show_message(_("Message received from %s") % name, message, timeout=0)
 
         gobject.timeout_add(1000, self.monitor)
-
-    def set_offline(self, machine, message=None):
-        """Marks a machine as offline"""
-        if machine not in self.machines:
-            print "Error: machine %s not registered!" % machine
-            return
-        gtk.gdk.threads_enter()
-        self.machines[machine].button.set_image(self.machines[machine].button.img_off)
-        if message:
-            self.tooltip.set_tip(self.machines[machine], _("%s\%s!") % (time.asctime(), message))
-        gtk.gdk.threads_leave()
 
     def send_screen(self, widget):
         """Starts screen sharing for selected machines"""
@@ -627,6 +656,43 @@ class TeacherGui:
             machines = [client]
         for machine in machines:
             self.service.add_client_action(machine, protocol.ACTION_OPENURL, url)
+
+    def disconnect(self, widget, client=None):
+        """Disconnect a student from teacher"""
+        if not client:
+            # TODO: it is too dangerous to disconnect everyone, no?
+            machines = self.get_selected_machines()
+        else:
+            machines = [client]
+        for machine in machines:
+            disconnect_message=_("The teacher asked you to leave this class")
+            self.service.disconnect_student(machine, message=disconnect_message)
+            # now back to the machine image
+            machine_img = self.machines.get(machine, None)
+            if not machine_img:
+                print "Error: unable to locate pixmap for machine %s" % client
+                return
+            machine_img.button.set_image(self.image_disconnected)
+            self.machines_status[machine] = "rejected"
+            self.tooltip.set_tip(machine_img, _("Disconnected from teacher at %s!") % (time.asctime()))
+
+    def reconnect(self, widget, client=None):
+        """Reconnect a student to the teacher"""
+        if not client:
+            # TODO: it is too dangerous to disconnect everyone, no?
+            machines = self.get_selected_machines()
+        else:
+            machines = [client]
+        for machine in machines:
+            self.service.add_client_action(machine, protocol.ACTION_PLEASEREGISTER)
+            self.service.reconnect_student(machine)
+            # now back to the machine image
+            machine_img = self.machines.get(machine, None)
+            if not machine_img:
+                print "Error: unable to locate pixmap for machine %s" % client
+                return
+            self.machines_status[machine] = "registered"
+            machine_img.button.set_image(self.image_connected)
 
     def shutdown(self, widget, client=None):
         """Shares an URL with students"""
@@ -753,35 +819,54 @@ class TeacherGui:
             print "Error: unknown machine!"
             return
 
+        # is machine rejected?
+        status = self.machines_status.get(machine, "registered")
+        print status
+
         # popup menu
         popup_menu = gtk.Menu()
-        menu_msg = gtk.MenuItem(_("Send message to student"))
-        menu_msg.connect("activate", self.send_msg_student, machine)
-        popup_menu.append(menu_msg)
 
-        menu_view = gtk.MenuItem(_("View student screen"))
-        menu_view.connect("activate", self.request_screenshot, machine)
-        popup_menu.append(menu_view)
+        if status == "registered":
+            menu_msg = gtk.MenuItem(_("Send message to student"))
+            menu_msg.connect("activate", self.send_msg_student, machine)
+            popup_menu.append(menu_msg)
 
-        menu_url = gtk.MenuItem(_("Send a web page to student"))
-        menu_url.connect("activate", self.share_url, machine)
-        popup_menu.append(menu_url)
+            menu_view = gtk.MenuItem(_("View student screen"))
+            menu_view.connect("activate", self.request_screenshot, machine)
+            popup_menu.append(menu_view)
 
-        menu_file = gtk.MenuItem(_("Send a file to student"))
-        menu_file.connect("activate", self.share_files, machine)
-        popup_menu.append(menu_file)
+            menu_url = gtk.MenuItem(_("Send a web page to student"))
+            menu_url.connect("activate", self.share_url, machine)
+            popup_menu.append(menu_url)
 
-        menu_control = gtk.MenuItem(_("Remote control student computer"))
-        menu_control.set_sensitive(False)
-        popup_menu.append(menu_control)
+            menu_file = gtk.MenuItem(_("Send a file to student"))
+            menu_file.connect("activate", self.share_files, machine)
+            popup_menu.append(menu_file)
 
-        menu_disconnect = gtk.MenuItem(_("Remove student from class"))
-        menu_disconnect.set_sensitive(False)
-        popup_menu.append(menu_disconnect)
+            menu_control = gtk.MenuItem(_("Remote control student computer"))
+            menu_control.set_sensitive(False)
+            popup_menu.append(menu_control)
 
-        menu_shutdown = gtk.MenuItem(_("Turn off student computer"))
-        menu_shutdown.connect("activate", self.shutdown, machine)
-        popup_menu.append(menu_shutdown)
+            menu_disconnect = gtk.MenuItem(_("Remove student from class"))
+            menu_disconnect.connect("activate", self.disconnect, machine)
+            popup_menu.append(menu_disconnect)
+
+            menu_shutdown = gtk.MenuItem(_("Turn off student computer"))
+            menu_shutdown.connect("activate", self.shutdown, machine)
+            popup_menu.append(menu_shutdown)
+
+        elif status == "rejected":
+            menu_msg = gtk.MenuItem(_("Allow student to participate in the class"))
+            menu_msg.connect("activate", self.reconnect, machine)
+            popup_menu.append(menu_msg)
+        elif status == "pending":
+            # for teacher-side machine authorization, please see service
+            # thread to see how it should work, namely the REGISTER message
+            # for now, do nothing
+            return
+        else:
+            print "Unknown machine status for %s: %s" % (machine, status)
+            return
 
         popup_menu.show_all()
         popup_menu.popup(None, None, None, event.button, event.time)

@@ -465,6 +465,8 @@ class Student:
                         self.teacher = name
                         self.teacher_addr = source
                         self.connect_to_teacher(self.teacher)
+                    elif ret == "pending":
+                        print "pending authorization from teacher"
                     elif ret == "rejected":
                         print "rejected by teacher"
                     else:
