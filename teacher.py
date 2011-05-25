@@ -142,7 +142,12 @@ class TeacherRunner(Thread):
         elif request == protocol.REQUEST_RAISEHAND:
             # student raised his hand
             print "Student called your attention"
-            self.raise_hand(client)
+            question = params.get("message", None)
+            if question:
+                question = question[0]
+                self.raise_hand(client, message=question)
+            else:
+                self.raise_hand(client)
         elif request == protocol.REQUEST_SHOWSCREEN:
             # student wants to show his screen
             print "Student wants to show his screen to you"

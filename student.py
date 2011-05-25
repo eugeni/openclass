@@ -219,9 +219,39 @@ class Student:
         """Select different teacher or disconnection from current one"""
         return self.login(data)
 
+    def question(self, title, input=None):
+        """Asks a question :)"""
+        # cria a janela do dialogo
+        dialog = gtk.Dialog(_("Question"), None, 0,
+                (gtk.STOCK_OK, gtk.RESPONSE_OK,
+                gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+        dialogLabel = gtk.Label(title)
+        dialog.vbox.add(dialogLabel)
+        dialog.vbox.set_border_width(8)
+        dialog.set_default_response(gtk.RESPONSE_OK)
+        if input:
+            entry = gtk.Entry()
+            entry.set_text(input)
+            dialog.vbox.add(entry)
+        dialog.show_all()
+        response = dialog.run()
+        if response == gtk.RESPONSE_OK:
+            res = entry.get_text()
+            dialog.destroy()
+            if res:
+                return res
+            else:
+                return True
+        else:
+            dialog.destroy()
+            return None
+
     def raise_hand(self, data):
         """Raise your hand to teacher"""
-        command, params = self.send_command(protocol.REQUEST_RAISEHAND)
+        question = self.question(_("Call teacher attention"), _("Teacher, look at me!"))
+        if not question:
+            return
+        command, params = self.send_command(protocol.REQUEST_RAISEHAND, {"message": question})
         print command
 
     def on_about(self, data):
