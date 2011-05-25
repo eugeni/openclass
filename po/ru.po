@@ -1,0 +1,296 @@
+# OpenClass
+# Copyright (C) 2011, Eugeni Dodonov
+# Eugeni Dodonov <eugeni@dodonov.net>, 2011
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: OpenClass\n"
+"POT-Creation-Date: 2011-05-25 13:59+BRT\n"
+"PO-Revision-Date: 2011-05-25 14:33-0300\n"
+"Last-Translator: Eugeni Dodonov <eugeni@dodonov.net>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+#: ../student.py:97
+msgid "Identify yourself to the teacher"
+msgstr "Идентифицироваться учителю"
+
+#: ../student.py:97
+msgid "_Login"
+msgstr "_Вход"
+
+#: ../student.py:98
+msgid "Select your teacher"
+msgstr "Выбор учителя"
+
+#: ../student.py:98
+msgid "_Teacher"
+msgstr "_Учитель"
+
+#: ../student.py:99
+msgid "Raise your hand to call teacher attention"
+msgstr "Позвать учителя"
+
+#: ../student.py:99
+msgid "_Call attention"
+msgstr "_Позвать учителя"
+
+#: ../student.py:100
+msgid "About OpenClass"
+msgstr "О проекте"
+
+#: ../student.py:100
+msgid "_About"
+msgstr "_О проекте"
+
+#: ../student.py:101
+msgid "Quit class"
+msgstr "Выход"
+
+#: ../student.py:101
+msgid "_Quit"
+msgstr "_Выход"
+
+#: ../student.py:136
+msgid "Starting broadcasting service.."
+msgstr ""
+
+#: ../student.py:183
+msgid "OpenClass student (disconnected)"
+msgstr "OpenClass ученик (не подключен)"
+
+#: ../student.py:185
+msgid "Disconnected from teacher"
+msgstr "Не подключен к учителю"
+
+#: ../student.py:193
+msgid "OpenClass student (connected to %s)"
+msgstr "OpenClass ученик (подключен к %s)"
+
+#: ../student.py:195
+msgid "Connected to <b>%s</b>"
+msgstr "Подключен к <b>%s</b>"
+
+#: ../student.py:235
+msgid "Teacher asked you for attention"
+msgstr "Учитель просит внимания"
+
+#: ../student.py:258
+#: ../teacher.py:391
+msgid "Login"
+msgstr "Вход"
+
+#: ../student.py:261
+#: ../teacher.py:394
+msgid "Please login"
+msgstr "Вход в систему"
+
+#: ../student.py:265
+msgid "Your name:"
+msgstr "Имя:"
+
+#: ../student.py:277
+msgid "Logged in as <b>%s</b>"
+msgstr "Подключен как <b>%s</b>"
+
+#: ../student.py:336
+msgid "Message received from teacher"
+msgstr "Получено сообщение от учителя"
+
+#: ../student.py:496
+msgid "Starting GUI.."
+msgstr ""
+
+#: ../student.py:499
+msgid ""
+"\n"
+"Welcome to OpenClass Student!!\n"
+"\n"
+msgstr ""
+"\n"
+"Добро пожаловать в OpenClass (ученик)\n"
+"\n"
+
+#: ../teacher.py:158
+msgid "Bad request for file"
+msgstr "Неправильный запрос файла"
+
+#: ../teacher.py:164
+msgid "File not authorized for transfer"
+msgstr "Файл не авторизован к передаче"
+
+#: ../teacher.py:171
+msgid "Unable to transfer %s: %s"
+msgstr "Невозможно скачать %s: %s"
+
+#: ../teacher.py:194
+msgid "The student asks for your attention"
+msgstr "Ученик просит вашего внимания"
+
+#: ../teacher.py:198
+#: ../teacher.py:668
+msgid "The teacher asked you to leave this class"
+msgstr "Учитель попросил покинуть этот класс"
+
+#: ../teacher.py:269
+msgid "OpenClass Teacher"
+msgstr "OpenClass Учитель"
+
+#: ../teacher.py:282
+#: ../teacher.py:642
+msgid "Send Screen"
+msgstr "Проекция экрана"
+
+#: ../teacher.py:286
+msgid "Lock Screens"
+msgstr "Блокировка экранов"
+
+#: ../teacher.py:290
+msgid "Share files"
+msgstr "Передача файлов"
+
+#: ../teacher.py:294
+msgid "Share a web page"
+msgstr "Передача веб-страницы"
+
+#: ../teacher.py:298
+msgid "Turn off students"
+msgstr "Выключение компьютеров"
+
+#: ../teacher.py:304
+msgid "Quit"
+msgstr "Выход"
+
+#: ../teacher.py:323
+msgid "Student view"
+msgstr "Экран ученика"
+
+#: ../teacher.py:332
+msgid "Refresh"
+msgstr "Обновить"
+
+#: ../teacher.py:338
+msgid "Close"
+msgstr "Закрыть"
+
+#: ../teacher.py:398
+msgid "Your name (teacher or class name):"
+msgstr "Ваше имя (имя учителя или класса):"
+
+#: ../teacher.py:421
+msgid "Please select screen size for projection"
+msgstr "Выберете разрешение экрана для проекции"
+
+#: ../teacher.py:431
+#: ../teacher.py:446
+msgid "Full screen size"
+msgstr "Весь экран"
+
+#: ../teacher.py:483
+msgid "Question"
+msgstr "Вопрос"
+
+#: ../teacher.py:555
+msgid "Viewing display of %s"
+msgstr "Просмотр экрана %s"
+
+#: ../teacher.py:605
+msgid "Updated on %s"
+msgstr "Обновлен %s"
+
+#: ../teacher.py:622
+msgid "Message received from %s"
+msgstr "Получено сообщение от %s"
+
+#: ../teacher.py:635
+msgid "Stop sending screen"
+msgstr "Завершить проецирование"
+
+#: ../teacher.py:650
+msgid "Share a web page with students"
+msgstr "Переслать ссылку на веб-ресурс ученикам"
+
+#: ../teacher.py:677
+msgid "Disconnected from teacher at %s!"
+msgstr "Отключен от учетеля в %s!"
+
+#: ../teacher.py:700
+msgid "Are you sure you want to turn off all the student computers?"
+msgstr "Вы уверены что хотите отключить компьютеры всех учеников?"
+
+#: ../teacher.py:700
+#: ../teacher.py:702
+msgid "Please confirm the shutdown request"
+msgstr "Подтвердите отключение компьютеров"
+
+#: ../teacher.py:702
+msgid "Are you sure you want to turn off this computer?"
+msgstr "Вы уверены что хотите отключить этот компьютер?"
+
+#: ../teacher.py:714
+msgid "Select a file to share with students"
+msgstr "Выбор файла для передачи ученикам"
+
+#: ../teacher.py:736
+msgid "Stop locking screen"
+msgstr "Завершить блокировку экрана"
+
+#: ../teacher.py:743
+msgid "Lock Screen"
+msgstr "Блокировать экран"
+
+#: ../teacher.py:786
+msgid "name"
+msgstr "имя"
+
+#: ../teacher.py:801
+msgid "Please, pay attention!"
+msgstr "Пожалуйста, внимание!"
+
+#: ../teacher.py:801
+msgid "Send a message to student"
+msgstr "Послать сообщение ученику"
+
+#: ../teacher.py:830
+msgid "Send message to student"
+msgstr "Послать сообщение ученику"
+
+#: ../teacher.py:834
+msgid "View student screen"
+msgstr "Просмотр экрана ученика"
+
+#: ../teacher.py:838
+msgid "Send a web page to student"
+msgstr "Послать веб-страницу ученику"
+
+#: ../teacher.py:842
+msgid "Send a file to student"
+msgstr "Послать файл ученику"
+
+#: ../teacher.py:846
+msgid "Remote control student computer"
+msgstr "Удаленно "
+
+#: ../teacher.py:850
+msgid "Remove student from class"
+msgstr "Отсоединить ученика"
+
+#: ../teacher.py:854
+msgid "Turn off student computer"
+msgstr "Выключить компьютер ученика"
+
+#: ../teacher.py:859
+msgid "Allow student to participate in the class"
+msgstr "Разрешить ученику подключиться к текущему классу"
+
+#: ../teacher.py:881
+msgid "Starting broadcast.."
+msgstr ""
+
+#: ../teacher.py:891
+msgid "Starting main loop.."
+msgstr ""
+
