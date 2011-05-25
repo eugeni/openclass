@@ -1,3 +1,4 @@
+ - i18n: new localization: Russian
  - allow teacher to remove and re-add students from/to class
  - allow teacher to see when students change names
  - display students screen on global view
