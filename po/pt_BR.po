@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: OpenClass\n"
-"POT-Creation-Date: 2011-05-13 12:21+BRT\n"
-"PO-Revision-Date: 2011-05-13 12:22-0300\n"
+"POT-Creation-Date: 2011-05-25 13:59+BRT\n"
+"PO-Revision-Date: 2011-05-25 14:01-0300\n"
 "Last-Translator: Eugeni Dodonov <eugeni@dodonov.net>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -15,97 +15,97 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 
-#: ../student.py:86
+#: ../student.py:97
 msgid "Identify yourself to the teacher"
 msgstr "Identifique-se para o professor"
 
-#: ../student.py:86
+#: ../student.py:97
 msgid "_Login"
 msgstr "_Login"
 
-#: ../student.py:87
+#: ../student.py:98
 msgid "Select your teacher"
 msgstr "Selecione o seu professor"
 
-#: ../student.py:87
+#: ../student.py:98
 msgid "_Teacher"
 msgstr "_Professor"
 
-#: ../student.py:88
+#: ../student.py:99
 msgid "Raise your hand to call teacher attention"
 msgstr "Chamar a atenção do professor"
 
-#: ../student.py:88
+#: ../student.py:99
 msgid "_Call attention"
 msgstr "_Chamar atenção"
 
-#: ../student.py:89
+#: ../student.py:100
 msgid "About OpenClass"
 msgstr "Sobre OpenClass"
 
-#: ../student.py:89
+#: ../student.py:100
 msgid "_About"
 msgstr "_Sobre"
 
-#: ../student.py:90
+#: ../student.py:101
 msgid "Quit class"
 msgstr "Sair da aula"
 
-#: ../student.py:90
+#: ../student.py:101
 msgid "_Quit"
 msgstr "_Sair"
 
-#: ../student.py:125
+#: ../student.py:136
 msgid "Starting broadcasting service.."
 msgstr "Iniciando serviço de broadcast.."
 
-#: ../student.py:172
+#: ../student.py:183
 msgid "OpenClass student (disconnected)"
 msgstr "OpenClass - aluno (desconectado)"
 
-#: ../student.py:174
+#: ../student.py:185
 msgid "Disconnected from teacher"
 msgstr "Desconectado do professor"
 
-#: ../student.py:182
+#: ../student.py:193
 msgid "OpenClass student (connected to %s)"
 msgstr "OpenClass - aluno (conectado a %s)"
 
-#: ../student.py:184
+#: ../student.py:195
 msgid "Connected to <b>%s</b>"
 msgstr "Conectado a <b>%s</b>"
 
-#: ../student.py:224
+#: ../student.py:235
 msgid "Teacher asked you for attention"
 msgstr "O Professor pediu a sua atenção"
 
-#: ../student.py:247
-#: ../teacher.py:345
+#: ../student.py:258
+#: ../teacher.py:391
 msgid "Login"
 msgstr "Login"
 
-#: ../student.py:250
-#: ../teacher.py:348
+#: ../student.py:261
+#: ../teacher.py:394
 msgid "Please login"
 msgstr "Por favor, efetue o login"
 
-#: ../student.py:254
+#: ../student.py:265
 msgid "Your name:"
 msgstr "Seu nome:"
 
-#: ../student.py:266
+#: ../student.py:277
 msgid "Logged in as <b>%s</b>"
 msgstr "Logado como <b>%s</b>"
 
-#: ../student.py:317
+#: ../student.py:336
 msgid "Message received from teacher"
 msgstr "Mensagem recebida do professor"
 
-#: ../student.py:475
+#: ../student.py:496
 msgid "Starting GUI.."
 msgstr "Iniciando interface gráfica"
 
-#: ../student.py:478
+#: ../student.py:499
 msgid ""
 "\n"
 "Welcome to OpenClass Student!!\n"
@@ -115,145 +115,186 @@ msgstr ""
 "Seja bem-vindo ao OpenClass\n"
 "\n"
 
-#: ../teacher.py:131
+#: ../teacher.py:158
 msgid "Bad request for file"
 msgstr "Requisição inválida"
 
-#: ../teacher.py:137
+#: ../teacher.py:164
 msgid "File not authorized for transfer"
 msgstr "Arquivo não foi autorizado para transferência"
 
-#: ../teacher.py:144
+#: ../teacher.py:171
 msgid "Unable to transfer %s: %s"
 msgstr "Não foi possível transferir %s: %s"
 
-#: ../teacher.py:164
+#: ../teacher.py:194
 msgid "The student asks for your attention"
 msgstr "O aluno pediu a sua atenção"
 
-#: ../teacher.py:230
+#: ../teacher.py:198
+#: ../teacher.py:668
+msgid "The teacher asked you to leave this class"
+msgstr "O Professor pediu para você sair dessa sala de aula"
+
+#: ../teacher.py:269
 msgid "OpenClass Teacher"
 msgstr "OpenClass Professor"
 
-#: ../teacher.py:243
-#: ../teacher.py:564
+#: ../teacher.py:282
+#: ../teacher.py:642
 msgid "Send Screen"
 msgstr "Enviar a tela"
 
-#: ../teacher.py:247
+#: ../teacher.py:286
 msgid "Lock Screens"
 msgstr "Bloquear as telas"
 
-#: ../teacher.py:251
+#: ../teacher.py:290
 msgid "Share files"
 msgstr "Compartilhar arquivos"
 
-#: ../teacher.py:255
+#: ../teacher.py:294
 msgid "Share a web page"
 msgstr "Compartilhar endereço da web"
 
-#: ../teacher.py:261
+#: ../teacher.py:298
+msgid "Turn off students"
+msgstr "Desligar computadores de alunos"
+
+#: ../teacher.py:304
 msgid "Quit"
 msgstr "Sair"
 
-#: ../teacher.py:276
+#: ../teacher.py:323
 msgid "Student view"
 msgstr "Visão do aluno"
 
-#: ../teacher.py:285
+#: ../teacher.py:332
 msgid "Refresh"
 msgstr "Atualizar"
 
-#: ../teacher.py:291
+#: ../teacher.py:338
 msgid "Close"
 msgstr "Fechar"
 
-#: ../teacher.py:352
+#: ../teacher.py:398
 msgid "Your name (teacher or class name):"
 msgstr "Seu nome (nome do professor ou da aula):"
 
-#: ../teacher.py:375
+#: ../teacher.py:421
 msgid "Please select screen size for projection"
 msgstr "Selecione a resolução da tela para projeção"
 
-#: ../teacher.py:385
-#: ../teacher.py:400
+#: ../teacher.py:431
+#: ../teacher.py:446
 msgid "Full screen size"
 msgstr "Tamanho completo"
 
-#: ../teacher.py:420
+#: ../teacher.py:483
 msgid "Question"
 msgstr "Pergunta"
 
-#: ../teacher.py:488
+#: ../teacher.py:555
 msgid "Viewing display of %s"
 msgstr "Visualizando tela de %s"
 
-#: ../teacher.py:519
+#: ../teacher.py:605
 msgid "Updated on %s"
 msgstr "Atualizado em %s"
 
-#: ../teacher.py:533
+#: ../teacher.py:622
 msgid "Message received from %s"
 msgstr "Mensagem recebida de %s"
 
-#: ../teacher.py:545
-msgid "%s\\%s!"
-msgstr "%s\\%s!"
-
-#: ../teacher.py:557
+#: ../teacher.py:635
 msgid "Stop sending screen"
 msgstr "Finalizar o envio da tela"
 
-#: ../teacher.py:572
+#: ../teacher.py:650
 msgid "Share a web page with students"
 msgstr "Compartilhar uma página da web com os alunos"
 
-#: ../teacher.py:581
+#: ../teacher.py:677
+msgid "Disconnected from teacher at %s!"
+msgstr "Desconectado do professor em %s!"
+
+#: ../teacher.py:700
+msgid "Are you sure you want to turn off all the student computers?"
+msgstr "Você tem certeza de que deseja desligar os computadores de todos os alunos?"
+
+#: ../teacher.py:700
+#: ../teacher.py:702
+msgid "Please confirm the shutdown request"
+msgstr "Por favor confirme que deseja desligar o computador"
+
+#: ../teacher.py:702
+msgid "Are you sure you want to turn off this computer?"
+msgstr "Você tem certeza de que deseja desligar este computador?"
+
+#: ../teacher.py:714
 msgid "Select a file to share with students"
 msgstr "Selecione o arquivo para compartilhar com os alunos"
 
-#: ../teacher.py:600
+#: ../teacher.py:736
 msgid "Stop locking screen"
 msgstr "Finalizar o bloqueio das telas"
 
-#: ../teacher.py:607
+#: ../teacher.py:743
 msgid "Lock Screen"
 msgstr "Bloquear as telas"
 
-#: ../teacher.py:661
+#: ../teacher.py:786
 msgid "name"
 msgstr "nome"
 
-#: ../teacher.py:680
+#: ../teacher.py:801
 msgid "Please, pay attention!"
 msgstr "Por favor, preste atenção!"
 
-#: ../teacher.py:680
+#: ../teacher.py:801
 msgid "Send a message to student"
 msgstr "Enviar mensagem para aluno"
 
-#: ../teacher.py:701
+#: ../teacher.py:830
 msgid "Send message to student"
 msgstr "Enviar mensagem para aluno"
 
-#: ../teacher.py:705
+#: ../teacher.py:834
 msgid "View student screen"
 msgstr "Visualizar tela do aluno"
 
-#: ../teacher.py:709
+#: ../teacher.py:838
+msgid "Send a web page to student"
+msgstr "Enviar uma página web para o aluno"
+
+#: ../teacher.py:842
+msgid "Send a file to student"
+msgstr "Enviar um arquivo para o aluno"
+
+#: ../teacher.py:846
 msgid "Remote control student computer"
 msgstr "Controle remoto do computador de aluno"
 
-#: ../teacher.py:713
+#: ../teacher.py:850
 msgid "Remove student from class"
 msgstr "Remover aluno da sala"
 
-#: ../teacher.py:727
+#: ../teacher.py:854
+#, fuzzy
+msgid "Turn off student computer"
+msgstr "Controle remoto do computador de aluno"
+
+#: ../teacher.py:859
+msgid "Allow student to participate in the class"
+msgstr "Permitir aluno a participar dessa sala de aula"
+
+#: ../teacher.py:881
 msgid "Starting broadcast.."
 msgstr "Iniciando serviço de broadcast.."
 
-#: ../teacher.py:737
+#: ../teacher.py:891
 msgid "Starting main loop.."
 msgstr "Iniciando o programa.."
 
+#~ msgid "%s\\%s!"
+#~ msgstr "%s\\%s!"
