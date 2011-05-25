@@ -24,14 +24,15 @@ look at teacher)
  - file sharing and URL sharing to enrich class activities
  - shutting down student computers from teacher
  - allow and reject students from a specific class
+ - allow to block students from attempting to connect to a class
 
 (From student to teacher)
  - automatic teacher discovery via broadcast
  - receiving of teacher screen projection via multicasting protocol, suitable
 for both wired and wireless environments
  - "raise hand" functionality to call teacher attention
- - possibility to select teacher to connect to [not available in current
-version]
+ - possibility to select teacher to connect to
+ - automatic handling of network saturation and disconnection events
 
 Usage
 -----
