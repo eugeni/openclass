@@ -186,14 +186,20 @@ class Student:
         teacher_label.get_children()[0].set_use_markup(True)
         self.teacher = None
         self.teacher_addr = None
+        # enable quit button
+        quit = self.manager.get_widget('/Menubar/Menu/Quit')
+        quit.set_sensitive(True)
 
     def connect_to_teacher(self, teacher):
-        """Disconnected from teacher"""
+        """Connect to teacher"""
         self.icon.set_from_file("iface/machine.png")
         self.icon.set_tooltip(_('OpenClass student (connected to %s)') % teacher)
         teacher_label = self.manager.get_widget('/Menubar/Menu/Teacher')
         teacher_label.get_children()[0].set_markup(_("Connected to <b>%s</b>") % teacher)
         teacher_label.get_children()[0].set_use_markup(True)
+        # disable quit button
+        quit = self.manager.get_widget('/Menubar/Menu/Quit')
+        quit.set_sensitive(False)
 
     def on_activate(self, data):
         """Tray icon is clicked"""
