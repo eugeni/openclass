@@ -1,3 +1,4 @@
+ - support multi-seat configurations and multiple clients per machine
  - allow to send custom messages to teacher
  - implemented teacher selection
  - do not allow student to disconnect from teacher while in class
