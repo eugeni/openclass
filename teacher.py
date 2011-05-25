@@ -688,7 +688,6 @@ class TeacherGui:
         else:
             machines = [client]
         for machine in machines:
-            self.service.add_client_action(machine, protocol.ACTION_PLEASEREGISTER)
             self.service.reconnect_student(machine)
             # now back to the machine image
             machine_img = self.machines.get(machine, None)

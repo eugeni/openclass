@@ -177,6 +177,7 @@ class Student:
 
         # initialize list of teachers
         self.teachers = gtk.combo_box_new_text()
+        self.teachers_addr = {}
 
         # login dialog
         self.create_login_dialog(None)
@@ -198,9 +199,9 @@ class Student:
     def connect_to_teacher(self, teacher):
         """Connect to teacher"""
         self.icon.set_from_file("iface/machine.png")
-        self.icon.set_tooltip(_('OpenClass student (connected to %s)') % teacher)
+        self.icon.set_tooltip(_('OpenClass student (connected to %s)') % self.teacher)
         teacher_label = self.manager.get_widget('/Menubar/Menu/Teacher')
-        teacher_label.get_children()[0].set_markup(_("Connected to <b>%s</b>") % teacher)
+        teacher_label.get_children()[0].set_markup(_("Connected to <b>%s</b>") % self.teacher)
         teacher_label.get_children()[0].set_use_markup(True)
         # disable quit button
         quit = self.manager.get_widget('/Menubar/Menu/Quit')
@@ -297,12 +298,18 @@ class Student:
             if response == gtk.RESPONSE_OK:
                 self.name = self.entry_login.get_text()
                 print "Login: %s" % self.name
-                source = self.teachers.get_active_text()
+                teacher = self.teachers.get_active_text()
+                if teacher in self.teachers_addr:
+                    source = self.teachers_addr[teacher]
+                else:
+                    # unknown teacher?
+                    print "Unknown teacher address for teacher %s" % teacher
+                    continue
                 print "Will register on %s" % source
                 ret, params = self.send_command(protocol.REQUEST_REGISTER, {"name": self.name}, teacher=source)
                 if ret == "registered":
                     # registered successfully
-                    self.teacher = source
+                    self.teacher = teacher
                     self.teacher_addr = source
                     self.connect_to_teacher(self.teacher)
                     # start threads
@@ -317,6 +324,9 @@ class Student:
                     print "pending authorization from teacher"
                 elif ret == "rejected":
                     print "rejected by teacher"
+                    n = pynotify.Notification(_("Connection not allowed"), _("The teacher (%s) does not allows you to connect to his class") % teacher)
+                    n.set_timeout(10)
+                    n.show()
                 else:
                     print "Unknown answer: %s" % ret
             else:
@@ -492,10 +502,10 @@ class Student:
             # if there is an announce, but we are not yet logged in, skip
             msg = self.protocol.parse_header(data)
             name, flags = self.protocol.parse_announce(msg)
-            # TODO: support multiple teachers
             model = self.teachers.get_model()
-            if source not in [x[0] for x in model]:
-                self.teachers.append_text(source)
+            if name not in [x[0] for x in model]:
+                self.teachers.append_text(name)
+                self.teachers_addr[name] = source
                 # should we enable the login dialog?
                 if len(model) > 0:
                     self.teachers.set_active(0)
