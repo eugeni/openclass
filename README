@@ -18,13 +18,15 @@ activities in the classroom. Among such activities, the most commonly used are:
  - screen projection (send content of teacher screen to all the students)
  - full-screen resolution-independent screen projection
  - student attention request (blocking student activities and asking them to
-look at teacher)
+   look at teacher)
  - viewing contents of all students screens at once
  - direct messaging to students
  - file sharing and URL sharing to enrich class activities
  - shutting down student computers from teacher
  - allow and reject students from a specific class
  - allow to block students from attempting to connect to a class
+ - support for multi-seat configurations and multiple clients per machine (for
+   example, xdmcp-based environments)
 
 (From student to teacher)
  - automatic teacher discovery via broadcast
