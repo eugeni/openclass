@@ -4,7 +4,7 @@
  - display students screen on global view
  - allow to send actions to individual students
  - implemented class shutdown
- - ceiling scaling values
+ - ceiling scaling values to avoid "wireframes" in weird resolutions
 
 0.0.4:
  - properly close file selection dialog
