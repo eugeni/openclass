@@ -19,7 +19,7 @@ LOCALEDIR=$(DATADIR)/locale
 
 GOALS = $(PGOAL).pot $(MOFILES)
 
-all: $(GOALS)
+all: $(GOALS) merge
 
 install: all
 	for l in $(LANGS); do \
