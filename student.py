@@ -133,7 +133,7 @@ class Student:
 
         # Inicializa as threads
         self.bcast = network.BcastListener(network.LISTENPORT)
-        self.log( _("Starting broadcasting service.."))
+        print "Starting broadcasting service.."
         self.bcast.start()
 
         self.mcast = network.McastListener()
@@ -558,10 +558,9 @@ if __name__ == "__main__":
     # notification
     pynotify.init("OpenClass student")
 
-    print _("Starting GUI..")
+    print "Starting GUI.."
     gui = Student("iface/student.glade")
     try:
-        gui.log(_("\nWelcome to OpenClass Student!!\n\n"))
         gtk.main()
         gtk.gdk.threads_leave()
     except:

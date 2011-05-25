@@ -887,7 +887,7 @@ if __name__ == "__main__":
     socket.setdefaulttimeout(2)
     gtk.gdk.threads_init()
     gtk.gdk.threads_enter()
-    print _("Starting broadcast..")
+    print "Starting broadcast.."
     # Main service service
     service = TeacherRunner()
     # Main interface
@@ -897,6 +897,6 @@ if __name__ == "__main__":
     # notification
     pynotify.init("OpenClass teacher")
 
-    print _("Starting main loop..")
+    print "Starting main loop.."
     gtk.main()
     gtk.gdk.threads_leave()
