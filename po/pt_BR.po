@@ -1,6 +1,6 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR ORGANIZATION
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# OpenClass
+# Copyright (C) 2011, Eugeni Dodonov
+# Eugeni Dodonov <eugeni@dodonov.net>, 2011
 #
 msgid ""
 msgstr ""
