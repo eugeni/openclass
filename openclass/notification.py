@@ -19,7 +19,7 @@ import gtk
 import gobject
 
 try:
-    import pynotify2
+    import pynotify
     _HAS_PYNOTIFY=True
 except:
     _HAS_PYNOTIFY=False
