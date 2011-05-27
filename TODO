@@ -1,9 +1,9 @@
 TODO list for openclass
 
 
+- When teacher quits, disconnect all the students
 - Group chat (?)
 - Logging
-- Individual messaging from student to teacher
 - Multimedia streaming
 - Implement possibility for teacher to change class name/re-login
 - Allow teacher to re-transmit one student's screen to the class

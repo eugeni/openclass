@@ -32,7 +32,6 @@ import gtk
 import pygtk
 import gobject
 from gtk import gdk
-import pynotify
 
 from multiprocessing import Queue
 import SocketServer
@@ -54,7 +53,7 @@ MACHINES_X = 5
 MACHINES_Y = 8
 
 # configuration
-from openclass import network, system, protocol, screen
+from openclass import network, system, protocol, screen, notification
 
 # helper functions
 
@@ -260,6 +259,9 @@ class TeacherGui:
         self.clients_queue = Queue()
         self.service = service
         self.service.set_gui(self)
+
+        # notification
+        self.notification = notification.Notification("OpenClass teacher")
 
         # colors
         self.color_normal = gtk.gdk.color_parse("#99BFEA")
@@ -514,7 +516,7 @@ class TeacherGui:
 
     def show_message(self, title, message, timeout=0):
         """Shows a message to student"""
-        n = pynotify.Notification(title, message)
+        n = self.notification.notify(title, message)
         n.set_timeout(timeout)
         n.show()
         return
@@ -893,9 +895,6 @@ if __name__ == "__main__":
     # Main interface
     gui = TeacherGui(service)
     service.start()
-
-    # notification
-    pynotify.init("OpenClass teacher")
 
     print "Starting main loop.."
     gtk.main()

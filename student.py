@@ -41,7 +41,6 @@ import thread
 import socket
 import traceback
 import time
-import pynotify
 
 import urllib, urllib2
 import math
@@ -56,7 +55,7 @@ except IOError:
     _ = str
     traceback.print_exc()
 
-from openclass import network, system, protocol, screen
+from openclass import network, system, protocol, screen, notification
 
 DEBUG=False
 
@@ -73,6 +72,9 @@ class Student:
         self.color_normal = gtk.gdk.color_parse("#99BFEA")
         self.color_active = gtk.gdk.color_parse("#FFBBFF")
         self.color_background = gtk.gdk.color_parse("#FFFFFF")
+
+        # notification
+        self.notification = notification.Notification("OpenClass student")
 
         self.icon = gtk.StatusIcon()
 
@@ -357,9 +359,7 @@ class Student:
                     print "pending authorization from teacher"
                 elif ret == "rejected":
                     print "rejected by teacher"
-                    n = pynotify.Notification(_("Connection not allowed"), _("The teacher (%s) does not allows you to connect to his class") % teacher)
-                    n.set_timeout(10)
-                    n.show()
+                    self.notification.notify(_("Connection not allowed"), _("The teacher (%s) does not allows you to connect to his class") % teacher, 10)
                 else:
                     print "Unknown answer: %s" % ret
             else:
@@ -415,9 +415,7 @@ class Student:
 
     def show_message(self, message):
         """Shows a message to student"""
-        n = pynotify.Notification(_("Message received from teacher"), message)
-        n.set_timeout(0)
-        n.show()
+        self.notification.notify(_("Message received from teacher"), message)
         return
 
     def shot(self):
@@ -557,9 +555,6 @@ if __name__ == "__main__":
     # Atualizando a lista de interfaces
     gtk.gdk.threads_init()
     gtk.gdk.threads_enter()
-
-    # notification
-    pynotify.init("OpenClass student")
 
     print "Starting GUI.."
     gui = Student("iface/student.glade")
