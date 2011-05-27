@@ -11,6 +11,7 @@ BuildRequires: python-devel
 BuildArch: noarch
 Requires:  python
 Requires:  pygtk2.0
+Requires:  python-notify
 
 %description
 OpenClass is a simple open-source solution for class control, designed with the
