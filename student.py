@@ -31,7 +31,6 @@ import struct
 import os
 import logging
 import gtk
-import gtk.glade
 import pygtk
 import gobject
 from gtk import gdk
