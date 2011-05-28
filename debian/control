@@ -1,0 +1,20 @@
+Source: openclass
+Section: x11
+Priority: extra
+Maintainer: Eugeni Dodonov <eugeni@dodonov.net>
+Build-Depends: debhelper (>= 7.0.50~)
+Standards-Version: 3.9.1
+Homepage: http://openclass.dodonov.net/
+
+Package: openclass
+Architecture: any
+Depends: ${misc:Depends}, ${python:Depends}, python-notify, python-gtk2
+Description: simple open-source solution for class control
+ OpenClass is a simple open-source solution for class control, designed with the
+ following features in mind:
+  - small footprint
+  - light-weight functionality
+  - minimum of non-essential features
+ .
+ If you already know how italc, bluelab, mythware, iClass and similar solutions
+ work, you already know what OpenClass is.
