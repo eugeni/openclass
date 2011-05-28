@@ -1,6 +1,6 @@
 # Installation directories
 top_srcdir=..
-localedir = $(RPM_BUILD_ROOT)/usr/share/locale
+localedir = $(DESTDIR)/usr/share/locale
 
 PGOAL = openclass
 
@@ -13,7 +13,7 @@ POFILES = $(shell ls *.po)
 MOFILES = $(POFILES:%.po=%.mo)
 LANGS = $(POFILES:%.po=%)
 
-PREFIX = $(RPM_BUILD_ROOT)/usr
+PREFIX = $(DESTDIR)/usr
 DATADIR = $(PREFIX)/share
 LOCALEDIR=$(DATADIR)/locale
 

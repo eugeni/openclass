@@ -5,17 +5,17 @@ version:
 	echo "version='$(VERSION)'" > version.py
 
 install:
-	mkdir -p $(RPM_BUILD_ROOT)/usr/share/openclass
-	mkdir -p $(RPM_BUILD_ROOT)/usr/bin
-	install -m755 openclass-teacher $(RPM_BUILD_ROOT)/usr/bin/openclass-teacher
-	install -m755 openclass-student $(RPM_BUILD_ROOT)/usr/bin/openclass-student
-	cp -a teacher.py student.py iface openclass $(RPM_BUILD_ROOT)/usr/share/openclass/
+	mkdir -p $(DESTDIR)/usr/share/openclass
+	mkdir -p $(DESTDIR)/usr/bin
+	install -m755 openclass-teacher $(DESTDIR)/usr/bin/openclass-teacher
+	install -m755 openclass-student $(DESTDIR)/usr/bin/openclass-student
+	cp -a teacher.py student.py iface openclass $(DESTDIR)/usr/share/openclass/
 	# locale
 	$(MAKE) -C po $@
 	# desktop
-	mkdir -p $(RPM_BUILD_ROOT)/usr/share/applications/
-	install -m644 openclass-teacher.desktop $(RPM_BUILD_ROOT)/usr/share/applications/
-	install -m644 openclass-student.desktop $(RPM_BUILD_ROOT)/usr/share/applications/
+	mkdir -p $(DESTDIR)/usr/share/applications/
+	install -m644 openclass-teacher.desktop $(DESTDIR)/usr/share/applications/
+	install -m644 openclass-student.desktop $(DESTDIR)/usr/share/applications/
 
 cleandist:
 	rm -rf $(PACKAGE)-$(VERSION) $(PACKAGE)-$(VERSION).tar.bz2
