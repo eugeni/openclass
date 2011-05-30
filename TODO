@@ -2,7 +2,6 @@ TODO list for openclass
 
 
 For version 1.0:
-- finish windows installer
 - when sending files to student, give an option between saving then or
   opening directly
 - implement windows-specific low-level functions
