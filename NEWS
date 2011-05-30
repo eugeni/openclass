@@ -1,3 +1,4 @@
+0.2:
  - reduce number of imported packages
  - changed installation procedure to non-rpm-specific
  - implemented cross-platform notification, even in cases where
