@@ -1,3 +1,13 @@
+ - reduce number of imported packages
+ - changed installation procedure to non-rpm-specific
+ - implemented cross-platform notification, even in cases where
+   notification-daemon is missing
+ - add debian/ubuntu package
+ - add windows installer
+ - make shutdown work on windows
+ - improve shutdown on Linux (should work when /usr/bin/poweroff is controlled
+   by consolehelper)
+
 0.1:
  - support multi-seat configurations and multiple clients per machine
  - allow to send custom messages to teacher
