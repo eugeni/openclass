@@ -57,7 +57,7 @@ def shutdown():
         return os.system("poweroff")
     else:
         # TODO: no shutdown yet on windows
-        return None
+        return os.system("shutdown -s -t 01 -c \"Shutting down per teacher request\"")
 
 def get_client_id():
     """Returns client id (if any)"""
