@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: OpenClass\n"
-"POT-Creation-Date: 2011-05-25 20:36+BRT\n"
-"PO-Revision-Date: 2011-05-25 20:38-0300\n"
+"POT-Creation-Date: 2011-05-30 20:32+BRT\n"
+"PO-Revision-Date: 2011-05-30 20:32-0300\n"
 "Last-Translator: Eugeni Dodonov <eugeni@dodonov.net>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -15,278 +15,282 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 
-#: ../student.py:97
+#: ../student.py:98
 msgid "Identify yourself to the teacher"
 msgstr "Идентифицироваться учителю"
 
-#: ../student.py:97
+#: ../student.py:98
 msgid "_Login"
 msgstr "_Вход"
 
-#: ../student.py:98
+#: ../student.py:99
 msgid "Select your teacher"
 msgstr "Выбор учителя"
 
-#: ../student.py:98
+#: ../student.py:99
 msgid "_Teacher"
 msgstr "_Учитель"
 
-#: ../student.py:99
+#: ../student.py:100
 msgid "Raise your hand to call teacher attention"
 msgstr "Позвать учителя"
 
-#: ../student.py:99
+#: ../student.py:100
 msgid "_Call attention"
 msgstr "_Позвать учителя"
 
-#: ../student.py:100
+#: ../student.py:101
 msgid "About OpenClass"
 msgstr "О проекте"
 
-#: ../student.py:100
+#: ../student.py:101
 msgid "_About"
 msgstr "_О проекте"
 
-#: ../student.py:101
+#: ../student.py:102
 msgid "Quit class"
 msgstr "Выход"
 
-#: ../student.py:101
+#: ../student.py:102
 msgid "_Quit"
 msgstr "_Выход"
 
-#: ../student.py:189
+#: ../student.py:193
 msgid "OpenClass student (disconnected)"
 msgstr "OpenClass ученик (не подключен)"
 
-#: ../student.py:191
+#: ../student.py:195
 msgid "Disconnected from teacher"
 msgstr "Не подключен к учителю"
 
-#: ../student.py:202
+#: ../student.py:206
 msgid "OpenClass student (connected to %s)"
 msgstr "OpenClass ученик (подключен к %s)"
 
-#: ../student.py:204
+#: ../student.py:208
 msgid "Connected to <b>%s</b>"
 msgstr "Подключен к <b>%s</b>"
 
-#: ../student.py:225
-#: ../teacher.py:491
+#: ../student.py:229
+#: ../teacher.py:514
 msgid "Question"
 msgstr "Вопрос"
 
-#: ../student.py:251
+#: ../student.py:255
 msgid "Call teacher attention"
 msgstr "Позвать учителя"
 
-#: ../student.py:251
+#: ../student.py:255
 msgid "Teacher, look at me!"
 msgstr "Учитель, мне нужна помощь!"
 
-#: ../student.py:277
+#: ../student.py:281
 msgid "Teacher asked you for attention"
 msgstr "Учитель просит внимания"
 
-#: ../student.py:300
-#: ../teacher.py:396
+#: ../student.py:304
+#: ../teacher.py:419
 msgid "Login"
 msgstr "Вход"
 
-#: ../student.py:303
-#: ../teacher.py:399
+#: ../student.py:307
+#: ../teacher.py:422
 msgid "Please login"
 msgstr "Вход в систему"
 
-#: ../student.py:307
+#: ../student.py:311
 msgid "Your name:"
 msgstr "Имя:"
 
-#: ../student.py:315
+#: ../student.py:319
 msgid "Your teacher:"
 msgstr "Учитель:"
 
-#: ../student.py:350
+#: ../student.py:354
 msgid "Logged in as <b>%s</b>"
 msgstr "Подключен как <b>%s</b>"
 
-#: ../student.py:357
+#: ../student.py:361
 msgid "Connection not allowed"
 msgstr "Подключение не разрешено"
 
-#: ../student.py:357
+#: ../student.py:361
 msgid "The teacher (%s) does not allows you to connect to his class"
 msgstr "Учитель (%s) не разрешил подключаться к его уроку"
 
-#: ../student.py:415
+#: ../student.py:417
 msgid "Message received from teacher"
 msgstr "Получено сообщение от учителя"
 
-#: ../teacher.py:163
+#: ../teacher.py:171
 msgid "Bad request for file"
 msgstr "Неправильный запрос файла"
 
-#: ../teacher.py:169
+#: ../teacher.py:177
 msgid "File not authorized for transfer"
 msgstr "Файл не авторизован к передаче"
 
-#: ../teacher.py:176
+#: ../teacher.py:184
 msgid "Unable to transfer %s: %s"
 msgstr "Невозможно скачать %s: %s"
 
-#: ../teacher.py:199
+#: ../teacher.py:214
 msgid "The student asks for your attention"
 msgstr "Ученик просит вашего внимания"
 
-#: ../teacher.py:203
-#: ../teacher.py:677
+#: ../teacher.py:218
+#: ../teacher.py:714
 msgid "The teacher asked you to leave this class"
 msgstr "Учитель попросил покинуть этот класс"
 
-#: ../teacher.py:274
+#: ../teacher.py:292
 msgid "OpenClass Teacher"
 msgstr "OpenClass Учитель"
 
-#: ../teacher.py:287
-#: ../teacher.py:651
+#: ../teacher.py:305
+#: ../teacher.py:688
 msgid "Send Screen"
 msgstr "Проекция экрана"
 
-#: ../teacher.py:291
+#: ../teacher.py:309
 msgid "Lock Screens"
 msgstr "Блокировка экранов"
 
-#: ../teacher.py:295
+#: ../teacher.py:313
 msgid "Share files"
 msgstr "Передача файлов"
 
-#: ../teacher.py:299
+#: ../teacher.py:317
 msgid "Share a web page"
 msgstr "Передача веб-страницы"
 
-#: ../teacher.py:303
+#: ../teacher.py:321
 msgid "Turn off students"
 msgstr "Выключение компьютеров"
 
-#: ../teacher.py:309
+#: ../teacher.py:327
 msgid "Quit"
 msgstr "Выход"
 
-#: ../teacher.py:328
+#: ../teacher.py:346
 msgid "Student view"
 msgstr "Экран ученика"
 
-#: ../teacher.py:337
+#: ../teacher.py:355
+msgid "Share with other students"
+msgstr "Переслать экран другим ученикам"
+
+#: ../teacher.py:360
 msgid "Refresh"
 msgstr "Обновить"
 
-#: ../teacher.py:343
+#: ../teacher.py:366
 msgid "Close"
 msgstr "Закрыть"
 
-#: ../teacher.py:403
+#: ../teacher.py:426
 msgid "Your name (teacher or class name):"
 msgstr "Ваше имя (имя учителя или класса):"
 
-#: ../teacher.py:427
+#: ../teacher.py:450
 msgid "Please select screen size for projection"
 msgstr "Выберете разрешение экрана для проекции"
 
-#: ../teacher.py:437
-#: ../teacher.py:453
+#: ../teacher.py:460
+#: ../teacher.py:476
 msgid "Full screen size"
 msgstr "Весь экран"
 
-#: ../teacher.py:564
+#: ../teacher.py:601
 msgid "Viewing display of %s"
 msgstr "Просмотр экрана %s"
 
-#: ../teacher.py:614
+#: ../teacher.py:651
 msgid "Updated on %s"
 msgstr "Обновлен %s"
 
-#: ../teacher.py:631
+#: ../teacher.py:668
 msgid "Message received from %s"
 msgstr "Получено сообщение от %s"
 
-#: ../teacher.py:644
+#: ../teacher.py:681
 msgid "Stop sending screen"
 msgstr "Завершить проецирование"
 
-#: ../teacher.py:659
+#: ../teacher.py:696
 msgid "Share a web page with students"
 msgstr "Переслать ссылку на веб-ресурс ученикам"
 
-#: ../teacher.py:686
+#: ../teacher.py:723
 msgid "Disconnected from teacher at %s!"
 msgstr "Отключен от учетеля в %s!"
 
-#: ../teacher.py:708
+#: ../teacher.py:745
 msgid "Are you sure you want to turn off all the student computers?"
 msgstr "Вы уверены что хотите отключить компьютеры всех учеников?"
 
-#: ../teacher.py:708
-#: ../teacher.py:710
+#: ../teacher.py:745
+#: ../teacher.py:747
 msgid "Please confirm the shutdown request"
 msgstr "Подтвердите отключение компьютеров"
 
-#: ../teacher.py:710
+#: ../teacher.py:747
 msgid "Are you sure you want to turn off this computer?"
 msgstr "Вы уверены что хотите отключить этот компьютер?"
 
-#: ../teacher.py:722
+#: ../teacher.py:759
 msgid "Select a file to share with students"
 msgstr "Выбор файла для передачи ученикам"
 
-#: ../teacher.py:745
+#: ../teacher.py:782
 msgid "Stop locking screen"
 msgstr "Завершить блокировку экрана"
 
-#: ../teacher.py:752
+#: ../teacher.py:789
 msgid "Lock Screen"
 msgstr "Блокировать экран"
 
-#: ../teacher.py:795
+#: ../teacher.py:832
 msgid "name"
 msgstr "имя"
 
-#: ../teacher.py:810
+#: ../teacher.py:847
 msgid "Please, pay attention!"
 msgstr "Пожалуйста, внимание!"
 
-#: ../teacher.py:810
+#: ../teacher.py:847
 msgid "Send a message to student"
 msgstr "Послать сообщение ученику"
 
-#: ../teacher.py:839
+#: ../teacher.py:876
 msgid "Send message to student"
 msgstr "Послать сообщение ученику"
 
-#: ../teacher.py:843
+#: ../teacher.py:880
 msgid "View student screen"
 msgstr "Просмотр экрана ученика"
 
-#: ../teacher.py:847
+#: ../teacher.py:884
 msgid "Send a web page to student"
 msgstr "Послать веб-страницу ученику"
 
-#: ../teacher.py:851
+#: ../teacher.py:888
 msgid "Send a file to student"
 msgstr "Послать файл ученику"
 
-#: ../teacher.py:855
+#: ../teacher.py:892
 msgid "Remote control student computer"
 msgstr "Удаленно "
 
-#: ../teacher.py:859
+#: ../teacher.py:896
 msgid "Remove student from class"
 msgstr "Отсоединить ученика"
 
-#: ../teacher.py:863
+#: ../teacher.py:900
 msgid "Turn off student computer"
 msgstr "Выключить компьютер ученика"
 
-#: ../teacher.py:868
+#: ../teacher.py:905
 msgid "Allow student to participate in the class"
 msgstr "Разрешить ученику подключиться к текущему классу"
 
