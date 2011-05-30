@@ -89,6 +89,15 @@ class TeacherRunner(Thread):
         # multicast sender
         self.mcast = network.McastSender()
 
+        # temporary files
+        self.tmpfiles = []
+
+    def add_temporary_file(self, suffix=''):
+        """Creates a temporary file"""
+        tmpfile = system.create_tmp_file(suffix=suffix)
+        self.tmpfiles.append(tmpfile)
+        return tmpfile
+
     def process_request(self, client, request, params):
         """Gets pending actions for a client"""
         print "Processing requests for %s (%s)" % (client, request)
@@ -182,6 +191,13 @@ class TeacherRunner(Thread):
             self.bcast.actions.put(1)
         self.mcast.quit()
         self.server.actions.put(1)
+
+        # remove temporary files
+        for z in self.tmpfiles:
+            try:
+                os.unlink(z)
+            except:
+                traceback.print_exc()
 
     def set_gui(self, gui):
         """Associates a GUI to this service"""
@@ -335,6 +351,11 @@ class TeacherGui:
         vbox.pack_start(hbox, False, False)
         self.shot_label = gtk.Label()
         hbox.pack_start(self.shot_label, False, False)
+
+        self.shot_share = gtk.Button(_("Share with other students"))
+        self.shot_share.connect('clicked', self.share_student_screen)
+        # mark currently refreshed client
+        hbox.pack_start(self.shot_share)
 
         self.shot_refresh = gtk.Button(_("Refresh"))
         self.shot_refresh.connect('clicked', self.refresh_shot)
@@ -559,6 +580,20 @@ class TeacherGui:
     def refresh_shot(self, widget):
         """Refreshes a screenshot"""
         self.service.add_client_action(self.shot_refresh.current_client, protocol.ACTION_SHOT)
+
+    def share_student_screen(self, widget):
+        """Shares a student screen picture with other students"""
+        # save current pixbuf and share it with everyone except currently
+        # connected client
+        tmpfile = self.service.add_temporary_file(suffix=".jpg")
+        self.shot_drawing.get_pixbuf().save(tmpfile, "jpeg", {"quality": "75"})
+
+        client = self.shot_refresh.current_client
+        machines = [x for x in self.get_selected_machines() if x != client]
+        self.service.authorize_file_transfer(tmpfile)
+        for machine in machines:
+            print "Sharing with %s" % machine
+            self.service.add_client_action(machine, protocol.ACTION_OPENFILE, tmpfile)
 
     def show_screenshot(self, client, width, height, shot):
         """Displays a student screenshot"""

@@ -22,6 +22,8 @@ import struct
 import SocketServer
 import time
 
+import tempfile
+
 def get_user_name():
     """Returns current user name"""
     if get_os() == "Linux":
@@ -66,3 +68,9 @@ def get_client_id():
     else:
         client_id = None
     return client_id
+
+def create_tmp_file(suffix=''):
+    """Creates a temporary file"""
+    fd, tmpfile = tempfile.mkstemp(suffix=suffix)
+    os.close(fd)
+    return tmpfile
