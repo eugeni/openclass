@@ -1,10 +1,19 @@
 TODO list for openclass
 
 
-- When teacher quits, disconnect all the students
+For version 1.0:
+- finish windows installer
+- when sending files to student, give an option between saving then or
+  opening directly
+- implement windows-specific low-level functions
+- fix hanging of student screen viewing on windows
+- add proper logging for debugging purposes
+
+For future versions:
+
 - Group chat (?)
-- Logging
 - Multimedia streaming
+- Multicast-based file sharing using optimisting streaming
 - Implement possibility for teacher to change class name/re-login
 - Allow teacher to re-transmit one student's screen to the class
 - Allow teacher to grab student's webcam
