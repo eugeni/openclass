@@ -169,8 +169,8 @@ class McastListener(Thread):
                 s.close()
                 return
             try:
-                data = s.recv(DATAGRAM_SIZE + 1024)
-                self.messages.put(data)
+                data, client_addr = s.recvfrom(DATAGRAM_SIZE + 1024)
+                self.messages.put((data, client_addr[0]))
             except socket.timeout:
                 #print "Timeout!"
                 pass

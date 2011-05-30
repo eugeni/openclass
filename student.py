@@ -472,9 +472,14 @@ class Student:
     def monitor_mcast(self):
         """Monitor for multicast messages"""
         while not self.mcast.messages.empty():
-            message = self.mcast.messages.get()
+            message, sender = self.mcast.messages.get()
+            print sender
             screen_width, screen_height, fullscreen, pos_x, pos_y, step_x, step_y, img = self.protocol.unpack_chunk(message)
             print "Received image at %dx%d-%dx%d (fullscreen=%s)" % (pos_x, pos_y, step_x, step_y, fullscreen)
+            # ignore messages received from different teacher
+            if sender != self.teacher_addr:
+                print "Ignoring multicast request from other teacher"
+                continue
             try:
                 loader = gdk.PixbufLoader(image_type="jpeg")
                 loader.write(img)

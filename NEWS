@@ -1,3 +1,5 @@
+ - allow to have multiple multicast screen senders in the lab
+
 0.2:
  - reduce number of imported packages
  - changed installation procedure to non-rpm-specific
