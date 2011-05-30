@@ -54,7 +54,7 @@ def shutdown():
     """Shuts down the machine"""
     if get_os() == "Linux":
         # shutdown
-        return os.system("shutdown now")
+        return os.system("poweroff")
     else:
         # TODO: no shutdown yet on windows
         return None
