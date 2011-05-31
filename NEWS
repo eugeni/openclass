@@ -1,3 +1,5 @@
+ - support long student names and other info in tooltips
+ - localization fixes
  - allow sharing a student screen with other students
  - allow to have multiple multicast screen senders in the lab
 

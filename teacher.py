@@ -622,6 +622,7 @@ class TeacherGui:
                     name = params.get("name", addr)
 
                     machine = self.mkmachine(name)
+                    machine.fullname = name
                     machine.button.connect('button_press_event', self.cb_machine, machine)
                     self.put_machine(machine)
                     self.machines[addr] = machine
@@ -647,8 +648,12 @@ class TeacherGui:
                         machine.button.set_image(img)
                     name = params.get("name")
                     if name:
-                        machine.label.set_markup("<small>%s</small>" % name)
-                    self.tooltip.set_tip(machine, _("Updated on %s") % (time.asctime()))
+                        machine.label.set_markup(self.mkname(name))
+                        machine.fullname = name
+                    tooltip = "%s\n" % name
+                    tooltip += "(%s)\n" % addr
+                    tooltip += _("Updated on %s") % time.asctime()
+                    self.tooltip.set_tip(machine, tooltip)
             elif action == "reject":
                 machine = self.machines[addr]
                 machine.button.set_image(self.image_disconnected)
@@ -831,7 +836,7 @@ class TeacherGui:
 
         label = gtk.Label(_("name"))
         label.set_use_markup(True)
-        label.set_markup("<small>%s</small>" % name)
+        label.set_markup(self.mkname(name))
         box.pack_start(label, expand=False)
 
         self.tooltip.set_tip(box, name)
@@ -841,6 +846,12 @@ class TeacherGui:
         box.button = button
         box.label = label
         return box
+
+    def mkname(self, name):
+        """Creates a pretty-printed name"""
+        if len(name) > 0:
+            name = "%s.." % name[:8]
+        return "<small>%s</small>" % name
 
     def send_msg_student(self, widget, machine):
         """Send a message to student"""
