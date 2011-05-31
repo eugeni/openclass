@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenClass\n"
 "POT-Creation-Date: 2011-05-30 20:32+BRT\n"
-"PO-Revision-Date: 2011-05-30 20:32-0300\n"
+"PO-Revision-Date: 2011-05-31 11:57-0300\n"
 "Last-Translator: Eugeni Dodonov <eugeni@dodonov.net>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -162,11 +162,11 @@ msgstr "Compartilhar arquivos"
 
 #: ../teacher.py:317
 msgid "Share a web page"
-msgstr "Compartilhar endereço da web"
+msgstr "Compartilhar página"
 
 #: ../teacher.py:321
 msgid "Turn off students"
-msgstr "Desligar computadores de alunos"
+msgstr "Desligar computadores"
 
 #: ../teacher.py:327
 msgid "Quit"
