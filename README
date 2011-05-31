@@ -15,12 +15,14 @@ OpenClass is a small class control solution, which helps teacher to control his
 activities in the classroom. Among such activities, the most commonly used are:
 
 (From teacher to student)
- - screen projection (send content of teacher screen to all the students)
+ - screen projection (send content of teacher screen to all the students) in
+   different resolutions and bandwidth usage modes
  - full-screen resolution-independent screen projection
  - student attention request (blocking student activities and asking them to
    look at teacher)
  - viewing contents of all students screens at once
  - direct messaging to students
+ - share a student screen with other students
  - file sharing and URL sharing to enrich class activities
  - shutting down student computers from teacher
  - allow and reject students from a specific class
@@ -35,6 +37,14 @@ for both wired and wireless environments
  - "raise hand" functionality to call teacher attention
  - possibility to select teacher to connect to
  - automatic handling of network saturation and disconnection events
+
+(Misc)
+
+ - support for Linux and Windows-based operating systems
+ - possibility to have multiple teachers and classes on same network/vlan
+ - multicast throttling to avoid saturating the network
+
+
 
 Usage
 -----
