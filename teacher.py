@@ -542,8 +542,7 @@ class TeacherGui:
 
     def show_message(self, title, message, timeout=0):
         """Shows a message to student"""
-        n = self.notification.notify(title, message)
-        n.set_timeout(timeout)
+        n = self.notification.notify(title, message, timeout)
         n.show()
         return
 
