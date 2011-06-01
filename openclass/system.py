@@ -75,3 +75,10 @@ def create_tmp_file(suffix=''):
     fd, tmpfile = tempfile.mkstemp(suffix=suffix)
     os.close(fd)
     return tmpfile
+
+def get_home():
+    """Returns user homedir"""
+    if get_os() == "Linux":
+        return os.getenv("HOME")
+    else:
+        return os.getenv("HOMEDIR")
