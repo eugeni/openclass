@@ -84,7 +84,7 @@ def get_home():
     if get_os() == "Linux":
         return os.getenv("HOME")
     else:
-        return os.getenv("HOMEDIR")
+        return os.getenv("HOMEPATH")
 
 def setup_logger(log_name):
     """Configures the logger"""
