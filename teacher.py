@@ -163,7 +163,7 @@ class TeacherRunner(Thread):
                 width = int(params["width"][0])
                 height = int(params["height"][0])
                 shot = params["shot"][0]
-                self.gui.show_screenshot(client, width, height, shot)
+                self.gui.queue_show_screenshot(client, width, height, shot)
             except:
                 traceback.print_exc()
         elif request == protocol.REQUEST_GETFILE:
@@ -412,7 +412,7 @@ class TeacherGui:
 
         self.login()
 
-    def show_screenshot(self, client, width, height, shot):
+    def queue_show_screenshot(self, client, width, height, shot):
         """Show a screenshot for a client"""
         self.clients_queue.put(("shot", client, {"width": width, "height": height, "shot": shot}))
 
