@@ -1,3 +1,4 @@
+ - implement event logging
  - fix username on win32
  - some fixes for windows placement on win32 platform
  - fix hanging on win32 while showing student screen
