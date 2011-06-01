@@ -18,6 +18,8 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 import gtk
 import gobject
 
+import system
+
 try:
     import pynotify
     _HAS_PYNOTIFY=True
@@ -27,7 +29,7 @@ except:
 class Notification:
     """A class which uses either pynotify, or, when it is not available,
     plain GTK windows to show something"""
-    def __init__(self, title, extra_spacing=40):
+    def __init__(self, title):
         """Initializes class"""
         if _HAS_PYNOTIFY:
             pynotify.init(title)
@@ -36,7 +38,6 @@ class Notification:
             # no pynotify
             self.title = title
             self.pynotify = False
-        self.extra_spacing = extra_spacing
 
     def notify(self, title, message, timeout=0):
         """Shows a notification for user"""
@@ -73,7 +74,13 @@ class Notification:
             # calculating screen size
             window.set_gravity(gtk.gdk.GRAVITY_SOUTH_EAST)
             width, height = window.get_size()
-            window.move(gtk.gdk.screen_width() - width, gtk.gdk.screen_height() - height - self.extra_spacing)
+	    extra_spacing = 0
+	    if system.get_os() != "Linux":
+                # on windows, windows appear under taskbar
+                # so do some dirty workaround here (HACK HACK HACK!)
+                # XXX this should be fixed sometime..
+                extra_spacing = 75
+            window.move(gtk.gdk.screen_width() - width, gtk.gdk.screen_height() - height - extra_spacing)
 
     def clicked(self, widget, event, window):
         """A window was clicked"""

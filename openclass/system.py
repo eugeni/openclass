@@ -50,7 +50,7 @@ def open_url(url):
         return os.system("xdg-open '%s' &" % url)
     else:
         # TODO: make it work on windows
-        return os.system(url)
+        return os.system("start %s" % url)
 
 def shutdown():
     """Shuts down the machine"""
@@ -66,7 +66,8 @@ def get_client_id():
     if get_os() == "Linux":
         client_id = os.getenv("DISPLAY")
     else:
-        client_id = None
+        # TODO: get proper client id
+        client_id = ""
     return client_id
 
 def create_tmp_file(suffix=''):
