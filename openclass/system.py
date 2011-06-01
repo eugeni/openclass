@@ -29,7 +29,7 @@ def get_user_name():
     if get_os() == "Linux":
         return os.getenv("USER")
     else:
-        return "user"
+        return os.getenv("USERNAME")
 
 def get_os():
     """Returns the name of the OS"""
