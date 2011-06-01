@@ -89,7 +89,7 @@ class TeacherRunner(Thread):
         self.bcast = None
 
         # multicast sender
-        self.mcast = network.McastSender()
+        self.mcast = network.McastSender(logger=logger)
 
         # temporary files
         self.tmpfiles = []
@@ -241,7 +241,7 @@ class TeacherRunner(Thread):
 
     def start_broadcast(self, class_name):
         """Start broadcasting service"""
-        self.bcast = network.BcastSender(network.LISTENPORT, self.protocol.create_announce(class_name))
+        self.bcast = network.BcastSender(self.logger, network.LISTENPORT, self.protocol.create_announce(class_name))
         self.class_name = class_name
         self.bcast.start()
 

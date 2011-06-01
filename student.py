@@ -139,7 +139,7 @@ class Student:
         self.max_missed_commands = max_missed_commands
 
         # Inicializa as threads
-        self.bcast = network.BcastListener(network.LISTENPORT)
+        self.bcast = network.BcastListener(logger=self.logger, port=network.LISTENPORT)
         self.logger.info("Starting broadcasting service..")
         self.bcast.start()
 
@@ -338,7 +338,7 @@ class Student:
                     source = self.teachers_addr[teacher]
                 else:
                     # unknown teacher?
-                    self.logger.error("Unknown teacher address for teacher %s" % teacher)
+                    self.logger.info("Unknown teacher address for teacher %s" % teacher)
                     continue
                 self.logger.info("Will register on %s" % source)
                 ret, params = self.send_command(protocol.REQUEST_REGISTER, {"name": self.name}, teacher=source)

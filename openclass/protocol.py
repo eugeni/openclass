@@ -95,8 +95,7 @@ class Protocol:
         """Parses a class announcment"""
         try:
             name, flags = struct.unpack("!64pi", announce)
-            print name
-            # strip trailing null bytes
+            # TODO: strip trailing null bytes
             return (name, flags)
         except:
             traceback.print_exc()

@@ -49,7 +49,7 @@ import system
 # {{{ BcastSender
 class BcastSender(Thread):
     """Sends broadcast requests"""
-    def __init__(self, port, data):
+    def __init__(self, logger, port, data):
         Thread.__init__(self)
         self.port = port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -58,6 +58,7 @@ class BcastSender(Thread):
         self.sock.bind(('', 0))
         self.actions = Queue()
         self.data = data
+        self.logger = logger
 
     def stop():
         """Stops sending"""
@@ -65,7 +66,6 @@ class BcastSender(Thread):
 
     def run(self):
         """Starts threading loop"""
-        print "Running!"
         while 1:
             # TODO: add timers to exit when required
             try:
@@ -73,12 +73,11 @@ class BcastSender(Thread):
                     # exiting
                     return
                 if DEBUG:
-                    self.gui.log(_("Sending broadcasting message.."))
+                    self.logger.debug("Sending broadcasting message..")
                 self.sock.sendto(self.data, ('255.255.255.255', self.port))
                 time.sleep(1)
             except:
-                self.gui.log("Error sending broadcast message: %s" % sys.exc_value)
-                traceback.print_exc()
+                self.logger.exception("Error sending broadcast message: %s" % sys.exc_value)
                 time.sleep(1)
 # }}}
 
@@ -182,13 +181,14 @@ class McastListener(Thread):
 # {{{ BcastListener
 class BcastListener(Thread):
     """Broadcast listening thread"""
-    def __init__(self, port=BCASTPORT, datagram_size=DATAGRAM_SIZE):
+    def __init__(self, logger, port=BCASTPORT, datagram_size=DATAGRAM_SIZE):
         Thread.__init__(self)
         self.port = port
         self.datagram_size = datagram_size
         self.actions = Queue()
         self.messages = Queue()
         self.lock = thread.allocate_lock()
+        self.logger = logger
 
     def get_msg(self):
         """Returns one of received messages"""
@@ -216,19 +216,18 @@ class BcastListener(Thread):
         # configura o mecanismo de captura de tempo
         while 1:
             if not self.actions.empty():
-                print "Finishing broadcast capture"
+                self.logger.info("Finishing broadcast capture")
                 s.close()
                 return
             try:
                 data, client_addr = s.recvfrom(self.datagram_size)
-                print "Received %s from %s" % (data, client_addr[0])
+                self.logger.info("Received %s from %s" % (data, client_addr[0]))
                 self.messages.put((data, client_addr[0]))
             except socket.timeout:
                 #print "Timeout!"
                 pass
             except:
-                print "Exception!"
-                traceback.print_exc()
+                self.logger.exception("Exception while handling broadcast")
 # }}}
 
 # {{{ TcpClient
@@ -280,7 +279,7 @@ class TcpClient:
 # {{{ McastSender
 class McastSender(Thread):
     """Multicast socket for sending stuff"""
-    def __init__(self, interval=0.05):
+    def __init__(self, logger, interval=0.05):
         """Configures multicast sender. Interval is the minimum interval between packets"""
         Thread.__init__(self)
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_IP)
@@ -289,6 +288,7 @@ class McastSender(Thread):
         self.queue = Queue()
         self.socket = s
         self.interval = interval
+        self.logger = logger
 
     def send(self, data, addr=MCASTADDR, port=MCASTPORT):
         """Sends stuff via multicast"""
@@ -307,7 +307,7 @@ class McastSender(Thread):
                 curdelay = curtime - lasttime
                 if curdelay < self.interval:
                     delay = self.interval - curdelay
-                    print "Sending too fast, sleeping for %f" % curdelay
+                    self.logger.debug("Sending too fast, sleeping for %f" % curdelay)
                     time.sleep(curdelay)
                 # do the sending
                 self.send(payload)
