@@ -370,6 +370,8 @@ class TeacherGui:
         self.shot_drawing = gtk.Image()
         vbox.pack_start(self.shot_drawing)
 
+        vbox.show_all()
+
         # tooltips
         self.tooltip = gtk.Tooltips()
 
@@ -608,7 +610,7 @@ class TeacherGui:
 
         self.shot_drawing.set_from_pixbuf(pb)
 
-        self.shot_window.show_all()
+        self.shot_window.show()
 
     def monitor(self):
         """Monitors new machines connections"""
