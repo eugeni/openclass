@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, see <http://www.gnu.org/licenses/>.
 """
 
+import sys
 import os
 import socket
 import traceback
@@ -90,9 +91,13 @@ def setup_logger(log_name):
     log_file="%s%s%s.log" % (get_home(), os.sep, log_name)
     logger = logging.getLogger("openclass_teacher")
     h1 = logging.FileHandler(log_file)
-    f = logging.Formatter("%(levelname)s %(asctime)s %(funcName)s %(lineno)d %(message)s")
+    f = logging.Formatter("%(levelname)s %(asctime)s: %(funcName)s+%(lineno)d: %(message)s")
     h1.setFormatter(f)
     h1.setLevel(logging.DEBUG)
+    h2 = logging.StreamHandler(sys.stdout)
+    h2.setFormatter(f)
+    h2.setLevel(logging.DEBUG)
     logger.addHandler(h1)
+    logger.addHandler(h2)
     logger.setLevel(logging.DEBUG)
     return logger
