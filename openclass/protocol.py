@@ -56,27 +56,28 @@ class Protocol:
     # class announce flags
     ANNOUNCE_RESTRICTED = 1<<0
 
-    def __init__(self):
+    def __init__(self, logger):
         """Initializes protocol processing class"""
         # protocol messages
         self.header = struct.pack("!10sii", OPENCLASS_HEADER, OPENCLASS_VERSION_MAJOR, OPENCLASS_VERSION_MINOR)
         self.header_len = len(self.header)
+        self.logger = logger
 
     def parse_header(self, msg):
         """Parses header"""
         if len(msg) < self.header_len:
             # message too short
-            print "Message too short"
+            self.logger.error("Message too short (%d < %d)" % (len(msg), self.header_len))
             return None
         header = msg[:self.header_len]
         name, major, minor = struct.unpack("!10sii", header)
         if name != OPENCLASS_HEADER:
             # wrong app name
-            print "Wrong app name: <%s|%s>" % (name, OPENCLASS_HEADER)
+            self.logger.error("Wrong app name: <%s|%s>" % (name, OPENCLASS_HEADER))
             return None
         if major != OPENCLASS_VERSION_MAJOR or minor != OPENCLASS_VERSION_MINOR:
             # bad version
-            print "Wrong app version"
+            self.logger.error("Wrong app version: %d.%d != %d.%d" % (major, minor, OPENCLASS_VERSION_MAJOR, OPENCLASS_VERSION_MINOR))
             return None
         # all ok
         return msg[self.header_len:]
@@ -98,7 +99,7 @@ class Protocol:
             # TODO: strip trailing null bytes
             return (name, flags)
         except:
-            traceback.print_exc()
+            self.logger.exception("Parsing protocol announce")
             return None
 
     def pack_chunk(self, screen_width, screen_height, fullscreen, chunk):

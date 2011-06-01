@@ -80,7 +80,7 @@ class TeacherRunner(Thread):
         self.authorized_files = []
 
         # protocol
-        self.protocol = protocol.Protocol()
+        self.protocol = protocol.Protocol(self.logger)
 
         # listening server
         self.server = network.HTTPListener(self)

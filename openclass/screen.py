@@ -60,7 +60,6 @@ class Screen:
 
         chunks=[]
 
-        print "%d %d" % (width, height)
         for y in range(chunks_y):
             pos_y = y * step_y
             for x in range(chunks_x):

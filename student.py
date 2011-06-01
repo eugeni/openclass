@@ -124,7 +124,7 @@ class Student:
         self.client_id = system.get_client_id()
 
         # protocol handler
-        self.protocol = protocol.Protocol()
+        self.protocol = protocol.Protocol(self.logger)
 
         # Configura o timer
         gobject.timeout_add(1000, self.monitor_bcast)
