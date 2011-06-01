@@ -571,7 +571,7 @@ class TeacherGui:
                     machine.machine_x = x
                     machine.machine_y = y
                     return
-        self.logger.info("Not enough layout space to add a machine!")
+        self.logger.error("Not enough layout space to add a machine!")
 
     def projection(self):
         """Grabs the screen for multicast projection when needed"""

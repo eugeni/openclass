@@ -474,7 +474,7 @@ class Student:
         while not self.mcast.messages.empty():
             message, sender = self.mcast.messages.get()
             screen_width, screen_height, fullscreen, pos_x, pos_y, step_x, step_y, img = self.protocol.unpack_chunk(message)
-            self.logger.info("Received image at %dx%d-%dx%d (fullscreen=%s)" % (pos_x, pos_y, step_x, step_y, fullscreen))
+            self.logger.debug("Received image at %dx%d-%dx%d (fullscreen=%s)" % (pos_x, pos_y, step_x, step_y, fullscreen))
             # ignore messages received from different teacher
             if sender != self.teacher_addr:
                 self.logger.info( "Ignoring multicast request from other teacher (%s instead of %s)" % (sender, self.teacher_addr))
