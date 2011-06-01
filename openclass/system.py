@@ -24,6 +24,8 @@ import time
 
 import tempfile
 
+import logging
+
 def get_user_name():
     """Returns current user name"""
     if get_os() == "Linux":
@@ -82,3 +84,15 @@ def get_home():
         return os.getenv("HOME")
     else:
         return os.getenv("HOMEDIR")
+
+def setup_logger(log_name):
+    """Configures the logger"""
+    log_file="%s%s%s.log" % (get_home(), os.sep, log_name)
+    logger = logging.getLogger("openclass_teacher")
+    h1 = logging.FileHandler(log_file)
+    f = logging.Formatter("%(levelname)s %(asctime)s %(funcName)s %(lineno)d %(message)s")
+    h1.setFormatter(f)
+    h1.setLevel(logging.DEBUG)
+    logger.addHandler(h1)
+    logger.setLevel(logging.DEBUG)
+    return logger

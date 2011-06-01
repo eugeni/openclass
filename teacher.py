@@ -27,7 +27,6 @@ import socket
 import struct
 
 import os
-import logging
 import gtk
 import pygtk
 import gobject
@@ -61,9 +60,12 @@ from openclass import network, system, protocol, screen, notification
 class TeacherRunner(Thread):
     selected_machines = 0
     """Teacher service"""
-    def __init__(self):
+    def __init__(self, logger):
         """Initializes the teacher thread"""
         Thread.__init__(self)
+
+        # logger
+        self.logger = logger
 
         # actions
         self.actions = Queue()
@@ -100,7 +102,7 @@ class TeacherRunner(Thread):
 
     def process_request(self, client, request, params):
         """Gets pending actions for a client"""
-        print "Processing requests for %s (%s)" % (client, request)
+        self.logger.info( "Processing requests for %s (%s)" % (client, request))
         response = None
         response_params = None
         if request == protocol.REQUEST_REGISTER:
@@ -123,7 +125,7 @@ class TeacherRunner(Thread):
             elif client_status == "registered":
                 response = "registered"
             else:
-                print "Error: unknown status for %s: %s" % (client, self.clients[client])
+                self.logger.error("Error: unknown status for %s: %s" % (client, self.clients[client]))
         elif request == protocol.REQUEST_ACTIONS:
             # student could send us additional params
             # if client is still unknown, default it to "pending" state
@@ -144,12 +146,12 @@ class TeacherRunner(Thread):
                     if len(self.clients_actions[client]) > 0:
                         response, response_params = self.clients_actions[client].pop(0)
             else:
-                    print "Error: unknown status for %s: %s" % (client, client_status)
+                    self.logger.error("Error: unknown status for %s: %s" % (client, client_status))
                     # don't know what to do with this student, tell it to go away
                     response = protocol.ACTION_PLEASEREGISTER
         elif request == protocol.REQUEST_RAISEHAND:
             # student raised his hand
-            print "Student called your attention"
+            self.logger.info("Student called your attention")
             question = params.get("message", None)
             if question:
                 question = question[0]
@@ -158,22 +160,22 @@ class TeacherRunner(Thread):
                 self.raise_hand(client)
         elif request == protocol.REQUEST_SHOWSCREEN:
             # student wants to show his screen
-            print "Student wants to show his screen to you"
+            self.logger.info("Student wants to show his screen to you")
             try:
                 width = int(params["width"][0])
                 height = int(params["height"][0])
                 shot = params["shot"][0]
                 self.gui.queue_show_screenshot(client, width, height, shot)
             except:
-                traceback.print_exc()
+                self.logger.exception("Error parsing screenshot information")
         elif request == protocol.REQUEST_GETFILE:
             if 'file' not in params:
                 response = _("Bad request for file")
             else:
                 filename = urllib.unquote(params['file'][0])
-                print "Asked to open %s" % filename
+                self.logger.info("Asked to open %s" % filename)
                 if filename not in self.authorized_files:
-                    print "Error: %s not authorized for transfer to %s" % (filename, client)
+                    self.logger.error("Error: %s not authorized for transfer to %s" % (filename, client))
                     response = _("File not authorized for transfer")
                 else:
                     try:
@@ -197,7 +199,7 @@ class TeacherRunner(Thread):
             try:
                 os.unlink(z)
             except:
-                traceback.print_exc()
+                self.logger.exception("Error removing temp files")
 
     def set_gui(self, gui):
         """Associates a GUI to this service"""
@@ -256,19 +258,21 @@ class TeacherRunner(Thread):
                 continue
             # chegou ALGO
             name, parameters = action
-            print "Running %s" % name
+            self.logger.info("Running %s" % name)
             if name == "quit":
                 return
             else:
-                print "Unknown action %s" % name
+                self.logger.error("Unknown action %s" % name)
 # }}}
 
 # {{{ TeacherGui
 class TeacherGui:
     selected_machines = 0
     """Teacher GUI main class"""
-    def __init__(self, service):
+    def __init__(self, service, logger):
         """Initializes the interface"""
+        # logger
+        self.logger = logger
         # internal variables
         self.class_name = None
         self.bcast = None
@@ -436,7 +440,7 @@ class TeacherGui:
         response = dialog.run()
         if response == gtk.RESPONSE_OK:
             self.class_name = entry_login.get_text()
-            print "Login: %s" % self.class_name
+            self.logger.info("Login: %s" % self.class_name)
             dialog.destroy()
             # Starting broadcasting service
             self.service.start_broadcast(self.class_name)
@@ -446,7 +450,7 @@ class TeacherGui:
         else:
             dialog.destroy()
             sys.exit(0)
-            print "leaving.."
+            self.logger.info("leaving..")
             return None
 
     def ask_resolution(self, title=_("Please select screen size for projection")):
@@ -472,7 +476,6 @@ class TeacherGui:
         height = self.projection_screen.height
         if response == gtk.RESPONSE_OK:
             exp = combobox.get_active_text()
-            print exp
             dialog.destroy()
             fullscreen = 0
             if exp != _("Full screen size"):
@@ -481,7 +484,7 @@ class TeacherGui:
                     width = int(width)
                     height = int(height)
                 except:
-                    traceback.print_exc()
+                    self.logger.exception("Error discovering resolution")
             else:
                     fullscreen = 1
             self.projection_width = width
@@ -546,7 +549,7 @@ class TeacherGui:
 
     def reject_client(self, client, name):
         """Rejects a client"""
-        print "Rejecting %s" % client
+        self.logger.info("Rejecting %s" % client)
         self.clients_queue.put(("reject", client, {"name": name}))
 
     def add_client(self, client, name, shot=None):
@@ -555,7 +558,7 @@ class TeacherGui:
 
     def queue_raise_hand(self, client, message):
         """A student calls for attention"""
-        print "Student %s asks for attention: %s" % (client, message)
+        self.logger.info("Student %s asks for attention: %s" % (client, message))
         self.clients_queue.put(("raisehand", client, {"message": message}))
 
     def put_machine(self, machine):
@@ -568,12 +571,12 @@ class TeacherGui:
                     machine.machine_x = x
                     machine.machine_y = y
                     return
-        print "Not enough layout space to add a machine!"
+        self.logger.info("Not enough layout space to add a machine!")
 
     def projection(self):
         """Grabs the screen for multicast projection when needed"""
         if self.current_action == protocol.ACTION_PROJECTION:
-            print "Sending screens, yee-ha!"
+            self.logger.info("Sending screens, yee-ha!")
             # we are projecting, grab stuff
             chunks = self.projection_screen.chunks(scale_x=self.projection_width, scale_y=self.projection_height)
             self.service.send_projection(self.projection_width, self.projection_height, self.projection_fullscreen, chunks)
@@ -594,7 +597,7 @@ class TeacherGui:
         machines = [x for x in self.get_selected_machines() if x != client]
         self.service.authorize_file_transfer(tmpfile)
         for machine in machines:
-            print "Sharing with %s" % machine
+            self.logger.info("Sharing with %s" % machine)
             self.service.add_client_action(machine, protocol.ACTION_OPENFILE, tmpfile)
 
     def show_screenshot(self, client, width, height, shot):
@@ -679,9 +682,9 @@ class TeacherGui:
     def send_screen(self, widget):
         """Starts screen sharing for selected machines"""
         machines = self.get_selected_machines()
-        print "Sending screen to %s" % machines
+        self.logger.info("Sending screen to %s" % machines)
         if self.current_action != protocol.ACTION_PROJECTION:
-            print "Sending screens"
+            self.logger.info("Sending screens")
             res = self.ask_resolution()
             if not res:
                 return
@@ -691,7 +694,7 @@ class TeacherGui:
             for machine in machines:
                 self.service.add_client_action(machine, protocol.ACTION_PROJECTION)
         else:
-            print "Stopping sending screens"
+            self.logger.info("Stopping sending screens")
             self.SendScreen.set_label(_("Send Screen"))
             self.current_action = protocol.ACTION_NOOP
             self.LockScreen.set_sensitive(True)
@@ -723,7 +726,7 @@ class TeacherGui:
             # now back to the machine image
             machine_img = self.machines.get(machine, None)
             if not machine_img:
-                print "Error: unable to locate pixmap for machine %s" % client
+                self.logger.error("Error: unable to locate pixmap for machine %s" % client)
                 return
             machine_img.button.set_image(self.image_disconnected)
             self.machines_status[machine] = "rejected"
@@ -741,7 +744,7 @@ class TeacherGui:
             # now back to the machine image
             machine_img = self.machines.get(machine, None)
             if not machine_img:
-                print "Error: unable to locate pixmap for machine %s" % client
+                self.logger.error("Error: unable to locate pixmap for machine %s" % client)
                 return
             self.machines_status[machine] = "registered"
             machine_img.button.set_image(self.image_connected)
@@ -783,16 +786,16 @@ class TeacherGui:
     def lock_screen(self, widget):
         """Starts screen locking for selected machines"""
         machines = self.get_selected_machines()
-        print "Locking screen on %s" % machines
+        self.logger.info("Locking screen on %s" % machines)
         if self.current_action != protocol.ACTION_ATTENTION:
-            print "Locking screens"
+            self.logger.info("Locking screens")
             self.LockScreen.set_label(_("Stop locking screen"))
             self.current_action = protocol.ACTION_ATTENTION
             self.SendScreen.set_sensitive(False)
             for machine in machines:
                 self.service.add_client_action(machine, protocol.ACTION_ATTENTION)
         else:
-            print "Stopping locking screens"
+            self.logger.info("Stopping locking screens")
             self.LockScreen.set_label(_("Lock Screen"))
             self.current_action = protocol.ACTION_NOOP
             self.SendScreen.set_sensitive(True)
@@ -811,10 +814,10 @@ class TeacherGui:
 
     def quit(self, widget):
         """Main window was closed"""
-        print "Closing pending threads.."
+        self.logger.info("Closing pending threads..")
         self.service.quit()
         gtk.main_quit()
-        print "done"
+        self.logger.info("done")
 
     def get_img(self, imgpath):
         """Returns image widget if exists"""
@@ -822,7 +825,7 @@ class TeacherGui:
         try:
             img.set_from_file(imgpath)
         except:
-            traceback.print_exc()
+            self.logger.exception("Getting image from %s" % imgpath)
         return img
 
     def mkmachine(self, name):
@@ -860,13 +863,13 @@ class TeacherGui:
         message = self.question(_("Send a message to student"), _("Please, pay attention!"))
         if not message:
             return
-        print "Will send: %s" % message
+        self.logger.info("Will send: %s" % message)
         self.service.add_client_action(machine, protocol.ACTION_MSG, message)
 
     def request_screenshot(self, widget, machine):
         """Request screenshot from student"""
         self.service.add_client_action(machine, protocol.ACTION_SHOT)
-        print "Sending request to %s" % machine
+        self.logger.info("Sending request to %s" % machine)
 
     def cb_machine(self, widget, event, machine):
         """Callback when clicked on a client machine"""
@@ -875,12 +878,11 @@ class TeacherGui:
             machine = self.machines_map[machine]
         else:
             # unknown machine?
-            print "Error: unknown machine!"
+            self.logger.error("Error: unknown machine %s!" % machine)
             return
 
         # is machine rejected?
         status = self.machines_status.get(machine, "registered")
-        print status
 
         # popup menu
         popup_menu = gtk.Menu()
@@ -924,7 +926,7 @@ class TeacherGui:
             # for now, do nothing
             return
         else:
-            print "Unknown machine status for %s: %s" % (machine, status)
+            self.logger.error("Unknown machine status for %s: %s" % (machine, status))
             return
 
         popup_menu.show_all()
@@ -933,17 +935,20 @@ class TeacherGui:
 # }}}
 
 if __name__ == "__main__":
+    # configure logging
+    logger = system.setup_logger("openclass_teacher")
+
     # configura o timeout padrao para sockets
     socket.setdefaulttimeout(2)
     gtk.gdk.threads_init()
     gtk.gdk.threads_enter()
-    print "Starting broadcast.."
+    logger.info("Starting broadcast..")
     # Main service service
-    service = TeacherRunner()
+    service = TeacherRunner(logger)
     # Main interface
-    gui = TeacherGui(service)
+    gui = TeacherGui(service, logger)
     service.start()
 
-    print "Starting main loop.."
+    logger.info("Starting main loop..")
     gtk.main()
     gtk.gdk.threads_leave()

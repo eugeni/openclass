@@ -65,8 +65,10 @@ iface_selected = 0
 class Student:
     selected_machines = 0
     """Teacher GUI main class"""
-    def __init__(self, guifile, max_missed_commands=30):
+    def __init__(self, logger=None, max_missed_commands=30):
         """Initializes the interface"""
+        # logger
+        self.logger = logger
         # colors
         self.color_normal = gtk.gdk.color_parse("#99BFEA")
         self.color_active = gtk.gdk.color_parse("#FFBBFF")
@@ -138,7 +140,7 @@ class Student:
 
         # Inicializa as threads
         self.bcast = network.BcastListener(network.LISTENPORT)
-        print "Starting broadcasting service.."
+        self.logger.info("Starting broadcasting service..")
         self.bcast.start()
 
         self.mcast = network.McastListener()
@@ -256,7 +258,6 @@ class Student:
         if not question:
             return
         command, params = self.send_command(protocol.REQUEST_RAISEHAND, {"message": question})
-        print command
 
     def on_about(self, data):
         dialog = gtk.AboutDialog()
@@ -331,15 +332,15 @@ class Student:
             response = dialog.run()
             if response == gtk.RESPONSE_OK:
                 self.name = self.entry_login.get_text()
-                print "Login: %s" % self.name
+                self.logger.info("Login: %s" % self.name)
                 teacher = self.teachers.get_active_text()
                 if teacher in self.teachers_addr:
                     source = self.teachers_addr[teacher]
                 else:
                     # unknown teacher?
-                    print "Unknown teacher address for teacher %s" % teacher
+                    self.logger.error("Unknown teacher address for teacher %s" % teacher)
                     continue
-                print "Will register on %s" % source
+                self.logger.info("Will register on %s" % source)
                 ret, params = self.send_command(protocol.REQUEST_REGISTER, {"name": self.name}, teacher=source)
                 if ret == "registered":
                     # registered successfully
@@ -355,12 +356,12 @@ class Student:
                     name_label.get_children()[0].set_use_markup(True)
                     break
                 elif ret == "pending":
-                    print "pending authorization from teacher"
+                    self.logger.info("pending authorization from teacher")
                 elif ret == "rejected":
-                    print "rejected by teacher"
+                    self.logger.info("rejected by teacher")
                     self.notification.notify(_("Connection not allowed"), _("The teacher (%s) does not allows you to connect to his class") % teacher, 10)
                 else:
-                    print "Unknown answer: %s" % ret
+                    self.logger.error("Unknown answer: %s" % ret)
             else:
                 break
         dialog.hide()
@@ -376,40 +377,39 @@ class Student:
             # connect to teacher for instructions
             command, params = self.send_command(protocol.REQUEST_ACTIONS, params)
             if command == protocol.ACTION_PROJECTION:
-                print "Projecting"
+                self.logger.info("Projecting")
                 self.start_projection()
             elif command == protocol.ACTION_ATTENTION:
-                print "Attention!"
+                self.logger.info( "Attention!")
                 self.ask_attention()
-                print params
             elif command == protocol.ACTION_MSG:
-                print "Message: %s" % params
+                self.logger.info("Message: %s" % params)
                 self.show_message(params)
                 self.noop()
             elif command == protocol.ACTION_NOOP:
-                print "Stopping everything"
+                self.logger.info("Stopping everything")
                 self.noop()
             elif command == protocol.ACTION_PLEASEREGISTER:
-                print "Students needs to register again"
+                self.logger.info("Students needs to register again")
                 self.noop()
                 self.disconnect()
             elif command == protocol.ACTION_SHOT:
-                print "Teacher requested our screenshot"
+                self.logger.info("Teacher requested our screenshot")
                 self.shot()
             elif command == protocol.ACTION_OPENFILE:
                 filename = urllib.quote(params)
-                print "Teacher requested us to open his file %s" % filename
+                self.logger.info("Teacher requested us to open his file %s" % filename)
                 url = "http://%s:%d/%s?file=%s" % (self.teacher_addr, network.LISTENPORT, protocol.REQUEST_GETFILE, filename)
                 system.open_url(url)
             elif command == protocol.ACTION_OPENURL:
                 url = params
-                print "Teacher requested us to open the link at %s" % url
+                self.logger.info("Teacher requested us to open the link at %s" % url)
                 system.open_url(url)
             elif command == protocol.ACTION_SHUTDOWN:
                 # TODO: show a confirmation window with a timeout
                 system.shutdown()
             else:
-                print "Unknown command %s" % command
+                self.logger.error("Unknown command %s" % command)
         gobject.timeout_add(1000, self.monitor_teacher)
 
     def show_message(self, message):
@@ -431,10 +431,10 @@ class Student:
         if not teacher:
             teacher = self.teacher_addr
         if not teacher:
-            print "Error: no teacher yet!"
+            self.logger.error("Error: no teacher yet!")
             return None, None
         if not self.name:
-            print "Error: not logged in yet!"
+            self.logger.error("Error: not logged in yet!")
             return None, None
         # TODO: proper user-agent
         url = "http://%s:%d/%s" % (teacher, network.LISTENPORT, command)
@@ -452,7 +452,7 @@ class Student:
                 if ret:
                     command, params = ret.split(" ", 1)
             except:
-                traceback.print_exc()
+                self.logger.exception("Parsing command from teacher")
                 command = ret
                 params = None
             self.missed_commands = 0
@@ -460,25 +460,24 @@ class Student:
             # something went wrong, disconnect
             self.missed_commands += 1
             if self.missed_commands > self.max_missed_commands:
-                print "Too many missing commands, leaving this teacher"
+                self.logger.warning("Too many missing commands, leaving this teacher")
                 self.noop()
                 self.teacher = None
                 self.teacher_addr = None
                 self.disconnect()
-                print "Unable to talk to teacher: %s" % sys.exc_value
-            print "Unable to talk to teacher for %d time: %s" % (self.missed_commands, sys.exc_value)
+                self.logger.error("Unable to talk to teacher: %s" % sys.exc_value)
+            self.logger.warning("Unable to talk to teacher for %d time: %s" % (self.missed_commands, sys.exc_value))
         return command, params
 
     def monitor_mcast(self):
         """Monitor for multicast messages"""
         while not self.mcast.messages.empty():
             message, sender = self.mcast.messages.get()
-            print sender
             screen_width, screen_height, fullscreen, pos_x, pos_y, step_x, step_y, img = self.protocol.unpack_chunk(message)
-            print "Received image at %dx%d-%dx%d (fullscreen=%s)" % (pos_x, pos_y, step_x, step_y, fullscreen)
+            self.logger.info("Received image at %dx%d-%dx%d (fullscreen=%s)" % (pos_x, pos_y, step_x, step_y, fullscreen))
             # ignore messages received from different teacher
             if sender != self.teacher_addr:
-                print "Ignoring multicast request from other teacher"
+                self.logger.info( "Ignoring multicast request from other teacher (%s instead of %s)" % (sender, self.teacher_addr))
                 continue
             try:
                 loader = gdk.PixbufLoader(image_type="jpeg")
@@ -526,7 +525,7 @@ class Student:
                     self.drawing.window.draw_pixbuf(gc, pb, 0, 0, pos_x, pos_y, step_x, step_y)
 
             except:
-                traceback.print_exc()
+                self.logger.exception("Processing multicast message")
 
         gobject.timeout_add(1000, self.monitor_mcast)
 
@@ -549,22 +548,21 @@ class Student:
                 pass
         gobject.timeout_add(1000, self.monitor_bcast)
 
-    def log(self, text):
-        """Logs something somewhere"""
-        print text
-
 if __name__ == "__main__":
+    # configure logging
+    logger = system.setup_logger("openclass_student")
+
     # configura o timeout padrao para sockets
     socket.setdefaulttimeout(5)
     # Atualizando a lista de interfaces
     gtk.gdk.threads_init()
     gtk.gdk.threads_enter()
 
-    print "Starting GUI.."
-    gui = Student("iface/student.glade")
+    logger.info("Starting GUI..")
+    gui = Student(logger=logger)
     try:
         gtk.main()
         gtk.gdk.threads_leave()
     except:
-        print "exiting.."
+        logger.info("exiting..")
         sys.exit()
