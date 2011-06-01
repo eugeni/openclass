@@ -8,7 +8,16 @@ import os
 DESTDIR="win_dist"
 
 setup(
-        console=['student.py', 'teacher.py'],
+        windows = [
+            {
+                "script": 'student.py',
+                "icon_resources": [(0, "iface/student.ico")]
+            },
+            {
+                "script": 'teacher.py',
+                "icon_resources": [(0, "iface/teacher.ico")]
+            }
+        ],
         options = {
             'py2exe':
                 {
@@ -17,9 +26,9 @@ setup(
                 },
                 },
             data_files = [
-            ("iface", glob.glob("iface/*")),
-	    ],
-        zipfile = "lib.dat",
+            ("iface", ["iface/machine.png", "iface/machine_off.png", "iface/openclass.png"]),
+        ],
+        zipfile = None,
         )
 
 # cleanup
