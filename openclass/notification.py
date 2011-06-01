@@ -74,8 +74,8 @@ class Notification:
             # calculating screen size
             window.set_gravity(gtk.gdk.GRAVITY_SOUTH_EAST)
             width, height = window.get_size()
-	    extra_spacing = 0
-	    if system.get_os() != "Linux":
+            extra_spacing = 0
+            if system.get_os() != "Linux":
                 # on windows, windows appear under taskbar
                 # so do some dirty workaround here (HACK HACK HACK!)
                 # XXX this should be fixed sometime..
