@@ -262,9 +262,8 @@ class Student:
     def on_about(self, data):
         dialog = gtk.AboutDialog()
         dialog.set_name('OpenClass')
-        dialog.set_version('0.0.1')
-        dialog.set_comments('A Simple and Small class control application. ')
-        dialog.set_website('github.com/eugeni/openclass')
+        dialog.set_comments('An open-source small class control application.')
+        dialog.set_website('http://openclass.dodonov.net/')
         dialog.run()
         dialog.destroy()
 
