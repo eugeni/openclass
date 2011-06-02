@@ -1,3 +1,5 @@
+ - simplify win32 packaging
+ - new icons
  - implement event logging
  - fix username on win32
  - some fixes for windows placement on win32 platform
