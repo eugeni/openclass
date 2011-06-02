@@ -53,7 +53,7 @@ def open_url(url):
         return os.system("xdg-open '%s' &" % url)
     else:
         # TODO: make it work on windows
-        return os.system("start %s" % url)
+        return os.startfile(url)
 
 def shutdown():
     """Shuts down the machine"""
