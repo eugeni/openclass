@@ -1,3 +1,15 @@
+openclass (0.3-1ubuntu2) natty; urgency=low
+
+  * New version 0.3.
+
+ -- Eugeni Dodonov <eugeni@dodonov.net>  Wed, 01 Jun 2011 21:37:45 -0300
+
+openclass (0.2-1ubuntu1) natty; urgency=low
+
+  * New version 0.2.
+
+ -- Eugeni Dodonov <eugeni@dodonov.net>  Mon, 30 May 2011 18:02:59 -0300
+
 openclass (0.1-1) natty; urgency=low
 
   * Initial release.
