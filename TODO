@@ -4,9 +4,6 @@ TODO list for openclass
 For version 1.0:
 - when sending files to student, give an option between saving then or
   opening directly
-- implement windows-specific low-level functions
-- fix hanging of student screen viewing on windows
-- add proper logging for debugging purposes
 
 For future versions:
 
