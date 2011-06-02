@@ -1,3 +1,4 @@
+0.3:
  - simplify win32 packaging
  - new icons
  - implement event logging
