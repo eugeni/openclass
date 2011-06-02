@@ -35,17 +35,6 @@ UninstPage instfiles
 ;--------------------------------
 
  
-Section "Microsoft Visual C++ 2008 Redistributable (required)" SEC01
-  SectionIn RO
-  
-  SetOutPath $INSTDIR
-
-  ; please download it and make available for the installer
-  ; available at http://www.microsoft.com/downloads/details.aspx?FamilyID=9b2da534-3e03-4391-8a4d-074b9f2bc1bf&displaylang=en
-  File "vcredist_x86.exe"
-  ExecWait "$INSTDIR\vcredist_x86.exe"
-SectionEnd
-
 ; The stuff to install
 Section "OpenClass (required)"
 
@@ -57,7 +46,6 @@ Section "OpenClass (required)"
   ; Put file there
   File "win_dist\*.dll"
   File /r "win_dist\iface"
-  File "win_dist\lib.dat"
   File "win_dist\*.pyd"
   File "win_dist\teacher.exe"
   File "win_dist\student.exe"
@@ -75,6 +63,17 @@ Section "OpenClass (required)"
 SectionEnd
 
 ; Optional section (can be disabled by the user)
+;
+Section "Microsoft Visual C++ 2008 Redistributable (required)" SEC01
+  
+  SetOutPath $INSTDIR
+
+  ; please download it and make available for the installer
+  ; available at http://www.microsoft.com/downloads/details.aspx?FamilyID=9b2da534-3e03-4391-8a4d-074b9f2bc1bf&displaylang=en
+  File "vcredist_x86.exe"
+  ExecWait "$INSTDIR\vcredist_x86.exe"
+SectionEnd
+
 Section "Start Menu Shortcuts"
 
   CreateDirectory "$SMPROGRAMS\OpenClass"
@@ -99,7 +98,6 @@ Section "Uninstall"
   Delete $INSTDIR\student.exe
   Delete $INSTDIR\*.dll
   Delete $INSTDIR\*.pyd
-  Delete $INSTDIR\lib.dat
   Delete $INSTDIR\uninstall.exe
   Delete "$INSTDIR\vcredist_x86.exe"
   RmDir /r $INSTDIR\iface
