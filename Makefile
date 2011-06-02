@@ -5,11 +5,12 @@ version:
 	echo "version='$(VERSION)'" > version.py
 
 install:
-	mkdir -p $(DESTDIR)/usr/share/openclass
+	mkdir -p $(DESTDIR)/usr/share/openclass/iface
 	mkdir -p $(DESTDIR)/usr/bin
 	install -m755 openclass-teacher $(DESTDIR)/usr/bin/openclass-teacher
 	install -m755 openclass-student $(DESTDIR)/usr/bin/openclass-student
-	cp -a teacher.py student.py iface openclass $(DESTDIR)/usr/share/openclass/
+	cp -a teacher.py student.py openclass $(DESTDIR)/usr/share/openclass/
+	cp -a iface/{machine,machine_off,openclass}.png $(DESTDIR)/usr/share/openclass/
 	# locale
 	$(MAKE) -C po $@
 	# desktop
