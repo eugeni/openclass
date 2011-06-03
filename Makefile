@@ -18,6 +18,9 @@ install:
 	install -m644 openclass-teacher.desktop $(DESTDIR)/usr/share/applications/
 	install -m644 openclass-student.desktop $(DESTDIR)/usr/share/applications/
 
+clean:
+	$(MAKE) -C po $@
+
 cleandist:
 	rm -rf $(PACKAGE)-$(VERSION) $(PACKAGE)-$(VERSION).tar.bz2
 
