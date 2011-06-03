@@ -102,7 +102,7 @@ class TeacherRunner(Thread):
 
     def process_request(self, client, request, params):
         """Gets pending actions for a client"""
-        self.logger.info( "Processing requests for %s (%s)" % (client, request))
+        self.logger.debug("Processing requests for %s (%s)" % (client, request))
         response = None
         response_params = None
         if request == protocol.REQUEST_REGISTER:

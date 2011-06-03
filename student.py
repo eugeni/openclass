@@ -557,6 +557,7 @@ class Student:
             # if there is an announce, but we are not yet logged in, skip
             msg = self.protocol.parse_header(data)
             name, flags = self.protocol.parse_announce(msg)
+            self.logger.debug("Found teacher <%s> at %s" % (name, source))
             model = self.teachers.get_model()
             if name not in [x[0] for x in model]:
                 self.teachers.append_text(name)
