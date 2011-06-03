@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2011-05-30 20:32+BRT\n"
+"POT-Creation-Date: 2011-06-03 08:29+BRT\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,71 +15,71 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../student.py:98
+#: ../student.py:100
 msgid "Identify yourself to the teacher"
 msgstr ""
 
-#: ../student.py:98
+#: ../student.py:100
 msgid "_Login"
 msgstr ""
 
-#: ../student.py:99
+#: ../student.py:101
 msgid "Select your teacher"
 msgstr ""
 
-#: ../student.py:99
+#: ../student.py:101
 msgid "_Teacher"
 msgstr ""
 
-#: ../student.py:100
+#: ../student.py:102
 msgid "Raise your hand to call teacher attention"
 msgstr ""
 
-#: ../student.py:100
+#: ../student.py:102
 msgid "_Call attention"
 msgstr ""
 
-#: ../student.py:101
+#: ../student.py:103
 msgid "About OpenClass"
 msgstr ""
 
-#: ../student.py:101
+#: ../student.py:103
 msgid "_About"
 msgstr ""
 
-#: ../student.py:102
+#: ../student.py:104
 msgid "Quit class"
 msgstr ""
 
-#: ../student.py:102
+#: ../student.py:104
 msgid "_Quit"
 msgstr ""
 
-#: ../student.py:193
+#: ../student.py:195
 msgid "OpenClass student (disconnected)"
 msgstr ""
 
-#: ../student.py:195
+#: ../student.py:197
 msgid "Disconnected from teacher"
 msgstr ""
 
-#: ../student.py:206
+#: ../student.py:208
 msgid "OpenClass student (connected to %s)"
 msgstr ""
 
-#: ../student.py:208
+#: ../student.py:210
 msgid "Connected to <b>%s</b>"
 msgstr ""
 
-#: ../student.py:229 ../teacher.py:514
+#: ../student.py:231 ../teacher.py:519
 msgid "Question"
 msgstr ""
 
-#: ../student.py:255
+#: ../student.py:257
 msgid "Call teacher attention"
 msgstr ""
 
-#: ../student.py:255
+#: ../student.py:257
 msgid "Teacher, look at me!"
 msgstr ""
 
@@ -87,11 +87,11 @@ msgstr ""
 msgid "Teacher asked you for attention"
 msgstr ""
 
-#: ../student.py:304 ../teacher.py:419
+#: ../student.py:304 ../teacher.py:425
 msgid "Login"
 msgstr ""
 
-#: ../student.py:307 ../teacher.py:422
+#: ../student.py:307 ../teacher.py:428
 msgid "Please login"
 msgstr ""
 
@@ -115,175 +115,195 @@ msgstr ""
 msgid "The teacher (%s) does not allows you to connect to his class"
 msgstr ""
 
-#: ../student.py:417
+#: ../student.py:411
+msgid "Received files"
+msgstr ""
+
+#: ../student.py:419
+msgid "Received a file from teacher: %s"
+msgstr ""
+
+#: ../student.py:419 ../student.py:422
+msgid "File download"
+msgstr ""
+
+#: ../student.py:422
+msgid "Unable to download file %s from teacher."
+msgstr ""
+
+#: ../student.py:438
 msgid "Message received from teacher"
 msgstr ""
 
-#: ../teacher.py:171
+#: ../teacher.py:173
 msgid "Bad request for file"
 msgstr ""
 
-#: ../teacher.py:177
+#: ../teacher.py:179
 msgid "File not authorized for transfer"
 msgstr ""
 
-#: ../teacher.py:184
+#: ../teacher.py:186
 msgid "Unable to transfer %s: %s"
 msgstr ""
 
-#: ../teacher.py:214
+#: ../teacher.py:216
 msgid "The student asks for your attention"
 msgstr ""
 
-#: ../teacher.py:218 ../teacher.py:714
+#: ../teacher.py:220 ../teacher.py:722
 msgid "The teacher asked you to leave this class"
 msgstr ""
 
-#: ../teacher.py:292
+#: ../teacher.py:296
 msgid "OpenClass Teacher"
 msgstr ""
 
-#: ../teacher.py:305 ../teacher.py:688
+#: ../teacher.py:309 ../teacher.py:696
 msgid "Send Screen"
 msgstr ""
 
-#: ../teacher.py:309
+#: ../teacher.py:313
 msgid "Lock Screens"
 msgstr ""
 
-#: ../teacher.py:313
+#: ../teacher.py:317
 msgid "Share files"
 msgstr ""
 
-#: ../teacher.py:317
+#: ../teacher.py:321
 msgid "Share a web page"
 msgstr ""
 
-#: ../teacher.py:321
+#: ../teacher.py:325
 msgid "Turn off students"
 msgstr ""
 
-#: ../teacher.py:327
+#: ../teacher.py:331
 msgid "Quit"
 msgstr ""
 
-#: ../teacher.py:346
+#: ../teacher.py:350
 msgid "Student view"
 msgstr ""
 
-#: ../teacher.py:355
+#: ../teacher.py:359
 msgid "Share with other students"
 msgstr ""
 
-#: ../teacher.py:360
+#: ../teacher.py:364
 msgid "Refresh"
 msgstr ""
 
-#: ../teacher.py:366
+#: ../teacher.py:370
 msgid "Close"
 msgstr ""
 
-#: ../teacher.py:426
+#: ../teacher.py:432
 msgid "Your name (teacher or class name):"
 msgstr ""
 
-#: ../teacher.py:450
+#: ../teacher.py:456
 msgid "Please select screen size for projection"
 msgstr ""
 
-#: ../teacher.py:460 ../teacher.py:476
+#: ../teacher.py:466 ../teacher.py:481
 msgid "Full screen size"
 msgstr ""
 
-#: ../teacher.py:601
+#: ../teacher.py:604
 msgid "Viewing display of %s"
 msgstr ""
 
-#: ../teacher.py:651
+#: ../teacher.py:658
 msgid "Updated on %s"
 msgstr ""
 
-#: ../teacher.py:668
+#: ../teacher.py:676
 msgid "Message received from %s"
 msgstr ""
 
-#: ../teacher.py:681
+#: ../teacher.py:689
 msgid "Stop sending screen"
 msgstr ""
 
-#: ../teacher.py:696
+#: ../teacher.py:704
 msgid "Share a web page with students"
 msgstr ""
 
-#: ../teacher.py:723
+#: ../teacher.py:731
 msgid "Disconnected from teacher at %s!"
 msgstr ""
 
-#: ../teacher.py:745
+#: ../teacher.py:753
 msgid "Are you sure you want to turn off all the student computers?"
 msgstr ""
 
-#: ../teacher.py:745 ../teacher.py:747
+#: ../teacher.py:753 ../teacher.py:755
 msgid "Please confirm the shutdown request"
 msgstr ""
 
-#: ../teacher.py:747
+#: ../teacher.py:755
 msgid "Are you sure you want to turn off this computer?"
 msgstr ""
 
-#: ../teacher.py:759
+#: ../teacher.py:767
 msgid "Select a file to share with students"
 msgstr ""
 
-#: ../teacher.py:782
+#: ../teacher.py:770
+msgid "Open the file on students immediately"
+msgstr ""
+
+#: ../teacher.py:801
 msgid "Stop locking screen"
 msgstr ""
 
-#: ../teacher.py:789
+#: ../teacher.py:808
 msgid "Lock Screen"
 msgstr ""
 
-#: ../teacher.py:832
+#: ../teacher.py:851
 msgid "name"
 msgstr ""
 
-#: ../teacher.py:847
+#: ../teacher.py:872
 msgid "Please, pay attention!"
 msgstr ""
 
-#: ../teacher.py:847
+#: ../teacher.py:872
 msgid "Send a message to student"
 msgstr ""
 
-#: ../teacher.py:876
+#: ../teacher.py:900
 msgid "Send message to student"
 msgstr ""
 
-#: ../teacher.py:880
+#: ../teacher.py:904
 msgid "View student screen"
 msgstr ""
 
-#: ../teacher.py:884
+#: ../teacher.py:908
 msgid "Send a web page to student"
 msgstr ""
 
-#: ../teacher.py:888
+#: ../teacher.py:912
 msgid "Send a file to student"
 msgstr ""
 
-#: ../teacher.py:892
+#: ../teacher.py:916
 msgid "Remote control student computer"
 msgstr ""
 
-#: ../teacher.py:896
+#: ../teacher.py:920
 msgid "Remove student from class"
 msgstr ""
 
-#: ../teacher.py:900
+#: ../teacher.py:924
 msgid "Turn off student computer"
 msgstr ""
 
-#: ../teacher.py:905
+#: ../teacher.py:929
 msgid "Allow student to participate in the class"
 msgstr ""
 
