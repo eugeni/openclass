@@ -97,7 +97,7 @@ class Protocol:
         try:
             name, flags = struct.unpack("!64pi", announce)
             # TODO: strip trailing null bytes
-            return (name, flags)
+            return (name.strip(), flags)
         except:
             self.logger.exception("Parsing protocol announce")
             return None
