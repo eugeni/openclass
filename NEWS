@@ -1,3 +1,4 @@
+ - properly parse teacher names on broadcast
  - l18n fixes on russian
  - when sending files to student, give an option between saving then or opening directly
 
