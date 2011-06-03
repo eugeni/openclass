@@ -396,10 +396,32 @@ class Student:
                 self.logger.info("Teacher requested our screenshot")
                 self.shot()
             elif command == protocol.ACTION_OPENFILE:
-                filename = urllib.quote(params)
-                self.logger.info("Teacher requested us to open his file %s" % filename)
-                url = "http://%s:%d/%s?file=%s" % (self.teacher_addr, network.LISTENPORT, protocol.REQUEST_GETFILE, filename)
-                system.open_url(url)
+                file_action = params
+                self.logger.info("Teacher requested us to process file action: %s" % file_action)
+                try:
+                    do_open, filename_short, filename = file_action.split(":", 2)
+                    filename = urllib.quote(filename)
+                    url = "http://%s:%d/%s?file=%s" % (self.teacher_addr, network.LISTENPORT, protocol.REQUEST_GETFILE, filename)
+                    self.logger.debug("Grabbing file from %s" % url)
+                    if do_open == "open":
+                        system.open_url(url)
+                    else:
+                        # just download the file, do not open it yet
+                        try:
+                            localfile = system.create_local_file(_("Received files"), filename_short)
+                            opener = urllib.FancyURLopener().open(url)
+                            with open(localfile, "w") as fd:
+                                while True:
+                                    data = opener.read(16384)
+                                    if not data:
+                                        break
+                                    fd.write(data)
+                            self.notification.notify(_("File download"), _("Received a file from teacher: %s") % localfile)
+                        except:
+                            self.logger.exception("Downloading file %s from teacher" % url)
+                            self.notification.notify(_("File download"), _("Unable to download file %s from teacher.") % filename_short)
+                except:
+                    self.logger.exception("Open file request")
             elif command == protocol.ACTION_OPENURL:
                 url = params
                 self.logger.info("Teacher requested us to open the link at %s" % url)

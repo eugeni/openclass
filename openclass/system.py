@@ -86,6 +86,20 @@ def get_home():
     else:
         return os.getenv("HOMEPATH")
 
+def get_local_storage(directory, create=False):
+    """Returns the directory to store files locally"""
+    localdir = "%s%s%s" % (get_home(), os.sep, directory)
+    if create:
+        if not os.access(localdir, os.W_OK | os.R_OK):
+            os.makedirs(localdir)
+    return localdir
+
+def create_local_file(directory, filename):
+    """Creates a new file in local storage dir"""
+    localdir = get_local_storage(directory, create=True)
+    localfile = "%s%s%s" % (localdir, os.sep, filename)
+    return localfile
+
 def setup_logger(log_name):
     """Configures the logger"""
     log_file="%s%s%s.log" % (get_home(), os.sep, log_name)

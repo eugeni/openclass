@@ -767,19 +767,30 @@ class TeacherGui:
         chooser = gtk.FileChooserDialog(title=_("Select a file to share with students"),action=gtk.FILE_CHOOSER_ACTION_OPEN,
                       buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_SAVE,gtk.RESPONSE_OK))
         chooser.set_default_response(gtk.RESPONSE_OK)
+        checkbox = gtk.CheckButton(label=_("Open the file on students immediately"))
+        checkbox.set_active(True)
+        chooser.vbox.pack_start(checkbox, False, False)
+        chooser.vbox.show_all()
         response = chooser.run()
         if response != gtk.RESPONSE_OK:
             chooser.destroy()
             return
         filename = chooser.get_filename()
+        do_open = checkbox.get_active()
+        # discover short filename
+        filename_short = filename.split(os.sep)[-1]
         self.service.authorize_file_transfer(filename)
         chooser.destroy()
+        if do_open:
+            file_action="open::%s" % filename
+        else:
+            file_action="down:%s:%s" % (filename_short, filename)
         if not client:
             machines = self.get_selected_machines()
         else:
             machines = [client]
         for machine in machines:
-            self.service.add_client_action(machine, protocol.ACTION_OPENFILE, filename)
+            self.service.add_client_action(machine, protocol.ACTION_OPENFILE, file_action)
 
     def lock_screen(self, widget):
         """Starts screen locking for selected machines"""
