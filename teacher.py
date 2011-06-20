@@ -314,9 +314,20 @@ class TeacherGui:
 
         # Configura os timers
         # monitora os eventos
-        gobject.timeout_add(1000, self.monitor)
+        try:
+            self.events_frequency = int(self.config.get("gui", "events_frequency", "1000"))
+        except:
+            self.logger.exception("Detecting events exception")
+            self.events_frequency = 1000
+        gobject.timeout_add(self.events_frequency, self.monitor)
         # monitora a projecao
-        gobject.timeout_add(500, self.projection)
+        try:
+            self.projection_frequency = int(self.config.get("projection", "frequency", "500"))
+        except:
+            self.logger.exception("Detecting projection exception")
+            self.events_frequency = 500
+
+        gobject.timeout_add(self.projection_frequency, self.projection)
 
         self.window.show_all()
 
@@ -499,7 +510,7 @@ class TeacherGui:
             self.service.send_projection(self.projection_width,
                     self.projection_height, self.projection_fullscreen, chunks)
 
-        gobject.timeout_add(500, self.projection)
+        gobject.timeout_add(self.projection_frequency, self.projection)
 
     def refresh_shot(self, widget):
         """Refreshes a screenshot"""
@@ -596,7 +607,7 @@ class TeacherGui:
                     name = self.machines[addr].machine
                 self.show_message(_("Message received from %s") % name, message, timeout=0)
 
-        gobject.timeout_add(1000, self.monitor)
+        gobject.timeout_add(self.events_frequency, self.monitor)
 
     def send_screen(self, widget):
         """Starts screen sharing for selected machines"""
