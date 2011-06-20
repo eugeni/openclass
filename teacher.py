@@ -288,7 +288,7 @@ class TeacherGui:
         self.notification = notification.Notification("OpenClass teacher")
 
         # find out what is our skin
-        skin_name = self.config.variable("gui", "skin", "DefaultSkin")
+        skin_name = self.config.get("gui", "skin", "DefaultSkin")
         skin_class = skins.get_skin(logger, skin_name)
         self.skin = skin_class(logger, self)
 
@@ -481,9 +481,24 @@ class TeacherGui:
         """Grabs the screen for multicast projection when needed"""
         if self.current_action == protocol.ACTION_PROJECTION:
             self.logger.info("Sending screens, yee-ha!")
+            # how many chunks?
+            # TODO: auto-detect this according to the screen size
+            try:
+                chunks_x = int(self.config.get("projection", "tiles_x", "4"))
+                chunks_y = int(self.config.get("projection", "tiles_y", "4"))
+            except:
+                self.logger.exception("Detecting number of chunks")
+                chunks_x = 4
+                chunks_y = 4
             # we are projecting, grab stuff
-            chunks = self.projection_screen.chunks(scale_x=self.projection_width, scale_y=self.projection_height)
-            self.service.send_projection(self.projection_width, self.projection_height, self.projection_fullscreen, chunks)
+
+            chunks = self.projection_screen.chunks(chunks_x=chunks_x,
+                    chunks_y=chunks_y, scale_x=self.projection_width,
+                    scale_y=self.projection_height)
+
+            self.service.send_projection(self.projection_width,
+                    self.projection_height, self.projection_fullscreen, chunks)
+
         gobject.timeout_add(500, self.projection)
 
     def refresh_shot(self, widget):
