@@ -272,10 +272,11 @@ class TeacherRunner(Thread):
 class TeacherGui:
     selected_machines = 0
     """Teacher GUI main class"""
-    def __init__(self, service, logger, skin):
+    def __init__(self, service, logger, config):
         """Initializes the interface"""
         # logger
         self.logger = logger
+        self.config = config
         # internal variables
         self.class_name = None
         self.bcast = None
@@ -286,8 +287,10 @@ class TeacherGui:
         # notification
         self.notification = notification.Notification("OpenClass teacher")
 
-        # apply skin
-        self.skin = skin(logger, self)
+        # find out what is our skin
+        skin_name = self.config.variable("gui", "skin", "DefaultSkin")
+        skin_class = skins.get_skin(logger, skin_name)
+        self.skin = skin_class(logger, self)
 
         self.machines = {}
         self.machines_map = {}
@@ -854,10 +857,6 @@ if __name__ == "__main__":
     config = config.Config(logger, CONFIGFILE, SYSTEM_CONFIGFILE)
     config.load()
 
-    # find out what is our skin
-    skin_name = config.variable("gui", "skin", "DefaultSkin")
-    skin = skins.get_skin(logger, skin_name)
-
     # configura o timeout padrao para sockets
     socket.setdefaulttimeout(2)
     gtk.gdk.threads_init()
@@ -866,7 +865,7 @@ if __name__ == "__main__":
     # Main service service
     service = TeacherRunner(logger)
     # Main interface
-    gui = TeacherGui(service, logger, skin)
+    gui = TeacherGui(service, logger, config)
     service.start()
 
     logger.info("Starting main loop..")
