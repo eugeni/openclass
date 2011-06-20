@@ -48,15 +48,16 @@ except IOError:
     _ = str
     traceback.print_exc()
 
+# configuration
+from openclass import network, system, protocol, screen, notification, config
+import skins
+
+# variables
 MACHINES_X = 5
 MACHINES_Y = 8
 
-# configuration
-from openclass import network, system, protocol, screen, notification
-# skins
-from skins.DefaultSkin import DefaultSkin as Skin
-
-# helper functions
+CONFIGFILE = system.get_full_path(system.get_local_storage(), ".openclass.conf")
+SYSTEM_CONFIGFILE = system.get_full_path(system.get_system_storage(), "openclass.conf")
 
 # {{{ TeacherRunner
 class TeacherRunner(Thread):
@@ -271,7 +272,7 @@ class TeacherRunner(Thread):
 class TeacherGui:
     selected_machines = 0
     """Teacher GUI main class"""
-    def __init__(self, service, logger):
+    def __init__(self, service, logger, skin):
         """Initializes the interface"""
         # logger
         self.logger = logger
@@ -286,7 +287,7 @@ class TeacherGui:
         self.notification = notification.Notification("OpenClass teacher")
 
         # apply skin
-        self.skin = Skin(logger, self)
+        self.skin = skin(logger, self)
 
         self.machines = {}
         self.machines_map = {}
@@ -849,6 +850,14 @@ if __name__ == "__main__":
     # configure logging
     logger = system.setup_logger("openclass_teacher")
 
+    # configuration file
+    config = config.Config(logger, CONFIGFILE, SYSTEM_CONFIGFILE)
+    config.load()
+
+    # find out what is our skin
+    skin_name = config.variable("gui", "skin", "DefaultSkin")
+    skin = skins.get_skin(logger, skin_name)
+
     # configura o timeout padrao para sockets
     socket.setdefaulttimeout(2)
     gtk.gdk.threads_init()
@@ -857,9 +866,11 @@ if __name__ == "__main__":
     # Main service service
     service = TeacherRunner(logger)
     # Main interface
-    gui = TeacherGui(service, logger)
+    gui = TeacherGui(service, logger, skin)
     service.start()
 
     logger.info("Starting main loop..")
     gtk.main()
+    # saving config changes and reference values
+    config.save()
     gtk.gdk.threads_leave()

@@ -86,7 +86,15 @@ def get_home():
     else:
         return os.getenv("HOMEPATH")
 
-def get_local_storage(directory, create=False):
+def get_system_storage():
+    """Returns the directory where global configuration is located"""
+    if get_os() == "Linux":
+        return "/etc/"
+    else:
+        # where to store on windows?
+        return get_local_storage(".")
+
+def get_local_storage(directory="", create=False):
     """Returns the directory to store files locally"""
     localdir = "%s%s%s" % (get_home(), os.sep, directory)
     if create:
@@ -97,8 +105,11 @@ def get_local_storage(directory, create=False):
 def create_local_file(directory, filename):
     """Creates a new file in local storage dir"""
     localdir = get_local_storage(directory, create=True)
-    localfile = "%s%s%s" % (localdir, os.sep, filename)
-    return localfile
+    return get_full_path(localdir, filename)
+
+def get_full_path(directory, filename):
+    """Gets the full path to a filename"""
+    return "%s%s%s" % (directory, os.sep, filename)
 
 def setup_logger(log_name):
     """Configures the logger"""
