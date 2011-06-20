@@ -53,6 +53,8 @@ MACHINES_Y = 8
 
 # configuration
 from openclass import network, system, protocol, screen, notification
+# skins
+from skins.DefaultSkin import DefaultSkin as Skin
 
 # helper functions
 
@@ -283,128 +285,28 @@ class TeacherGui:
         # notification
         self.notification = notification.Notification("OpenClass teacher")
 
-        # colors
-        self.color_normal = gtk.gdk.color_parse("#99BFEA")
-        self.color_active = gtk.gdk.color_parse("#FFBBFF")
-        self.color_background = gtk.gdk.color_parse("#FFFFFF")
+        # apply skin
+        self.skin = Skin(logger, self)
 
-        # building the interface
-        self.window = gtk.Window()
-        self.window.set_resizable(False)
-        self.window.set_default_size(800, 600)
-        self.window.set_position(gtk.WIN_POS_CENTER)
-        self.window.set_title(_("OpenClass Teacher"))
-        self.window.connect('destroy', self.quit)
+        self.machines = {}
+        self.machines_map = {}
+        self.machines_status = {}
 
-        # main layout
-        MainLayout = gtk.Fixed()
-        MainLayout.set_property("width_request", 640)
-        MainLayout.set_property("height_request", 480)
-        self.window.add(MainLayout)
+        # inicializa o timestamp
+        self.curtimestamp = 0
 
-        MenuVBox = gtk.VBox()
-        MenuVBox.set_property("width_request", 160)
-        MenuVBox.set_property("height_request", 520)
-        MainLayout.put(MenuVBox, 10, 20)
-        self.SendScreen = gtk.Button(_("Send Screen"))
-        self.SendScreen.connect('clicked', self.send_screen)
-        MenuVBox.pack_start(self.SendScreen, False, False, 5)
-
-        self.LockScreen = gtk.Button(_("Lock Screens"))
-        self.LockScreen.connect('clicked', self.lock_screen)
-        MenuVBox.pack_start(self.LockScreen, False, False, 5)
-
-        self.ShareFile = gtk.Button(_("Share files"))
-        self.ShareFile.connect('clicked', self.share_files)
-        MenuVBox.pack_start(self.ShareFile, False, False, 5)
-
-        self.ShareFile = gtk.Button(_("Share a web page"))
-        self.ShareFile.connect('clicked', self.share_url)
-        MenuVBox.pack_start(self.ShareFile, False, False, 5)
-
-        self.ShareFile = gtk.Button(_("Turn off students"))
-        self.ShareFile.connect('clicked', self.shutdown)
-        MenuVBox.pack_start(self.ShareFile, False, False, 5)
-
-        MenuVBox.pack_start(gtk.Label(), False, False, 100)
-
-        self.QuitButton = gtk.Button(_("Quit"))
-        self.QuitButton.connect('clicked', self.quit)
-        MenuVBox.pack_start(self.QuitButton, False, False, 5)
-
-        # scrolling machine view
-        MachinesScrollWindow = gtk.ScrolledWindow()
-        MachinesScrollWindow.set_property("width_request", 580)
-        MachinesScrollWindow.set_property("height_request", 520)
-        MainLayout.put(MachinesScrollWindow, 200, 30)
-
-        self.MachineLayout = gtk.Layout()
-        MachinesScrollWindow.add(self.MachineLayout)
-
-        # machines images
-        self.image_connected = self.get_img("iface/machine.png")
-        self.image_disconnected = self.get_img("iface/machine_off.png")
-
-        # screenshot view
-        self.shot_window = gtk.Window()
-        self.shot_window.set_title(_("Student view"))
-        self.shot_window.connect('destroy', lambda *w: self.shot_window.hide())
-        vbox = gtk.VBox()
-        self.shot_window.add(vbox)
-        hbox = gtk.HBox()
-        vbox.pack_start(hbox, False, False)
-        self.shot_label = gtk.Label()
-        hbox.pack_start(self.shot_label, False, False)
-
-        self.shot_share = gtk.Button(_("Share with other students"))
-        self.shot_share.connect('clicked', self.share_student_screen)
-        # mark currently refreshed client
-        hbox.pack_start(self.shot_share)
-
-        self.shot_refresh = gtk.Button(_("Refresh"))
-        self.shot_refresh.connect('clicked', self.refresh_shot)
-        # mark currently refreshed client
-        self.shot_refresh.current_client = None
-        hbox.pack_start(self.shot_refresh)
-
-        button = gtk.Button(_("Close"))
-        button.connect('clicked', lambda *w: self.shot_window.hide())
-        hbox.pack_start(button)
-
-        self.shot_drawing = gtk.Image()
-        vbox.pack_start(self.shot_drawing)
-
-        vbox.show_all()
-
-        # tooltips
-        self.tooltip = gtk.Tooltips()
-
-        # Muda o background
-        self.window.modify_bg(gtk.STATE_NORMAL, self.color_background)
-        self.MachineLayout.modify_bg(gtk.STATE_NORMAL, self.color_background)
+        # projection screen
+        self.projection_screen = screen.Screen()
+        self.projection_width = None
+        self.projection_height = None
 
         # Inicializa a matriz de maquinas
         self.machine_layout = [None] * MACHINES_X
         for x in range(0, MACHINES_X):
             self.machine_layout[x] = [None] * MACHINES_Y
 
-        self.machines = {}
-        self.machines_map = {}
-        self.machines_status = {}
-
-        # Mostra as maquinas
-        self.MachineLayout.show_all()
-
-        # inicializa o timestamp
-        self.curtimestamp = 0
-
         # maquinas de estados
         self.current_action = protocol.ACTION_NOOP
-
-        # projection screen
-        self.projection_screen = screen.Screen()
-        self.projection_width = None
-        self.projection_height = None
 
         # Configura os timers
         # monitora os eventos
