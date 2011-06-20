@@ -26,3 +26,14 @@ class Skin:
         otherwise bad things will happen. Trust me."""
         pass
 
+def get_skin(logger, skin_name):
+    """Converts a skin name into a valid skin"""
+    skin = None
+    try:
+        skin_file = __import__("skins.%s" % skin_name)
+        skin_class = getattr(skin_file, skin_name)
+        skin = getattr(skin_class, skin_name)
+    except:
+        logger.exception("Trying to load skin %s" % skin_name)
+    return skin
+
