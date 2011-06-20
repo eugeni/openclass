@@ -63,12 +63,15 @@ SYSTEM_CONFIGFILE = system.get_full_path(system.get_system_storage(), "openclass
 class TeacherRunner(Thread):
     selected_machines = 0
     """Teacher service"""
-    def __init__(self, logger):
+    def __init__(self, logger, config):
         """Initializes the teacher thread"""
         Thread.__init__(self)
 
         # logger
         self.logger = logger
+
+        # configuration
+        self.config = config
 
         # actions
         self.actions = Queue()
@@ -92,7 +95,12 @@ class TeacherRunner(Thread):
         self.bcast = None
 
         # multicast sender
-        self.mcast = network.McastSender(logger=logger)
+        try:
+            self.mcast_frequency = float(self.config.get("multicast", "min_interval", "0.05"))
+        except:
+            self.logger.exception("Detecting multicast interval")
+            self.mcast_frequency = 0.05
+        self.mcast = network.McastSender(logger=logger, interval = self.mcast_frequency)
 
         # temporary files
         self.tmpfiles = []
@@ -889,7 +897,7 @@ if __name__ == "__main__":
     gtk.gdk.threads_enter()
     logger.info("Starting broadcast..")
     # Main service service
-    service = TeacherRunner(logger)
+    service = TeacherRunner(logger, config)
     # Main interface
     gui = TeacherGui(service, logger, config)
     service.start()
