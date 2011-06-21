@@ -59,6 +59,10 @@ MACHINES_Y = 8
 CONFIGFILE = system.get_full_path(system.get_local_storage(), ".openclass.conf")
 SYSTEM_CONFIGFILE = system.get_full_path(system.get_system_storage(), "openclass.conf")
 
+# Enable gkt.Button to show image and label
+settings = gtk.settings_get_default()
+settings.set_property('gtk-button-images', True)
+
 # {{{ TeacherRunner
 class TeacherRunner(Thread):
     selected_machines = 0
