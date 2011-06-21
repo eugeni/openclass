@@ -56,7 +56,4 @@ class Config:
         if not self.config.has_option(section, variable):
             self.config.set(section, variable, default)
         value = self.config.get(section, variable)
-        if not value:
-            value = default
-            self.config.set(section, variable, default)
         return value
