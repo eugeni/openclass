@@ -23,6 +23,8 @@ import struct
 import SocketServer
 import time
 
+import random
+
 import tempfile
 
 import logging
@@ -64,13 +66,16 @@ def shutdown():
         # TODO: no shutdown yet on windows
         return os.system("shutdown -s -t 01 -c \"Shutting down per teacher request\"")
 
-def get_client_id():
+def get_client_id(random=False):
     """Returns client id (if any)"""
     if get_os() == "Linux":
         client_id = os.getenv("DISPLAY")
     else:
         # TODO: get proper client id
         client_id = ""
+    if random:
+        # generate a random and hopefully unique id
+        client_id = "%s.%d" % (client_id, int(random.random() * 100000))
     return client_id
 
 def create_tmp_file(suffix=''):
