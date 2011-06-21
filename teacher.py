@@ -48,26 +48,30 @@ except IOError:
     _ = str
     traceback.print_exc()
 
+# configuration
+from openclass import network, system, protocol, screen, notification, config
+import skins
+
+# variables
 MACHINES_X = 5
 MACHINES_Y = 8
 
-# configuration
-from openclass import network, system, protocol, screen, notification
-# skins
-from skins.DefaultSkin import DefaultSkin as Skin
-
-# helper functions
+CONFIGFILE = system.get_full_path(system.get_local_storage(), ".openclass.conf")
+SYSTEM_CONFIGFILE = system.get_full_path(system.get_system_storage(), "openclass.conf")
 
 # {{{ TeacherRunner
 class TeacherRunner(Thread):
     selected_machines = 0
     """Teacher service"""
-    def __init__(self, logger):
+    def __init__(self, logger, config):
         """Initializes the teacher thread"""
         Thread.__init__(self)
 
         # logger
         self.logger = logger
+
+        # configuration
+        self.config = config
 
         # actions
         self.actions = Queue()
@@ -91,7 +95,12 @@ class TeacherRunner(Thread):
         self.bcast = None
 
         # multicast sender
-        self.mcast = network.McastSender(logger=logger)
+        try:
+            self.mcast_frequency = float(self.config.get("multicast", "min_interval", "0.05"))
+        except:
+            self.logger.exception("Detecting multicast interval")
+            self.mcast_frequency = 0.05
+        self.mcast = network.McastSender(logger=logger, interval = self.mcast_frequency)
 
         # temporary files
         self.tmpfiles = []
@@ -271,10 +280,11 @@ class TeacherRunner(Thread):
 class TeacherGui:
     selected_machines = 0
     """Teacher GUI main class"""
-    def __init__(self, service, logger):
+    def __init__(self, service, logger, config):
         """Initializes the interface"""
         # logger
         self.logger = logger
+        self.config = config
         # internal variables
         self.class_name = None
         self.bcast = None
@@ -285,8 +295,10 @@ class TeacherGui:
         # notification
         self.notification = notification.Notification("OpenClass teacher")
 
-        # apply skin
-        self.skin = Skin(logger, self)
+        # find out what is our skin
+        skin_name = self.config.get("gui", "skin", "DefaultSkin")
+        skin_class = skins.get_skin(logger, skin_name)
+        self.skin = skin_class(logger, self)
 
         self.machines = {}
         self.machines_map = {}
@@ -310,9 +322,20 @@ class TeacherGui:
 
         # Configura os timers
         # monitora os eventos
-        gobject.timeout_add(1000, self.monitor)
+        try:
+            self.events_frequency = int(self.config.get("gui", "events_frequency", "1000"))
+        except:
+            self.logger.exception("Detecting events exception")
+            self.events_frequency = 1000
+        gobject.timeout_add(self.events_frequency, self.monitor)
         # monitora a projecao
-        gobject.timeout_add(500, self.projection)
+        try:
+            self.projection_frequency = int(self.config.get("projection", "frequency", "500"))
+        except:
+            self.logger.exception("Detecting projection exception")
+            self.events_frequency = 500
+
+        gobject.timeout_add(self.projection_frequency, self.projection)
 
         self.window.show_all()
 
@@ -477,10 +500,25 @@ class TeacherGui:
         """Grabs the screen for multicast projection when needed"""
         if self.current_action == protocol.ACTION_PROJECTION:
             self.logger.info("Sending screens, yee-ha!")
+            # how many chunks?
+            # TODO: auto-detect this according to the screen size
+            try:
+                chunks_x = int(self.config.get("projection", "tiles_x", "4"))
+                chunks_y = int(self.config.get("projection", "tiles_y", "4"))
+            except:
+                self.logger.exception("Detecting number of chunks")
+                chunks_x = 4
+                chunks_y = 4
             # we are projecting, grab stuff
-            chunks = self.projection_screen.chunks(scale_x=self.projection_width, scale_y=self.projection_height)
-            self.service.send_projection(self.projection_width, self.projection_height, self.projection_fullscreen, chunks)
-        gobject.timeout_add(500, self.projection)
+
+            chunks = self.projection_screen.chunks(chunks_x=chunks_x,
+                    chunks_y=chunks_y, scale_x=self.projection_width,
+                    scale_y=self.projection_height)
+
+            self.service.send_projection(self.projection_width,
+                    self.projection_height, self.projection_fullscreen, chunks)
+
+        gobject.timeout_add(self.projection_frequency, self.projection)
 
     def refresh_shot(self, widget):
         """Refreshes a screenshot"""
@@ -577,7 +615,7 @@ class TeacherGui:
                     name = self.machines[addr].machine
                 self.show_message(_("Message received from %s") % name, message, timeout=0)
 
-        gobject.timeout_add(1000, self.monitor)
+        gobject.timeout_add(self.events_frequency, self.monitor)
 
     def send_screen(self, widget):
         """Starts screen sharing for selected machines"""
@@ -849,17 +887,23 @@ if __name__ == "__main__":
     # configure logging
     logger = system.setup_logger("openclass_teacher")
 
+    # configuration file
+    config = config.Config(logger, CONFIGFILE, SYSTEM_CONFIGFILE)
+    config.load()
+
     # configura o timeout padrao para sockets
     socket.setdefaulttimeout(2)
     gtk.gdk.threads_init()
     gtk.gdk.threads_enter()
     logger.info("Starting broadcast..")
     # Main service service
-    service = TeacherRunner(logger)
+    service = TeacherRunner(logger, config)
     # Main interface
-    gui = TeacherGui(service, logger)
+    gui = TeacherGui(service, logger, config)
     service.start()
 
     logger.info("Starting main loop..")
     gtk.main()
+    # saving config changes and reference values
+    config.save()
     gtk.gdk.threads_leave()
