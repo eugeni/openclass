@@ -306,6 +306,7 @@ class TeacherGui:
 
         self.machines = {}
         self.machines_map = {}
+        # TODO: unify machines_status and machines_alive with service thread
         self.machines_status = {}
         self.machines_alive = {}
 
@@ -595,6 +596,8 @@ class TeacherGui:
                     # do not process events from already rejected machines
                     if self.machines_status[addr] == "rejected":
                         continue
+                    elif self.machines_status[addr] == "pending":
+                        self.machines_status[addr] = "registered"
                     machine = self.machines[addr]
                     shot = params.get("shot")
                     if shot:
