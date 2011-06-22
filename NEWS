@@ -1,3 +1,4 @@
+ - detect when students lose connection
  - add support for configurable parameters
  - add support for user and site-wide configuration files
  - add support for different skins
