@@ -307,6 +307,14 @@ class TeacherGui:
         self.machines = {}
         self.machines_map = {}
         self.machines_status = {}
+        self.machines_alive = {}
+
+        # get client lifetime timestamp
+        try:
+            self.max_client_timeout = int(self.config.get("gui", "alive_interval", "10"))
+        except:
+            self.logget.exception("Detecting max client timeout")
+            self.max_client_timeout = 10
 
         # inicializa o timestamp
         self.curtimestamp = 0
@@ -559,8 +567,12 @@ class TeacherGui:
 
     def monitor(self):
         """Monitors new machines connections"""
+        # update machine timestamp
+        timestamp = time.time()
         while not self.clients_queue.empty():
             action, addr, params = self.clients_queue.get()
+            self.machines_alive[addr] = timestamp
+            timestamp_s = time.asctime(time.localtime(timestamp))
             if action == "new":
                 # adding a new machine
                 if addr not in self.machines:
@@ -599,7 +611,7 @@ class TeacherGui:
                         machine.fullname = name
                     tooltip = "%s\n" % name
                     tooltip += "(%s)\n" % addr
-                    tooltip += _("Updated on %s") % time.asctime()
+                    tooltip += _("Updated on %s") % timestamp_s
                     self.tooltip.set_tip(machine, tooltip)
             elif action == "reject":
                 machine = self.machines[addr]
@@ -619,6 +631,21 @@ class TeacherGui:
                     name = self.machines[addr].machine
                 self.show_message(_("Message received from %s") % name, message, timeout=0)
 
+        # nuke old clients
+        for addr in self.machines_alive:
+            client_ts = self.machines_alive[addr]
+            if client_ts < 0:
+                # skip already dead clients
+                continue
+            timeout = int(timestamp - client_ts)
+            if timeout > self.max_client_timeout:
+                self.logger.warning("Error: client %s has lost connection" % addr)
+                self.machines_alive[addr] = -1
+                try:
+                    machine = self.machines[addr]
+                    self.disconnect(machine, reject=False)
+                except:
+                    self.logger.exception("Attempting to disconnect idle machine")
         gobject.timeout_add(self.events_frequency, self.monitor)
 
     def send_screen(self, widget):
@@ -655,7 +682,7 @@ class TeacherGui:
         for machine in machines:
             self.service.add_client_action(machine, protocol.ACTION_OPENURL, url)
 
-    def disconnect(self, widget, client=None):
+    def disconnect(self, widget, client=None, reject=True):
         """Disconnect a student from teacher"""
         if not client:
             # TODO: it is too dangerous to disconnect everyone, no?
@@ -663,15 +690,20 @@ class TeacherGui:
         else:
             machines = [client]
         for machine in machines:
-            disconnect_message=_("The teacher asked you to leave this class")
-            self.service.disconnect_student(machine, message=disconnect_message)
-            # now back to the machine image
             machine_img = self.machines.get(machine, None)
             if not machine_img:
                 self.logger.error("Error: unable to locate pixmap for machine %s" % client)
-                return
-            machine_img.button.set_image(self.image_disconnected)
-            self.machines_status[machine] = "rejected"
+                continue
+            if reject:
+                # disconnect and reject
+                disconnect_message=_("The teacher asked you to leave this class")
+                self.service.disconnect_student(machine, message=disconnect_message)
+                machine_img.button.set_image(self.image_disconnected)
+                self.machines_status[machine] = "rejected"
+            else:
+                # only disconnect
+                machine_img.button.set_image(self.image_disconnected)
+                self.machines_status[machine] = "pending"
             self.tooltip.set_tip(machine_img, _("Disconnected from teacher at %s!") % (time.asctime()))
 
     def reconnect(self, widget, client=None):
