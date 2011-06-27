@@ -157,6 +157,9 @@ class TeacherRunner(Thread):
                 self.add_client(client, name, shot)
                 # checking actions for the client
                 response = self.gui.current_action
+                # TODO: support persistent actions which run until cancelled
+                # for example, individual screen blocking, constant screen
+                # streaming, and so on
                 if client in self.clients_actions:
                     if len(self.clients_actions[client]) > 0:
                         response, response_params = self.clients_actions[client].pop(0)
