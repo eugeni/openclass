@@ -5,6 +5,7 @@ For version 1.0:
 - Within notification window, allow to open received files.
 - Use proper notification when teacher is already running
 - Add configuration and settings backend and GUI
+- Support default response for dialogs
 
 For future versions:
 
