@@ -181,6 +181,8 @@ class Student:
 
         self.attention_window.hide()
 
+        self.__grabwindow = None
+        
         # initialize list of teachers
         self.teachers = gtk.combo_box_new_text()
         self.teachers_addr = {}
@@ -251,7 +253,27 @@ class Student:
         else:
             dialog.destroy()
             return None
-
+    
+    def block_keyboard_mouse(self):
+        if not self.__grabwindow:
+            self.__grabwindow = gtk.Invisible()
+            self.__grabwindow.show()
+            self.__grabwindow.realize()
+        self.__block_mouse()
+        gobject.idle_add(gtk.gdk.keyboard_grab,self.__grabwindow.window,True)
+        
+    def unblock_keyboard_mouse(self):
+        gobject.idle_add(gtk.gdk.pointer_ungrab)
+        gobject.idle_add(gtk.gdk.keyboard_ungrab)
+     
+    def __block_mouse(self):
+        pixmap = gtk.gdk.Pixmap(None, 1, 1, 1)
+        color = gtk.gdk.Color()
+        invisible_cursor = gtk.gdk.Cursor(pixmap, pixmap, color, color, 0, 0)
+        def grab_mouse():
+            gtk.gdk.pointer_grab(self.__grabwindow.window,owner_events=True,cursor=invisible_cursor)
+        gobject.idle_add(grab_mouse)
+    
     def raise_hand(self, data):
         """Raise your hand to teacher"""
         question = self.question(_("Call teacher attention"), _("Teacher, look at me!"))
@@ -284,12 +306,14 @@ class Student:
         self.attention_window.set_size_request(self.screen.width, self.screen.height)
         self.attention_window.show_all()
         self.attention_window.stick()
+        self.block_keyboard_mouse()
         self.attention_window.fullscreen()
 
     def start_projection(self):
         """Starts screen projection"""
         self.projection_window.visible = True
         self.projection_window.stick()
+        self.block_keyboard_mouse()
         self.projection_window.show_all()
 
     def noop(self):
@@ -298,6 +322,7 @@ class Student:
         self.projection_window.hide()
         self.attention_window.visible = False
         self.attention_window.hide()
+        self.unblock_keyboard_mouse()
 
     def create_login_dialog(self, widget):
         """Asks student to login"""
