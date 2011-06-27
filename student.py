@@ -313,7 +313,6 @@ class Student:
         """Starts screen projection"""
         self.projection_window.visible = True
         self.projection_window.stick()
-        self.block_keyboard_mouse()
         self.projection_window.show_all()
 
     def noop(self):
@@ -542,6 +541,7 @@ class Student:
                     if self.projection_window.is_fullscreen == False:
                         self.projection_window.set_has_frame(False)
                         self.projection_window.set_decorated(False)
+                        self.block_keyboard_mouse()
                         self.projection_window.fullscreen()
                         self.projection_window.is_fullscreen = True
                     scaling_ratio_x = 1.0 * width / screen_width
