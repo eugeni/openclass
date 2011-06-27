@@ -9,7 +9,7 @@ install:
 	mkdir -p $(DESTDIR)/usr/bin
 	install -m755 openclass-teacher $(DESTDIR)/usr/bin/openclass-teacher
 	install -m755 openclass-student $(DESTDIR)/usr/bin/openclass-student
-	cp -a teacher.py student.py openclass $(DESTDIR)/usr/share/openclass/
+	cp -a teacher.py student.py skins openclass $(DESTDIR)/usr/share/openclass/
 	cp -a iface/machine.png iface/machine_off.png iface/openclass.png $(DESTDIR)/usr/share/openclass/iface/
 	# locale
 	$(MAKE) -C po $@
