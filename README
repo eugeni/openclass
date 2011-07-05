@@ -72,3 +72,12 @@ when needed.
 After the student is logged in, it will automatically connect to the first
 available teacher (this functionality can be altered in next versions), or
 select the teacher to connect to manually (not available yet).
+
+
+
+License
+-------
+
+OpenClass is distributed according to GPL v2 license, with a special exception
+for skins, which can be distributed under any license as long as it does not
+interferes with core OpenClass functionalities.
