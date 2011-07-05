@@ -78,6 +78,16 @@ select the teacher to connect to manually (not available yet).
 License
 -------
 
-OpenClass is distributed according to GPL v2 license, with a special exception
+OpenClass is distributed according to GPL v2+ license, with a special exception
 for skins, which can be distributed under any license as long as it does not
 interferes with core OpenClass functionalities.
+
+The developers of OpenClass want to make the project available to everyone, and
+we want to continue to make the source code available and encourage outside
+contributions.
+
+By adopting a such licensing model, we believe that we can remain open source
+and encourage the freedom of development and contribution.  In addition, it
+makes it easier to use this project in situations where the GPL is not an
+option. Of course, open-source licensing of plugins is skins is preferred and
+encouraged!
