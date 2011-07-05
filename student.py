@@ -54,21 +54,21 @@ except IOError:
     _ = str
     traceback.print_exc()
 
-from openclass import network, system, protocol, screen, notification
+from openclass import network, system, protocol, screen, notification, config
+import skins
 
-DEBUG=False
-
-# configuracoes globais
-commands = None
-iface_selected = 0
-
+# variables
+CONFIGFILE = system.get_full_path(system.get_local_storage(), ".openclass-student.conf")
+SYSTEM_CONFIGFILE = system.get_full_path(system.get_system_storage(), "openclass-student.conf")
 class Student:
     selected_machines = 0
     """Teacher GUI main class"""
-    def __init__(self, logger=None, max_missed_commands=30):
+    def __init__(self, logger, config):
         """Initializes the interface"""
         # logger
         self.logger = logger
+        # config
+        self.config = config
         # colors
         self.color_normal = gtk.gdk.color_parse("#99BFEA")
         self.color_active = gtk.gdk.color_parse("#FFBBFF")
@@ -77,47 +77,13 @@ class Student:
         # notification
         self.notification = notification.Notification("OpenClass student")
 
-        self.icon = gtk.StatusIcon()
+        # screen
+        self.screen = screen.Screen()
 
-        menu = '''
-            <ui>
-             <menubar name="Menubar">
-              <menu action="Menu">
-               <menuitem action="Login"/>
-               <menuitem action="Teacher"/>
-               <separator/>
-               <menuitem action="RaiseHand"/>
-               <separator/>
-               <menuitem action="About"/>
-               <separator/>
-               <menuitem action="Quit"/>
-              </menu>
-             </menubar>
-            </ui>
-        '''
-        actions = [
-            ('Menu',  None, 'Menu'),
-            ('Login', None, _('_Login'), None, _('Identify yourself to the teacher'), self.login),
-            ('Teacher', gtk.STOCK_PREFERENCES, _('_Teacher'), None, _('Select your teacher'), self.choose_teacher),
-            ('RaiseHand', gtk.STOCK_INFO, _('_Call attention'), None, _('Raise your hand to call teacher attention'), self.raise_hand),
-            ('About', gtk.STOCK_ABOUT, _('_About'), None, _('About OpenClass'), self.on_about),
-            ('Quit', gtk.STOCK_QUIT, _('_Quit'), None, _('Quit class'), lambda *w: self.quit(None, None))
-            ]
-        ag = gtk.ActionGroup('Actions')
-        ag.add_actions(actions)
-        self.manager = gtk.UIManager()
-        self.manager.insert_action_group(ag, 0)
-        self.manager.add_ui_from_string(menu)
-        self.menu = self.manager.get_widget('/Menubar/Menu/About').props.parent
-        search = self.manager.get_widget('/Menubar/Menu/Login')
-        search.get_children()[0].set_markup('<b>_Login...</b>')
-        search.get_children()[0].set_use_underline(True)
-        search.get_children()[0].set_use_markup(True)
-        # disconnected by default
-        self.disconnect()
-        self.icon.set_visible(True)
-        self.icon.connect('activate', self.on_activate)
-        self.icon.connect('popup-menu', self.on_popup_menu)
+        # find out what is our skin
+        skin_name = self.config.get("student", "skin", "DefaultSkinStudent")
+        skin_class = skins.get_skin(logger, skin_name)
+        self.skin = skin_class(logger, self)
 
         # discover unique client ID (if any)
         # specially useful for multi-seat configurations
@@ -136,7 +102,11 @@ class Student:
         self.name = None
         self.outfile = None
         self.missed_commands = 0
-        self.max_missed_commands = max_missed_commands
+        try:
+            self.max_missed_commands = int(self.config.get("student", "student", "30"))
+        except:
+            self.logget.exception("Detecting max missed commands")
+            self.max_client_timeout = 30
 
         # Inicializa as threads
         self.bcast = network.BcastListener(logger=self.logger, port=network.LISTENPORT)
@@ -145,47 +115,15 @@ class Student:
 
         self.mcast = network.McastListener()
 
-        self.screen = screen.Screen()
-
-        # drawing
-        self.projection_window = gtk.Window()
-        self.projection_window.set_resizable(False)
-        #self.projection_window.set_has_frame(False)
-        #self.projection_window.set_decorated(False)
-        self.projection_window.set_keep_above(True)
-        self.projection_window.connect('delete-event', lambda *w: True)
-        self.projection_window.visible = False
-        self.projection_window.is_fullscreen = False
-        vbox = gtk.VBox()
-        self.projection_window.add(vbox)
-        self.gc = None
-        self.drawing = gtk.DrawingArea()
-        self.drawing.set_size_request(self.screen.width, self.screen.height)
-        vbox.pack_start(self.drawing)
-        self.projection_window.hide()
-
-        # attention
-        self.attention_window = gtk.Window()
-        self.attention_window.set_resizable(False)
-        self.attention_window.set_has_frame(False)
-        self.attention_window.set_decorated(False)
-        self.attention_window.set_keep_above(True)
-        self.attention_window.connect('delete-event', lambda *w: True)
-        self.attention_window.visible = False
-
-        vbox = gtk.VBox()
-        self.attention_window.add(vbox)
-        self.attention_label = gtk.Label()
-        self.attention_label.set_use_markup(True)
-        vbox.pack_start(self.attention_label)
-
-        self.attention_window.hide()
-
-        self.__grabwindow = None
-        
         # initialize list of teachers
         self.teachers = gtk.combo_box_new_text()
         self.teachers_addr = {}
+
+        # disconnected by default
+        self.disconnect()
+
+        # Building UI
+        self.__grabwindow = None
 
         # login dialog
         self.create_login_dialog(None)
@@ -599,6 +537,10 @@ if __name__ == "__main__":
     # configure logging
     logger = system.setup_logger("openclass_student")
 
+    # configuration file
+    config = config.Config(logger, CONFIGFILE, SYSTEM_CONFIGFILE)
+    config.load()
+
     # configura o timeout padrao para sockets
     socket.setdefaulttimeout(5)
     # Atualizando a lista de interfaces
@@ -606,9 +548,10 @@ if __name__ == "__main__":
     gtk.gdk.threads_enter()
 
     logger.info("Starting GUI..")
-    gui = Student(logger=logger)
+    gui = Student(logger=logger, config=config)
     try:
         gtk.main()
+        config.save()
         gtk.gdk.threads_leave()
     except:
         logger.info("exiting..")
