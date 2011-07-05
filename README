@@ -43,13 +43,14 @@ activities in the classroom. Among such activities, the most commonly used are:
  - support for Linux and Windows-based operating systems
  - possibility to have multiple teachers and classes on same network/vlan
  - multicast throttling to avoid saturating the network
+ - support for customization by means of skins/plugins
 
 License
 -------
 
 OpenClass is distributed according to GPL v2+ license, with a special exception
-for skins, which can be distributed under any license as long as it does not
-interferes with core OpenClass functionalities.
+for skins/plugins, which can be distributed under any license as long as it
+does not interferes with core OpenClass functionalities.
 
 The developers of OpenClass want to make the project available to everyone, and
 we want to continue to make the source code available and encourage outside
