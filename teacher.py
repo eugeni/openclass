@@ -942,7 +942,11 @@ if __name__ == "__main__":
     gtk.gdk.threads_enter()
     logger.info("Starting broadcast..")
     # Main service service
-    service = TeacherRunner(logger, config)
+    try:
+        service = TeacherRunner(logger, config)
+    except:
+        logger.error(_("Unable to start teacher, or teacher is already running"))
+        sys.exit(0)
     # Main interface
     gui = TeacherGui(service, logger, config)
     service.start()
