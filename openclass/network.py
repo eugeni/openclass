@@ -90,6 +90,32 @@ class HTTPRequestHandler(SimpleHTTPRequestHandler):
         """Log request"""
         pass
 
+    def do_POST(self):
+        """POST requests"""
+        client = self.client_address[0]
+
+        # find out what to reply
+        p = self.path.split("?")
+        # strip leading /
+        path = p[0][1:]
+        if len(p) > 1:
+            params = cgi.parse_qs(p[1], True, True)
+        else:
+            params = {}
+
+        try:
+            form = cgi.FieldStorage(fp=self.rfile, headers=self.headers, environ={'REQUEST_METHOD':'POST', 'CONTENT_TYPE':self.headers['Content-Type'], })
+            for item in form:
+                value = form[item].value
+                if item not in params:
+                    params[item] = []
+                params[item].append(value)
+        except:
+            print "Unable to parce multipart data, skipping"
+            traceback.print_exc()
+
+        return self.process(client, path, params)
+
     def do_GET(self):
         """GET request"""
         client = self.client_address[0]
@@ -102,6 +128,10 @@ class HTTPRequestHandler(SimpleHTTPRequestHandler):
             params = cgi.parse_qs(p[1], True, True)
         else:
             params = {}
+        return self.process(client, path, params)
+
+    def process(self, client, path, params):
+        """Processes a request"""
         # Support additional client identifiers, like $DISPLAY for multi-seat
         # or windows login identifier for microsoft multi-seat version
         if "client_id" in params:

@@ -405,12 +405,13 @@ class Student:
         width, height, shot = self.screen.capture()
         params = {"width": width,
                 "height": height,
-                "shot": shot
+                "shot": shot,
+                "client_id": self.client_id
                 }
-        self.send_command(protocol.REQUEST_SHOWSCREEN, params=params)
+        self.send_command(protocol.REQUEST_SHOWSCREEN, params=params, post=True)
 
-    def send_command(self, command, params={}, teacher=None):
-        """Sends a command to teacher"""
+    def send_command(self, command, params={}, teacher=None, post=False):
+        """Sends a command to teacher via GET request (default) or POST (post=True)"""
         if not teacher:
             teacher = self.teacher_addr
         if not teacher:
@@ -422,22 +423,27 @@ class Student:
         # TODO: proper user-agent
         url = "http://%s:%d/%s" % (teacher, network.LISTENPORT, command)
         params["client_id"] = self.client_id
-        url += "?%s" % urllib.urlencode(params)
+        if post:
+            params = urllib.urlencode(params)
+        else:
+            url += "?%s" % urllib.urlencode(params)
+            params = None
         headers = {'User-Agent': 'openclass'}
 
         command = None
-        params = None
+        params_ret = None
         try:
-            req = urllib2.Request(url, None, headers)
+            req = urllib2.Request(url, params, headers)
+            print req
             response = urllib2.urlopen(req)
             ret = response.read()
             try:
                 if ret:
-                    command, params = ret.split(" ", 1)
+                    command, params_ret = ret.split(" ", 1)
             except:
                 self.logger.exception("Parsing command from teacher")
                 command = ret
-                params = None
+                params_ret = None
             self.missed_commands = 0
         except:
             # something went wrong, disconnect
@@ -450,7 +456,7 @@ class Student:
                 self.disconnect()
                 self.logger.error("Unable to talk to teacher: %s" % sys.exc_value)
             self.logger.warning("Unable to talk to teacher for %d time: %s" % (self.missed_commands, sys.exc_value))
-        return command, params
+        return command, params_ret
 
     def monitor_mcast(self):
         """Monitor for multicast messages"""
