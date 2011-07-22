@@ -1,3 +1,4 @@
+ - properly handle configuration file on student
  - support sending long messages by POST
  - add support for student skins
 
