@@ -103,7 +103,7 @@ class Student:
         self.outfile = None
         self.missed_commands = 0
         try:
-            self.max_missed_commands = int(self.config.get("student", "student", "30"))
+            self.max_missed_commands = int(self.config.get("student", "max_missed_commands", "30"))
         except:
             self.logget.exception("Detecting max missed commands")
             self.max_client_timeout = 30
@@ -555,10 +555,6 @@ if __name__ == "__main__":
 
     logger.info("Starting GUI..")
     gui = Student(logger=logger, config=config)
-    try:
-        gtk.main()
-        config.save()
-        gtk.gdk.threads_leave()
-    except:
-        logger.info("exiting..")
-        sys.exit()
+    gtk.main()
+    config.save()
+    gtk.gdk.threads_leave()
