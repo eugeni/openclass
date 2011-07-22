@@ -232,7 +232,6 @@ class Student:
         gtk.main_quit()
         self.bcast.actions.put(1)
         self.mcast.actions.put(1)
-        sys.exit(0)
 
     def leave_class(self, widget):
         """Leave a class"""
@@ -289,6 +288,9 @@ class Student:
     def login(self, widget):
         """Shows the login dialog"""
         dialog = self.login_dialog
+        # disable exit button while on this screen
+        quit = self.manager.get_widget('/Menubar/Menu/Quit')
+        quit.set_sensitive(False)
         while True:
             response = dialog.run()
             if response == gtk.RESPONSE_OK:
@@ -326,6 +328,9 @@ class Student:
             else:
                 break
         dialog.hide()
+        # re-enable quit button
+        quit = self.manager.get_widget('/Menubar/Menu/Quit')
+        quit.set_sensitive(True)
 
     def monitor_teacher(self):
         """Periodically checks for teacher commands"""
@@ -556,5 +561,6 @@ if __name__ == "__main__":
     logger.info("Starting GUI..")
     gui = Student(logger=logger, config=config)
     gtk.main()
+    # saving config changes and reference values
     config.save()
     gtk.gdk.threads_leave()
