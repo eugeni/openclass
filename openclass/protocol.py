@@ -100,7 +100,7 @@ class Protocol:
             return (name.strip(), flags)
         except:
             self.logger.exception("Parsing protocol announce")
-            return None
+            return None, None
 
     def pack_chunk(self, screen_width, screen_height, fullscreen, chunk):
         """Packs a chunk into network-specific format for sending"""

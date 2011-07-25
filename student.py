@@ -530,18 +530,22 @@ class Student:
             data, source = self.bcast.get_msg()
             # if there is an announce, but we are not yet logged in, skip
             msg = self.protocol.parse_header(data)
-            name, flags = self.protocol.parse_announce(msg)
-            self.logger.debug("Found teacher <%s> at %s" % (name, source))
-            model = self.teachers.get_model()
-            if name not in [x[0] for x in model]:
-                self.teachers.append_text(name)
-                self.teachers_addr[name] = source
-                # should we enable the login dialog?
-                if len(model) > 0:
-                    self.teachers.set_active(0)
+            if msg == None:
+                # Was the protocol parsed correctly?
+                self.logger.info("Skipping unknown protocol announced by %s" % source)
             else:
-                # same teacher
-                pass
+                name, flags = self.protocol.parse_announce(msg)
+                self.logger.debug("Found teacher <%s> at %s" % (name, source))
+                model = self.teachers.get_model()
+                if name not in [x[0] for x in model]:
+                    self.teachers.append_text(name)
+                    self.teachers_addr[name] = source
+                    # should we enable the login dialog?
+                    if len(model) > 0:
+                        self.teachers.set_active(0)
+                else:
+                    # same teacher
+                    pass
         gobject.timeout_add(1000, self.monitor_bcast)
 
 if __name__ == "__main__":
