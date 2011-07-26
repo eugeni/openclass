@@ -652,7 +652,7 @@ class TeacherGui:
                     reject = False
                     if self.machines_status[addr] == "rejected":
                         reject = True
-                    self.disconnect(machine, reject)
+                    self.disconnect(machine, reject=reject)
                 except:
                     self.logger.exception("Attempting to disconnect idle machine")
         gobject.timeout_add(self.events_frequency, self.monitor)
